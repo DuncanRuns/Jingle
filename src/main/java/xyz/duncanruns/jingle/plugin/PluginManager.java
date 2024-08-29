@@ -115,6 +115,10 @@ public final class PluginManager {
 
     public static List<Pair<Path, JinglePluginData>> getFolderPlugins() throws IOException {
         if (!Files.exists(PLUGINS_PATH)) {
+            try {
+                Files.createDirectory(PLUGINS_PATH);
+            } catch (Exception ignored) {
+            }
             return Collections.emptyList();
         }
         List<Pair<Path, JinglePluginData>> plugins = new ArrayList<>();
