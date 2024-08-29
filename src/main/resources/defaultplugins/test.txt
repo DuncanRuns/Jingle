@@ -1,2 +1,0 @@
-This is here to prevent Jingle from crashing, it will just fail to load this text file which is caught instead of failing to find the defaultplugins dir
-PaceMan Tracker should be here instead soon
