@@ -61,7 +61,7 @@ public final class PluginManager {
                 boolean isFabricFailClass = nce.getMessage().contains("net/fabricmc/api/ModInitializer");
                 if (!isFabricFailClass) {
                     // If it is not a fabric fail class, we do want to warn for this
-                    Jingle.log(Level.WARN, "Failed to load class '" + className + "'! Jingle may crash if this is needed by a plugin...");
+                    Jingle.logError("Failed to load class '" + className + "'! Jingle may crash if this is needed by a plugin...:", nce);
                 }
             }
         }
