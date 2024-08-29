@@ -20,6 +20,12 @@ public class JingleAppLaunch {
     public static String[] args;
     public static boolean launchedWithDevPlugin = false;
 
+    public static void launchWithDevPlugin(String[] args, PluginManager.JinglePluginData pluginData, Runnable pluginInitializer) {
+        launchedWithDevPlugin = true;
+        PluginManager.registerPlugin(pluginData, pluginInitializer);
+        main(args);
+    }
+
     public static void main(String[] args) {
         try {
             System.out.println(GrabUtil.grab("https://raw.githubusercontent.com/DuncanRuns/Julti/main/meta.json"));
