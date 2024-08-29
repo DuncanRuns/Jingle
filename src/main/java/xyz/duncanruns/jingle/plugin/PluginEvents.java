@@ -17,9 +17,7 @@ public final class PluginEvents {
         // Runs when Jingle is shutting down
         STOP,
         // Runs when all instances are found
-        MAIN_INSTANCE_CHANGED,
-        // Runs when the hotkey manager reloads
-        HOTKEY_MANAGER_RELOAD;
+        MAIN_INSTANCE_CHANGED;
 
         private final List<Runnable> runnables = new LinkedList<>();
 

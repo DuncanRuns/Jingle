@@ -1,58 +1,17 @@
 package xyz.duncanruns.jingle.script;
 
-import org.apache.commons.lang3.tuple.Pair;
-import xyz.duncanruns.jingle.Jingle;
-import xyz.duncanruns.jingle.script.lua.InterruptibleDebugLib;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.*;
 
 public class ScriptRegistries {
-    private static final Map<String, Pair<Runnable, Supplier<ScriptInterrupter>>> HOTKEYS = new HashMap<>(); // Example: "test.lua:run" -> (runHotkey, cancellingFunction)
+    private static final Map<String, Runnable> HOTKEYS_ACTIONS = new HashMap<>(); // Example: "test.lua:run" -> (runHotkey, cancellingFunction)
     private static final Map<String, Runnable> CUSTOMIZATIONS = new HashMap<>(); // Example: "test.lua" -> (function)
 
-    public static Map<String, Runnable> getHotkeys() {
-        Map<String, Runnable> map = new HashMap<>();
-        for (Map.Entry<String, Pair<Runnable, Supplier<ScriptInterrupter>>> entry : HOTKEYS.entrySet()) {
-            Runnable hotkeyFunction = entry.getValue().getLeft();
-            Supplier<ScriptInterrupter> interrupterSupplier = entry.getValue().getRight();
-            map.put(entry.getKey(), () -> {
-                ScriptInterrupter scriptInterrupter = interrupterSupplier.get();
-                try {
-                    synchronized (Jingle.class) {
-                        hotkeyFunction.run();
-                    }
-                } catch (InterruptibleDebugLib.LuaInterruptedException ignored) {
-                }
-                scriptInterrupter.invalidate();
-            });
-        }
-        return map;
+    public static Set<String> getHotkeyActionNames() {
+        return Collections.unmodifiableSet(HOTKEYS_ACTIONS.keySet());
     }
 
-    /**
-     * @param fullName The script file name and registered hotkey name (example: "test.lua:run")
-     */
-    public static Optional<Runnable> getScriptHotkeyRunner(String fullName) {
-        Pair<Runnable, Supplier<ScriptInterrupter>> stuff = HOTKEYS.get(fullName);
-        if (stuff == null) return Optional.empty();
-        Runnable hotkeyFunction = stuff.getLeft();
-        Supplier<ScriptInterrupter> interrupterSupplier = stuff.getRight();
-
-        return Optional.of(() -> {
-            ScriptInterrupter scriptInterrupter = interrupterSupplier.get();
-            try {
-                synchronized (Jingle.class) {
-                    hotkeyFunction.run();
-                }
-            } catch (InterruptibleDebugLib.LuaInterruptedException ignored) {
-            }
-            scriptInterrupter.invalidate();
-        });
-
+    public static Optional<Runnable> getHotkeyAction(String hotkeyName) {
+        return Optional.ofNullable(HOTKEYS_ACTIONS.getOrDefault(hotkeyName, null));
     }
 
     public static Map<String, Runnable> getCustomizations() {
@@ -60,11 +19,15 @@ public class ScriptRegistries {
     }
 
     public static void clear() {
-        HOTKEYS.clear();
+        HOTKEYS_ACTIONS.clear();
         CUSTOMIZATIONS.clear();
     }
 
-    public static void addHotkey(ScriptFile script, String hotkeyName, Runnable hotkeyFunction, Supplier<ScriptInterrupter> interrupterSupplier) {
-        HOTKEYS.put(script.getName() + ":" + hotkeyName, Pair.of(hotkeyFunction, interrupterSupplier));
+    public static void addHotkeyAction(ScriptFile script, String hotkeyName, Runnable hotkeyFunction) {
+        HOTKEYS_ACTIONS.put(script.getName() + ":" + hotkeyName, hotkeyFunction);
+    }
+
+    public static void addCustomization(ScriptFile scriptFile, Runnable customizationFunction) {
+        CUSTOMIZATIONS.put(scriptFile.getName(), customizationFunction);
     }
 }

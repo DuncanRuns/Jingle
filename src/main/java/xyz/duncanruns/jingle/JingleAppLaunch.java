@@ -5,11 +5,9 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.plugin.PluginManager;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
-import xyz.duncanruns.jingle.util.GrabUtil;
 import xyz.duncanruns.jingle.util.LockUtil;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -27,11 +25,6 @@ public class JingleAppLaunch {
     }
 
     public static void main(String[] args) {
-        try {
-            System.out.println(GrabUtil.grab("https://raw.githubusercontent.com/DuncanRuns/Julti/main/meta.json"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         JingleAppLaunch.args = args;
         System.out.println("Launched with args: " + Arrays.toString(args));
 
@@ -50,9 +43,13 @@ public class JingleAppLaunch {
 
         doLockStuff();
 
+        Jingle.options = JingleOptions.load();
+
         JingleGUI ignored = JingleGUI.get();
+
         PluginManager.loadPlugins();
         PluginManager.initializePlugins();
+
         Jingle.start();
     }
 

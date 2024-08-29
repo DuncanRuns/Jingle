@@ -2,11 +2,14 @@ package xyz.duncanruns.jingle;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import xyz.duncanruns.jingle.util.FileUtil;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JingleOptions {
@@ -14,7 +17,9 @@ public class JingleOptions {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+    public int[] lastPosition = new int[]{50, 50};
     public Map<String, Long> seenPaths = new HashMap<>();
+    public List<JsonObject> hotkeys = new ArrayList<>();
 
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {

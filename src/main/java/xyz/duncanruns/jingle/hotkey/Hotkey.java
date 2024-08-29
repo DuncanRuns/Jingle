@@ -1,5 +1,8 @@
 package xyz.duncanruns.jingle.hotkey;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import xyz.duncanruns.jingle.util.KeyboardUtil;
 
 import java.util.ArrayList;
@@ -12,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class Hotkey {
 
@@ -24,6 +28,15 @@ public class Hotkey {
         // This is the best way to prevent the hotkey from being tampered with, which also keeps it thread-safe.
         this.keys = new ArrayList<>(keys);
         this.hasBeenPressed = false;
+    }
+
+    public static List<Integer> keysFromJson(JsonArray jsonArray) {
+        return jsonArray.asList().stream()
+                .filter(JsonElement::isJsonPrimitive)
+                .map(JsonElement::getAsJsonPrimitive)
+                .filter(JsonPrimitive::isNumber)
+                .map(JsonPrimitive::getAsInt)
+                .collect(Collectors.toList());
     }
 
     public static String formatKeys(List<Integer> keys) {
@@ -73,6 +86,12 @@ public class Hotkey {
             }
         }, 25, 25, TimeUnit.MILLISECONDS);
 
+    }
+
+    public static JsonArray jsonFromKeys(List<Integer> keys) {
+        JsonArray ja = new JsonArray();
+        keys.forEach(ja::add);
+        return ja;
     }
 
     /**

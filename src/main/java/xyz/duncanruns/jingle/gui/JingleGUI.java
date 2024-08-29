@@ -1,10 +1,13 @@
 package xyz.duncanruns.jingle.gui;
 
+import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.bopping.Bopping;
+import xyz.duncanruns.jingle.hotkey.Hotkey;
+import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 
 import javax.swing.*;
@@ -13,6 +16,7 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Collections;
 
 public class JingleGUI extends JFrame {
     private static final JingleGUI instance = new JingleGUI();
@@ -28,6 +32,8 @@ public class JingleGUI extends JFrame {
     private JPanel noPluginsLoadedTab;
     private JTabbedPane mainTabbedPane;
     private JCheckBox showDebugLogsCheckBox;
+    private HotkeyListPanel hotkeyListPanel;
+    private JButton addHotkeyButton;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
     public RollingDocument logDocument = new RollingDocument();
@@ -39,15 +45,18 @@ public class JingleGUI extends JFrame {
         this.setContentPane(this.mainPanel);
         this.setPreferredSize(new Dimension(600, 400));
         this.pack();
-        this.setVisible(true);
+        this.setLocation(Jingle.options.lastPosition[0], Jingle.options.lastPosition[1]);
+        this.setInstance(null);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                Point location = JingleGUI.this.getLocation();
+                Jingle.options.lastPosition = new int[]{location.x, location.y};
                 Jingle.stop();
             }
         });
 
-        this.setInstance(null);
+        this.setVisible(true);
     }
 
     public static JingleGUI get() {
@@ -57,6 +66,18 @@ public class JingleGUI extends JFrame {
     @SuppressWarnings("unused")
     public static void addPluginTab(String name, JPanel panel) {
         JingleGUI.get().addPluginTabInternal(name, panel);
+    }
+
+    public void setInstance(OpenedInstanceInfo instance) {
+        boolean instanceExists = instance != null;
+        this.clearWorldsButton.setEnabled(instanceExists);
+        this.goBorderlessButton.setEnabled(instanceExists);
+        this.openMinecraftFolderButton.setEnabled(instanceExists);
+        if (instanceExists) {
+            this.instanceLabel.setText("Instance: " + instance.instancePath);
+        } else {
+            this.instanceLabel.setText("Instance: No instances opened!");
+        }
     }
 
     private void addPluginTabInternal(String name, JPanel panel) {
@@ -80,6 +101,26 @@ public class JingleGUI extends JFrame {
         });
 
         this.mainTabbedPane.addChangeListener(e -> this.jumpToEndOfLog());
+
+        this.addHotkeyButton.addActionListener(e -> {
+            EditHotkeyDialog dialog = new EditHotkeyDialog(this, "none", "builtin", Collections.emptyList(), true);
+            dialog.setLocation(this.getLocationOnScreen());
+            dialog.setVisible(true);
+            if (dialog.cancelled) return;
+            JsonObject savedHotkey = new JsonObject();
+            savedHotkey.addProperty("type", dialog.type);
+            savedHotkey.addProperty("action", dialog.action);
+            savedHotkey.add("keys", Hotkey.jsonFromKeys(dialog.keys));
+            savedHotkey.addProperty("ignoreModifiers", dialog.ignoreModifiers);
+            Jingle.options.hotkeys.add(savedHotkey);
+            this.hotkeyListPanel.reload();
+            HotkeyManager.reload();
+        });
+
+        this.reloadHotkeys();
+    }
+
+    private void reloadHotkeys() {
     }
 
     private void jumpToEndOfLog() {
@@ -94,6 +135,7 @@ public class JingleGUI extends JFrame {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
+        createUIComponents();
         mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainPanel.setEnabled(true);
@@ -145,10 +187,22 @@ public class JingleGUI extends JFrame {
         final Spacer spacer2 = new Spacer();
         panel2.add(spacer2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        mainTabbedPane.addTab("Plugins", panel3);
+        panel3.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 5, 5), -1, -1));
+        mainTabbedPane.addTab("Hotkeys", panel3);
+        final JScrollPane scrollPane3 = new JScrollPane();
+        panel3.add(scrollPane3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        scrollPane3.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        scrollPane3.setViewportView(hotkeyListPanel);
+        final Spacer spacer3 = new Spacer();
+        panel3.add(spacer3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        addHotkeyButton = new JButton();
+        addHotkeyButton.setText("Add");
+        panel3.add(addHotkeyButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel4 = new JPanel();
+        panel4.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        mainTabbedPane.addTab("Plugins", panel4);
         pluginsTabbedPane = new JTabbedPane();
-        panel3.add(pluginsTabbedPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
+        panel4.add(pluginsTabbedPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         noPluginsLoadedTab = new JPanel();
         noPluginsLoadedTab.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pluginsTabbedPane.addTab("No Plugins Loaded", noPluginsLoadedTab);
@@ -164,15 +218,7 @@ public class JingleGUI extends JFrame {
         return mainPanel;
     }
 
-    public void setInstance(OpenedInstanceInfo instance) {
-        boolean instanceExists = instance != null;
-        this.clearWorldsButton.setEnabled(instanceExists);
-        this.goBorderlessButton.setEnabled(instanceExists);
-        this.openMinecraftFolderButton.setEnabled(instanceExists);
-        if (instanceExists) {
-            this.instanceLabel.setText("Instance: " + instance.instancePath);
-        } else {
-            this.instanceLabel.setText("Instance: No instances opened!");
-        }
+    private void createUIComponents() {
+        this.hotkeyListPanel = new HotkeyListPanel(this);
     }
 }

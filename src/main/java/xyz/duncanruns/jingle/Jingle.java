@@ -66,7 +66,6 @@ public final class Jingle {
 
     public static void start() {
         assert !started;
-        options = JingleOptions.load();
         log(Level.INFO, ".config/Jingle/options.json loaded.");
 
         PluginEvents.RunnableEventType.OPTIONS_LOADED.runAll();
@@ -217,5 +216,18 @@ public final class Jingle {
             logError("Failed to load scripts:", e);
         }
         HotkeyManager.reload();
+    }
+
+    @SuppressWarnings("all")
+    public static Optional<Runnable> getBuiltinHotkeyAction(String name) {
+        switch (name) {
+            default:
+                return Optional.empty();
+        }
+    }
+
+    @SuppressWarnings("all")
+    public static Set<String> getBuiltinHotkeyActionNames() {
+        return new HashSet<>(Arrays.asList("none"));
     }
 }
