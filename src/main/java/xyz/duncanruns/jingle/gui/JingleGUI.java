@@ -104,7 +104,6 @@ public class JingleGUI extends JFrame {
 
         this.addHotkeyButton.addActionListener(e -> {
             EditHotkeyDialog dialog = new EditHotkeyDialog(this, "none", "builtin", Collections.emptyList(), true);
-            dialog.setLocation(this.getLocationOnScreen());
             dialog.setVisible(true);
             if (dialog.cancelled) return;
             JsonObject savedHotkey = new JsonObject();

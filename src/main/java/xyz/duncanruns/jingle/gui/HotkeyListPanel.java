@@ -38,9 +38,8 @@ public class HotkeyListPanel extends JPanel {
             boolean ignoreModifiers = hotkeyJson.has("ignoreModifiers") && hotkeyJson.get("ignoreModifiers").getAsBoolean();
 
             constraints.gridy++;
-            this.add(new JLabel(StringUtils.capitalize(action)), constraints.clone());
-            this.add(new JLabel(Hotkey.formatKeys(keys)), constraints.clone());
-            this.add(new JLabel(ignoreModifiers ? "True" : "False"), constraints.clone());
+            this.add(new JLabel(String.format("%s (%s)", action, StringUtils.capitalize(type))), constraints.clone());
+            this.add(new JLabel((ignoreModifiers ? "* " : "") + Hotkey.formatKeys(keys)), constraints.clone());
 
             JPanel buttonsPanel = new JPanel();
             buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
@@ -48,7 +47,6 @@ public class HotkeyListPanel extends JPanel {
             JButton editButton = new JButton("Edit");
             editButton.addActionListener(a -> {
                 EditHotkeyDialog dialog = new EditHotkeyDialog(this.owner, action, type, keys, ignoreModifiers);
-                dialog.setLocation(this.getLocationOnScreen());
                 dialog.setVisible(true);
                 if (dialog.cancelled) return;
                 int i = Jingle.options.hotkeys.indexOf(hotkeyJson);
@@ -94,7 +92,6 @@ public class HotkeyListPanel extends JPanel {
             constraints.gridy = 0;
             this.add(new JLabel("Action"), constraints.clone());
             this.add(new JLabel("Hotkey"), constraints.clone());
-            this.add(new JLabel("Ignore Modifiers"), constraints.clone());
         }
         this.revalidate();
     }

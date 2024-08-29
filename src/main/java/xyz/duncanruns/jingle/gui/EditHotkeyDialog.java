@@ -66,6 +66,7 @@ public class EditHotkeyDialog extends JDialog {
 
         this.finalizeComponents();
         this.pack();
+        this.setLocation(new Point(owner.getX() + (owner.getWidth() - this.getWidth()) / 2, owner.getY() + (owner.getHeight() - this.getHeight()) / 2));
     }
 
     private static Vector<HotkeyTypeAndAction> getHotkeyOptions() {
