@@ -180,7 +180,7 @@ public class EditHotkeyDialog extends JDialog {
 
         @Override
         public String toString() {
-            if (this.action.equals("none")) return "";
+            if (this.action.equalsIgnoreCase("none")) return "";
             return String.format("%s (%s)", Jingle.formatAction(this.action), StringUtils.capitalize(this.type));
         }
     }

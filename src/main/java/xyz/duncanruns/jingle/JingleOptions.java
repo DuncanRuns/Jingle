@@ -46,11 +46,17 @@ public class JingleOptions {
         }
     }
 
-    public List<SavedHotkey> getSavedHotkeys() {
-        return new ArrayList<>(this.hotkeys.stream().map(SavedHotkey::fromJson).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+    /**
+     * Converts the stored hotkey JsonObjects into SavedHotkey objects and returns as a copy. Modifying the returned list does not affect saved hotkeys.
+     */
+    public List<SavedHotkey> copySavedHotkeys() {
+        return new ArrayList<>(this.hotkeys.stream().map(SavedHotkey::fromJson).filter(Optional::isPresent).map(Optional::get).distinct().collect(Collectors.toList()));
     }
 
+    /**
+     * Converts the given list of SavedHotkey objects into JsonObjects and stores them in this options object.
+     */
     public void setSavedHotkeys(List<SavedHotkey> hotkeys) {
-        this.hotkeys = hotkeys.stream().map(SavedHotkey::toJson).collect(Collectors.toList());
+        this.hotkeys = hotkeys.stream().distinct().map(SavedHotkey::toJson).collect(Collectors.toList());
     }
 }

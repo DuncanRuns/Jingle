@@ -236,7 +236,7 @@ public final class Jingle {
 
     @SuppressWarnings("all")
     public static Set<String> getBuiltinHotkeyActionNames() {
-        return new HashSet<>(Arrays.asList("none"));
+        return new HashSet<>(Arrays.asList("None"));
     }
 
     public static String formatAction(String action) {

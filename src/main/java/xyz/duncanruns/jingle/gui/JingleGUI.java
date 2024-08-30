@@ -1,13 +1,12 @@
 package xyz.duncanruns.jingle.gui;
 
-import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.bopping.Bopping;
-import xyz.duncanruns.jingle.hotkey.Hotkey;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
+import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 
 import javax.swing.*;
@@ -17,6 +16,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Collections;
+import java.util.List;
 
 public class JingleGUI extends JFrame {
     private static final JingleGUI instance = new JingleGUI();
@@ -26,14 +26,14 @@ public class JingleGUI extends JFrame {
     public JButton clearWorldsButton;
     public JButton goBorderlessButton;
     public JTextArea logTextArea;
-    private JPanel instancePanel;
+    public JTabbedPane mainTabbedPane;
     public JButton clearWorldsFromAllButton;
+    public JButton addHotkeyButton;
+    private JPanel instancePanel;
     private JTabbedPane pluginsTabbedPane;
     private JPanel noPluginsLoadedTab;
-    private JTabbedPane mainTabbedPane;
     private JCheckBox showDebugLogsCheckBox;
     private HotkeyListPanel hotkeyListPanel;
-    private JButton addHotkeyButton;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
     public RollingDocument logDocument = new RollingDocument();
@@ -106,12 +106,13 @@ public class JingleGUI extends JFrame {
             EditHotkeyDialog dialog = new EditHotkeyDialog(this, "none", "builtin", Collections.emptyList(), true);
             dialog.setVisible(true);
             if (dialog.cancelled) return;
-            JsonObject savedHotkey = new JsonObject();
-            savedHotkey.addProperty("type", dialog.type);
-            savedHotkey.addProperty("action", dialog.action);
-            savedHotkey.add("keys", Hotkey.jsonFromKeys(dialog.keys));
-            savedHotkey.addProperty("ignoreModifiers", dialog.ignoreModifiers);
-            Jingle.options.hotkeys.add(savedHotkey);
+
+            synchronized (Jingle.class) {
+                SavedHotkey newHotkey = new SavedHotkey(dialog.type, dialog.action, dialog.keys, dialog.ignoreModifiers);
+                List<SavedHotkey> hotkeys = Jingle.options.copySavedHotkeys();
+                hotkeys.add(newHotkey);
+                Jingle.options.setSavedHotkeys(hotkeys);
+            }
             this.hotkeyListPanel.reload();
             HotkeyManager.reload();
         });

@@ -47,7 +47,7 @@ public class HotkeyListPanel extends JPanel {
         this.removeAll();
         GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 1, 0, 17, 0, new Insets(0, 10, 5, 10), 0, 0);
 
-        for (final SavedHotkey hotkey : Jingle.options == null ? Collections.<SavedHotkey>emptyList() : Jingle.options.getSavedHotkeys()) {
+        for (final SavedHotkey hotkey : Jingle.options == null ? Collections.<SavedHotkey>emptyList() : Jingle.options.copySavedHotkeys()) {
             constraints.gridy++;
             this.add(new JLabel(String.format("%s (%s)", Jingle.formatAction(hotkey.action), StringUtils.capitalize(hotkey.type))), constraints.clone());
             this.add(new JLabel((hotkey.ignoreModifiers ? "* " : "") + Hotkey.formatKeys(hotkey.keys)), constraints.clone());
@@ -76,10 +76,11 @@ public class HotkeyListPanel extends JPanel {
         JButton removeButton = new JButton("Remove");
         removeButton.addActionListener(a -> {
             synchronized (Jingle.class) {
-                Jingle.options.setSavedHotkeys(Jingle.options.getSavedHotkeys().stream().filter(h -> !h.equals(hotkey)).collect(Collectors.toList()));
+                Jingle.options.setSavedHotkeys(Jingle.options.copySavedHotkeys().stream().filter(h -> !h.equals(hotkey)).collect(Collectors.toList()));
                 this.reload();
                 HotkeyManager.reload();
             }
+            this.fixGhostBug();
         });
         return removeButton;
     }
@@ -92,12 +93,20 @@ public class HotkeyListPanel extends JPanel {
                 dialog.setVisible(true);
                 if (dialog.cancelled) return;
 
-                Jingle.options.setSavedHotkeys(Jingle.options.getSavedHotkeys().stream().map(h -> h.equals(hotkey) ? new SavedHotkey(dialog.type, dialog.action, dialog.keys, dialog.ignoreModifiers) : h).collect(Collectors.toList()));
+                Jingle.options.setSavedHotkeys(Jingle.options.copySavedHotkeys().stream().map(h -> h.equals(hotkey) ? new SavedHotkey(dialog.type, dialog.action, dialog.keys, dialog.ignoreModifiers) : h).collect(Collectors.toList()));
 
                 this.reload();
                 HotkeyManager.reload();
             }
+            this.fixGhostBug();
         });
         return editButton;
+    }
+
+    private void fixGhostBug() {
+        JTabbedPane mainTabbedPane = JingleGUI.get().mainTabbedPane;
+        int i = mainTabbedPane.getSelectedIndex();
+        mainTabbedPane.setSelectedIndex(0);
+        mainTabbedPane.setSelectedIndex(i);
     }
 }
