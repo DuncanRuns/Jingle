@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HotkeyListPanel extends JPanel {
     private final JFrame owner;
@@ -35,43 +36,10 @@ public class HotkeyListPanel extends JPanel {
             JPanel buttonsPanel = new JPanel();
             buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
 
-            JButton editButton = new JButton("Edit");
-            editButton.addActionListener(a -> {
-                EditHotkeyDialog dialog = new EditHotkeyDialog(this.owner, hotkey.action, hotkey.type, hotkey.keys, hotkey.ignoreModifiers);
-                dialog.setVisible(true);
-                if (dialog.cancelled) return;
-                List<SavedHotkey> hotkeys = Jingle.options.getSavedHotkeys();
-                SavedHotkey newHotkey = new SavedHotkey(dialog.type, dialog.action, dialog.keys, dialog.ignoreModifiers);
-                hotkeys.set(hotkeys.indexOf(hotkey), newHotkey);
-                Jingle.options.setSavedHotkeys(hotkeys);
-                this.reload();
-                HotkeyManager.reload();
-            });
-            JButton removeButton = new JButton("Remove");
-            removeButton.addActionListener(a -> {
-                Jingle.options.hotkeys.remove(hotkey.toJson());
-                this.reload();
-                HotkeyManager.reload();
-            });
+            JButton editButton = this.getEditButton(hotkey);
+            JButton removeButton = this.getRemoveButton(hotkey);
             buttonsPanel.add(editButton);
-            buttonsPanel.add(new JComponent() {
-                private final Dimension size = new Dimension(5, 0);
-
-                @Override
-                public Dimension getPreferredSize() {
-                    return this.size;
-                }
-
-                @Override
-                public Dimension getMaximumSize() {
-                    return this.size;
-                }
-
-                @Override
-                public Dimension getMinimumSize() {
-                    return this.size;
-                }
-            });
+            buttonsPanel.add(getButtonSpacer());
             buttonsPanel.add(removeButton);
             this.add(buttonsPanel, constraints.clone());
         }
@@ -83,5 +51,51 @@ public class HotkeyListPanel extends JPanel {
             this.add(new JLabel("Hotkey"), constraints.clone());
         }
         this.revalidate();
+    }
+
+    private static JComponent getButtonSpacer() {
+        return new JComponent() {
+            private final Dimension size = new Dimension(5, 0);
+
+            @Override
+            public Dimension getPreferredSize() {
+                return this.size;
+            }
+
+            @Override
+            public Dimension getMaximumSize() {
+                return this.size;
+            }
+
+            @Override
+            public Dimension getMinimumSize() {
+                return this.size;
+            }
+        };
+    }
+
+    private JButton getRemoveButton(SavedHotkey hotkey) {
+        JButton removeButton = new JButton("Remove");
+        removeButton.addActionListener(a -> {
+            Jingle.options.setSavedHotkeys(Jingle.options.getSavedHotkeys().stream().filter(h -> !h.equals(hotkey)).collect(Collectors.toList()));
+            this.reload();
+            HotkeyManager.reload();
+        });
+        return removeButton;
+    }
+
+    private JButton getEditButton(SavedHotkey hotkey) {
+        JButton editButton = new JButton("Edit");
+        editButton.addActionListener(a -> {
+            EditHotkeyDialog dialog = new EditHotkeyDialog(this.owner, hotkey.action, hotkey.type, hotkey.keys, hotkey.ignoreModifiers);
+            dialog.setVisible(true);
+            if (dialog.cancelled) return;
+
+            Jingle.options.setSavedHotkeys(Jingle.options.getSavedHotkeys().stream().map(h -> h.equals(hotkey) ? new SavedHotkey(dialog.type, dialog.action, dialog.keys, dialog.ignoreModifiers) : h).collect(Collectors.toList()));
+
+            this.reload();
+            HotkeyManager.reload();
+        });
+        return editButton;
     }
 }
