@@ -41,20 +41,20 @@ public class SavedHotkey {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || this.getClass() != o.getClass()) return false;
-
-        SavedHotkey that = (SavedHotkey) o;
-        return this.ignoreModifiers == that.ignoreModifiers && Objects.equals(this.type, that.type) && Objects.equals(this.action, that.action) && Objects.equals(this.keys, that.keys);
-    }
-
-    @Override
     public int hashCode() {
         int result = this.type.hashCode();
         result = 31 * result + this.action.hashCode();
         result = 31 * result + this.keys.hashCode();
         result = 31 * result + Boolean.hashCode(this.ignoreModifiers);
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+
+        SavedHotkey that = (SavedHotkey) o;
+        return this.ignoreModifiers == that.ignoreModifiers && Objects.equals(this.type, that.type) && Objects.equals(this.action, that.action) && Objects.equals(this.keys, that.keys);
     }
 }
