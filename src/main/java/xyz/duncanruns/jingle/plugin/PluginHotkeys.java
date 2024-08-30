@@ -2,8 +2,11 @@ package xyz.duncanruns.jingle.plugin;
 
 import java.util.*;
 
-public class PluginRegistries {
+public final class PluginHotkeys {
     private static final Map<String, Runnable> HOTKEYS_ACTIONS = new HashMap<>();
+
+    private PluginHotkeys() {
+    }
 
     public static void addHotkeyAction(String name, Runnable runnable) {
         HOTKEYS_ACTIONS.put(name, runnable);
