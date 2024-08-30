@@ -7,7 +7,9 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.InstanceChecker;
+import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
+import xyz.duncanruns.jingle.instance.StateTracker;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
 import xyz.duncanruns.jingle.script.ScriptEvents;
 import xyz.duncanruns.jingle.script.ScriptFile;
@@ -40,6 +42,7 @@ public final class Jingle {
     public static JingleOptions options = null;
 
     @Nullable public static OpenedInstanceInfo mainInstance = null;
+    @Nullable public static StateTracker stateTracker = null;
     @Nullable public static WinDef.HWND activeHwnd = null;
     public static final Path FOLDER = Paths.get(System.getProperty("user.home")).resolve(".config").resolve("Jingle").toAbsolutePath();
 
@@ -104,6 +107,7 @@ public final class Jingle {
             lastInstanceCheck = currentTime;
             updateMainInstance();
         }
+        if (stateTracker != null) stateTracker.tryUpdate();
         PluginEvents.RunnableEventType.END_TICK.runAll();
     }
 
@@ -142,10 +146,21 @@ public final class Jingle {
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         if (mainInstance == instance) return;
         mainInstance = instance;
+        stateTracker = instance == null ? null : new StateTracker(instance.instancePath.resolve("wpstateout.txt"), Jingle::onInstanceStateChange);
         JingleGUI.get().setInstance(instance);
         if (instance != null) seeInstancePath(instance.instancePath);
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath));
         PluginEvents.RunnableEventType.MAIN_INSTANCE_CHANGED.runAll();
+    }
+
+    private static void onInstanceStateChange(InstanceState previousState, InstanceState newState) {
+        if (previousState.equals(InstanceState.INWORLD) && !newState.equals(InstanceState.INWORLD)) {
+            onLeaveWorld();
+        }
+    }
+
+    private static void onLeaveWorld() {
+
     }
 
     private static void seeInstancePath(Path instancePath) {
