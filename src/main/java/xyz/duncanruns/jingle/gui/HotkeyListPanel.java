@@ -1,17 +1,16 @@
 package xyz.duncanruns.jingle.gui;
 
-import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.hotkey.Hotkey;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
+import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class HotkeyListPanel extends JPanel {
     private final JFrame owner;
@@ -26,41 +25,31 @@ public class HotkeyListPanel extends JPanel {
     public void reload() {
         this.removeAll();
         GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 1, 0, 17, 0, new Insets(0, 10, 5, 10), 0, 0);
-        List<JsonObject> hotkeys = Optional.ofNullable(Jingle.options).map(o -> o.hotkeys).orElse(Collections.emptyList());
 
-        for (final JsonObject hotkeyJson : hotkeys) {
-            if (!(hotkeyJson.has("type") && hotkeyJson.has("action") && hotkeyJson.has("keys") && hotkeyJson.get("keys").isJsonArray()))
-                continue;
-            String action = hotkeyJson.get("action").getAsString();
-            String type = hotkeyJson.get("type").getAsString();
-            List<Integer> keys = Hotkey.keysFromJson(hotkeyJson.getAsJsonArray("keys"));
-
-            boolean ignoreModifiers = hotkeyJson.has("ignoreModifiers") && hotkeyJson.get("ignoreModifiers").getAsBoolean();
+        for (final SavedHotkey hotkey : Jingle.options == null ? Collections.<SavedHotkey>emptyList() : Jingle.options.getSavedHotkeys()) {
 
             constraints.gridy++;
-            this.add(new JLabel(String.format("%s (%s)", action, StringUtils.capitalize(type))), constraints.clone());
-            this.add(new JLabel((ignoreModifiers ? "* " : "") + Hotkey.formatKeys(keys)), constraints.clone());
+            this.add(new JLabel(String.format("%s (%s)", hotkey.action, StringUtils.capitalize(hotkey.type))), constraints.clone());
+            this.add(new JLabel((hotkey.ignoreModifiers ? "* " : "") + Hotkey.formatKeys(hotkey.keys)), constraints.clone());
 
             JPanel buttonsPanel = new JPanel();
             buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
 
             JButton editButton = new JButton("Edit");
             editButton.addActionListener(a -> {
-                EditHotkeyDialog dialog = new EditHotkeyDialog(this.owner, action, type, keys, ignoreModifiers);
+                EditHotkeyDialog dialog = new EditHotkeyDialog(this.owner, hotkey.action, hotkey.type, hotkey.keys, hotkey.ignoreModifiers);
                 dialog.setVisible(true);
                 if (dialog.cancelled) return;
-                int i = Jingle.options.hotkeys.indexOf(hotkeyJson);
-                hotkeyJson.addProperty("type", dialog.type);
-                hotkeyJson.addProperty("action", dialog.action);
-                hotkeyJson.addProperty("ignoreModifiers", dialog.ignoreModifiers);
-                hotkeyJson.add("keys", Hotkey.jsonFromKeys(dialog.keys));
-                Jingle.options.hotkeys.set(i, hotkeyJson);
+                List<SavedHotkey> hotkeys = Jingle.options.getSavedHotkeys();
+                SavedHotkey newHotkey = new SavedHotkey(dialog.type, dialog.action, dialog.keys, dialog.ignoreModifiers);
+                hotkeys.set(hotkeys.indexOf(hotkey), newHotkey);
+                Jingle.options.setSavedHotkeys(hotkeys);
                 this.reload();
                 HotkeyManager.reload();
             });
             JButton removeButton = new JButton("Remove");
             removeButton.addActionListener(a -> {
-                Jingle.options.hotkeys.remove(hotkeyJson);
+                Jingle.options.hotkeys.remove(hotkey.toJson());
                 this.reload();
                 HotkeyManager.reload();
             });
