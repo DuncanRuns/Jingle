@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The instance checker will run checks for Minecraft instances every second while Julti has missing instances.
- * When it finds new instances, it will send an InstancesFoundQMessage to Julti.
+ * The instance checker will run checks for Minecraft instances every second while Jingle has missing instances.
+ * When it finds new instances, it will send an InstancesFoundQMessage to Jingle.
  * Additionally, it will remember all opened Minecraft instances on the computer for whenever needed (redetect instances).
  */
 public class InstanceChecker {

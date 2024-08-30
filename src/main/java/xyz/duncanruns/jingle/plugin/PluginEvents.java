@@ -16,8 +16,12 @@ public final class PluginEvents {
         OPTIONS_LOADED,
         // Runs when Jingle is shutting down
         STOP,
-        // Runs when all instances are found
-        MAIN_INSTANCE_CHANGED;
+        // Runs when the instance changes, can be null
+        MAIN_INSTANCE_CHANGED,
+        // Runs when the instance's state changes
+        STATE_CHANGE,
+        // Runs when a world is exited
+        EXIT_WORLD;
 
         private final List<Runnable> runnables = new LinkedList<>();
 

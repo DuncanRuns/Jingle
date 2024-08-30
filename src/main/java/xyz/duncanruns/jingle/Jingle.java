@@ -155,12 +155,13 @@ public final class Jingle {
 
     private static void onInstanceStateChange(InstanceState previousState, InstanceState newState) {
         if (previousState.equals(InstanceState.INWORLD) && !newState.equals(InstanceState.INWORLD)) {
-            onLeaveWorld();
+            onExitWorld();
         }
+        PluginEvents.RunnableEventType.STATE_CHANGE.runAll();
     }
 
-    private static void onLeaveWorld() {
-
+    private static void onExitWorld() {
+        PluginEvents.RunnableEventType.EXIT_WORLD.runAll();
     }
 
     private static void seeInstancePath(Path instancePath) {

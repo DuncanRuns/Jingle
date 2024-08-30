@@ -85,7 +85,7 @@ public class InstanceInfo {
         try {
             return PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
         } catch (PowerShellExecutionException | IOException e) {
-            Jingle.log(Level.ERROR, "Error getting PowerShell output, please send this log in the Julti discord: " + e.getMessage());
+            Jingle.log(Level.ERROR, "Error getting PowerShell output, please send this log in the Jingle discord: " + e.getMessage());
             return null;
         }
     }
