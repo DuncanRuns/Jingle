@@ -18,6 +18,7 @@ public class JingleAppLaunch {
     public static String[] args;
     public static boolean launchedWithDevPlugin = false;
 
+    @SuppressWarnings("unused")
     public static void launchWithDevPlugin(String[] args, PluginManager.JinglePluginData pluginData, Runnable pluginInitializer) {
         launchedWithDevPlugin = true;
         PluginManager.registerPlugin(pluginData, pluginInitializer);
