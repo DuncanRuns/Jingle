@@ -13,10 +13,7 @@ import xyz.duncanruns.jingle.script.ScriptEvents;
 import xyz.duncanruns.jingle.script.ScriptFile;
 import xyz.duncanruns.jingle.script.ScriptRegistries;
 import xyz.duncanruns.jingle.script.lua.LuaRunner;
-import xyz.duncanruns.jingle.util.ExceptionUtil;
-import xyz.duncanruns.jingle.util.MonitorUtil;
-import xyz.duncanruns.jingle.util.OpenUtil;
-import xyz.duncanruns.jingle.util.WindowStateUtil;
+import xyz.duncanruns.jingle.util.*;
 import xyz.duncanruns.jingle.win32.User32;
 
 import javax.annotation.Nullable;
@@ -207,13 +204,24 @@ public final class Jingle {
         try {
             Files.list(scriptsFolder).filter(path -> path.getFileName().toString().endsWith(".lua")).forEach(path -> {
                 try {
-                    LuaRunner.runLuaScript(ScriptFile.load(path));
+                    LuaRunner.runLuaScript(ScriptFile.loadFile(path));
                 } catch (Exception e) {
                     logError("Failed to load script \"" + path.getFileName() + "\":", e);
                 }
             });
         } catch (Exception e) {
             logError("Failed to load scripts:", e);
+        }
+        try {
+            for (String s : ResourceUtil.getResourcesFromFolder("defaultscripts")) {
+                try {
+                    LuaRunner.runLuaScript(ScriptFile.loadResource("/defaultscripts/" + s));
+                } catch (Exception e) {
+                    logError("Failed to load script \"" + s + "\":", e);
+                }
+            }
+        } catch (Exception e) {
+            logError("Failed to load default scripts:", e);
         }
         HotkeyManager.reload();
     }
@@ -229,5 +237,11 @@ public final class Jingle {
     @SuppressWarnings("all")
     public static Set<String> getBuiltinHotkeyActionNames() {
         return new HashSet<>(Arrays.asList("none"));
+    }
+
+    public static String formatAction(String action) {
+        if (!action.contains(":")) return action;
+        int i = action.indexOf(':');
+        return String.format("%s - %s", action.substring(0, i), action.substring(i + 1));
     }
 }

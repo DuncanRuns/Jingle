@@ -71,9 +71,9 @@ public class EditHotkeyDialog extends JDialog {
 
     private static Vector<HotkeyTypeAndAction> getHotkeyOptions() {
         Vector<HotkeyTypeAndAction> options = new Vector<>();
-        Jingle.getBuiltinHotkeyActionNames().forEach(s -> options.add(new HotkeyTypeAndAction("builtin", s)));
-        PluginRegistries.getHotkeyActionNames().forEach(s -> options.add(new HotkeyTypeAndAction("plugin", s)));
-        ScriptRegistries.getHotkeyActionNames().forEach(s -> options.add(new HotkeyTypeAndAction("script", s)));
+        Jingle.getBuiltinHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("builtin", s)));
+        PluginRegistries.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("plugin", s)));
+        ScriptRegistries.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("script", s)));
         return options;
     }
 
@@ -181,7 +181,7 @@ public class EditHotkeyDialog extends JDialog {
         @Override
         public String toString() {
             if (this.action.equals("none")) return "";
-            return String.format("%s (%s)", this.action, StringUtils.capitalize(this.type));
+            return String.format("%s (%s)", Jingle.formatAction(this.action), StringUtils.capitalize(this.type));
         }
     }
 }

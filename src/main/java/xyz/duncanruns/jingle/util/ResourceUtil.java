@@ -61,9 +61,7 @@ public final class ResourceUtil {
         }
     }
 
-    public static List<String> getResourcesFromFolder(String folder)
-            throws URISyntaxException, IOException {
-
+    public static List<String> getResourcesFromFolder(String folder) {
         List<String> result;
 
         try {
