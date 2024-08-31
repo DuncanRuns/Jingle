@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.plugin.PluginManager;
+import xyz.duncanruns.jingle.script.lua.LuaLibraries;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.LockUtil;
 
@@ -50,6 +51,8 @@ public class JingleAppLaunch {
 
         PluginManager.loadPlugins();
         PluginManager.initializePlugins();
+
+        LuaLibraries.generateLuaDocs();
 
         Jingle.start();
     }
