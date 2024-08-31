@@ -58,7 +58,11 @@ public final class HotkeyManager {
             sleep(1);
             for (Pair<Hotkey, Runnable> hotkeyAction : HOTKEYS) {
                 if (hotkeyAction.getLeft().wasPressed()) {
-                    hotkeyAction.getRight().run();
+                    try {
+                        hotkeyAction.getRight().run();
+                    } catch (Throwable t) {
+                        Jingle.logError("Error while running hotkey!", t);
+                    }
                 }
             }
         }
