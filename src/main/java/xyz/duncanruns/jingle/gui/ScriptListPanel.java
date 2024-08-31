@@ -42,13 +42,13 @@ public class ScriptListPanel extends JPanel {
             extraFunctions.ifPresent(map -> {
                 for (Map.Entry<String, Runnable> entry : map.entrySet()) {
                     JMenuItem item = menu.add(new JMenuItem());
-                    item.setName(entry.getKey());
                     item.setAction(new AbstractAction() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             entry.getValue().run();
                         }
                     });
+                    item.setText(entry.getKey());
                 }
             });
             menu.show(moreButton, 0, 0);
