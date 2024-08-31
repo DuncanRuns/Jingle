@@ -252,8 +252,8 @@ function regenerate()
         set_position(cap_item, total_width / 2, total_height / 2)
         obs.obs_sceneitem_set_alignment(cap_item, 0) -- align to center
         local scale = obs.vec2()
-        scale.x = 32
-        scale.y = 2
+        scale.x = 32 * total_width / 1920
+        scale.y = 2 * total_height / 1080
         obs.obs_sceneitem_set_scale(cap_item, scale)
         obs.obs_sceneitem_set_scale_filter(cap_item, obs.OBS_SCALE_POINT)
 
