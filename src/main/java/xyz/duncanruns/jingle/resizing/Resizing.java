@@ -57,8 +57,20 @@ public final class Resizing {
             WindowStateUtil.setHwndBorderless(hwnd);
             User32.INSTANCE.SetWindowPos(hwnd, new WinDef.HWND(new Pointer(0)), newRectangle.x, newRectangle.y, newRectangle.width, newRectangle.height, 0x0400);
             return (currentlyResized = true);
+        } else {
+            return undoResize();
         }
-        // (else)
+
+    }
+
+    public static boolean undoResize() {
+        assert Jingle.getMainInstance().isPresent();
+        OpenedInstanceInfo instance = Jingle.getMainInstance().get();
+        WinDef.HWND hwnd = instance.hwnd;
+        Rectangle previousRectangle = WindowStateUtil.getHwndRectangle(hwnd);
+
+        int centerX = (int) previousRectangle.getCenterX();
+        int centerY = (int) previousRectangle.getCenterY();
 
         Rectangle newRectangle = WindowStateUtil.withTopLeftToCenter(new Rectangle(centerX, centerY, previousWidth, previousHeight));
 
@@ -66,6 +78,5 @@ public final class Resizing {
         User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_EXSTYLE, new WinDef.LONG(previousExStyle));
         User32.INSTANCE.SetWindowPos(hwnd, new WinDef.HWND(new Pointer(0)), newRectangle.x, newRectangle.y, newRectangle.width, newRectangle.height, 0x0400);
         return (currentlyResized = false);
-
     }
 }
