@@ -1,0 +1,212 @@
+--[[
+
+    Jingle OBS Link v1.2.1
+    
+    The purpose of the OBS Link Script is to generate and control various Jingle related scenes and sources to assist in Speedrunning Minecraft.
+
+    LICENSE BELOW:
+
+    MIT License
+
+    Copyright (c) 2024 DuncanRuns
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+]]
+
+obs = obslua
+
+---- Variables ----
+
+jingle_dir = os.getenv("UserProfile"):gsub("\\", "/") .. "/.config/Jingle/"
+
+---- File Functions ----
+
+function read_first_line(filename)
+    local rfile = io.open(filename, "r")
+    if rfile == nil then
+        return ""
+    end
+    io.input(rfile)
+    local out = io.read()
+    io.close(rfile)
+    return out
+end
+
+-- Don't think I'll need this
+-- function write_file(filename, string)
+--     local wfile = io.open(filename, "w")
+--     io.output(wfile)
+--     io.write(string)
+--     io.close(wfile)
+-- end
+
+function get_state_file_string()
+    local success, result = pcall(read_first_line, jingle_dir .. "state")
+    if success then
+        return result
+    end
+    return nil
+end
+
+---- Obs Functions ----
+
+function get_scene(name)
+    local source = get_source(name)
+    if source == nil then
+        return nil
+    end
+    local scene = obs.obs_scene_from_source(source)
+    release_source(source)
+    return scene
+end
+
+function get_group_as_scene(name)
+    local source = get_source(name)
+    if source == nil then
+        return nil
+    end
+    local scene = obs.obs_group_from_source(source)
+    release_source(source)
+    return scene
+end
+
+function remove_source_or_scene(name)
+    local source = get_source(name)
+    obs.obs_source_remove(source)
+    release_source(source)
+end
+
+--- Requires release after use
+function get_source(name)
+    return obs.obs_get_source_by_name(name)
+end
+
+function release_source(source)
+    obs.obs_source_release(source)
+end
+
+function release_scene(scene)
+    obs.obs_scene_release(scene)
+end
+
+function scene_exists(name)
+    return get_scene(name) ~= nil
+end
+
+function create_scene(name)
+    release_scene(obs.obs_scene_create(name))
+end
+
+function switch_to_scene(scene_name)
+    local scene_source = get_source(scene_name)
+    if (scene_source == nil) then return false end
+    obs.obs_frontend_set_current_scene(scene_source)
+    release_source(scene_source)
+    return true
+end
+
+function get_video_info()
+    local video_info = obs.obs_video_info()
+    obs.obs_get_video_info(video_info)
+    return video_info
+end
+
+function set_position_with_bounds(scene_item, x, y, width, height, center_align)
+    -- default value false
+    center_align = center_align or false
+
+    local bounds = obs.vec2()
+    bounds.x = width
+    bounds.y = height
+
+    if center_align then
+        obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_NONE)
+        local scale = obs.vec2()
+        scale.x = center_align_scale_x
+        scale.y = center_align_scale_y
+        obs.obs_sceneitem_set_scale(scene_item, scale)
+    else
+        obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_STRETCH)
+        obs.obs_sceneitem_set_bounds(scene_item, bounds)
+    end
+
+    -- set alignment of the scene item to: center_align ? CENTER : TOP_LEFT
+    obs.obs_sceneitem_set_alignment(scene_item, center_align and ALIGN_CENTER or ALIGN_TOP_LEFT)
+
+    set_position(scene_item, x + (center_align and total_width / 2 or 0), y + (center_align and total_height / 2 or 0))
+end
+
+function set_position(scene_item, x, y)
+    local pos = obs.vec2()
+    pos.x = x
+    pos.y = y
+    obs.obs_sceneitem_set_pos(scene_item, pos)
+end
+
+function set_crop(scene_item, left, top, right, bottom)
+    local crop = obs.obs_sceneitem_crop()
+    crop.left = left
+    crop.top = top
+    crop.right = right
+    crop.bottom = bottom
+    obs.obs_sceneitem_set_crop(scene_item, crop)
+end
+
+function get_sceneitem_name(sceneitem)
+    return obs.obs_source_get_name(obs.obs_sceneitem_get_source(sceneitem))
+end
+
+function bring_to_top(item)
+    if item ~= nil then
+        obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_TOP)
+    end
+end
+
+function bring_to_bottom(item)
+    obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_BOTTOM)
+end
+
+function delete_source(name)
+    local source = get_source(name)
+    if (source ~= nil) then
+        obs.obs_source_remove(source)
+        release_source(source)
+    end
+end
+
+---- Script Functions ----
+
+function script_description()
+    return "<h1>Jingle OBS Link</h1><p>Links OBS to Jingle.</p>"
+end
+
+function script_properties()
+    local props = obs.obs_properties_create()
+
+    obs.obs_properties_add_button(
+        props, "generate_scenes_button", "Regenerate", regenerate)
+
+    return props
+end
+
+function regenerate()
+    obs.script_log(200, "TODO: Implement")
+end
+

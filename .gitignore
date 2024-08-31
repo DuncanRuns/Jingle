@@ -119,4 +119,5 @@ Temporary Items
 
 # I should probably make actual tests but for now I just exclude my janky stuff
 src/test/
-*.py
+OBS Link/obslua.lua
+*.pyc
