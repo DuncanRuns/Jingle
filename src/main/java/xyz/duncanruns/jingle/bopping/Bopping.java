@@ -56,7 +56,7 @@ public final class Bopping {
                     }
                 });
                 synchronized (Jingle.class) {
-                    JingleGUI.get().clearWorldsButton.setEnabled(Jingle.mainInstance != null);
+                    JingleGUI.get().clearWorldsButton.setEnabled(Jingle.getMainInstance().isPresent());
                     JingleGUI.get().clearWorldsFromAllButton.setEnabled(true);
                 }
             }

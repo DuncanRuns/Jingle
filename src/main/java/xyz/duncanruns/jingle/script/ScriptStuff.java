@@ -31,7 +31,7 @@ public final class ScriptStuff {
     }
 
     public static Optional<Map<String, Runnable>> getExtraFunctions(String scriptName) {
-        return Optional.ofNullable(EXTRA_FUNCTIONS.getOrDefault(scriptName, null)).map(HashMap::new);
+        return Optional.ofNullable(EXTRA_FUNCTIONS.getOrDefault(scriptName, null)).map(LinkedHashMap::new);
     }
 
     public static List<ScriptFile> getLoadedScripts() {
@@ -101,7 +101,7 @@ public final class ScriptStuff {
     }
 
     public static void addExtraFunction(ScriptFile script, String functionName, Runnable runnable) {
-        EXTRA_FUNCTIONS.computeIfAbsent(script.getName(), s -> new HashMap<>()).put(functionName, runnable);
+        EXTRA_FUNCTIONS.computeIfAbsent(script.getName(), s -> new LinkedHashMap<>()).put(functionName, runnable);
     }
 
     public enum RunnableEventType {

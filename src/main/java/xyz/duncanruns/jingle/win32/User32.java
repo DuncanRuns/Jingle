@@ -28,7 +28,7 @@ public interface User32 extends com.sun.jna.platform.win32.User32 {
 
     int GetWindowTextA(HWND hWnd, byte[] lpString, int nMaxCount);
 
-    LONG GetWindowLongA(HWND hWnd, int nIndex);
+    long GetWindowLongA(HWND hWnd, int nIndex);
 
     LONG SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong);
 

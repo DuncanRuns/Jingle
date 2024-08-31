@@ -1,12 +1,12 @@
 function runThinBt()
-    jingle.log("TODO: implement resizing")
+    jingle.toggleResize(250, 750);
 end
 function runPlanarAbuse()
-    jingle.log("TODO: implement resizing")
+    jingle.toggleResize(1920, 300);
 end
 
 function customize()
-    jingle.log("TODO: implement resizing")
+    jingle.log("TODO: implement customizing")
 end
 
 function runDoom()

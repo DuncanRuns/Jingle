@@ -66,7 +66,7 @@ public final class WindowStateUtil {
     }
 
     public static int getHwndStyle(HWND hwnd) {
-        return User32.INSTANCE.GetWindowLongA(hwnd, User32.GWL_STYLE).intValue();
+        return (int) User32.INSTANCE.GetWindowLongA(hwnd, User32.GWL_STYLE);
     }
 
     public static void setHwndStyle(HWND hwnd, int style) {

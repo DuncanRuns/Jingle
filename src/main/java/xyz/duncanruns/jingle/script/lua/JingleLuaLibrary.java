@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaFunction;
 import xyz.duncanruns.jingle.Jingle;
+import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.ScriptFile;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 
@@ -41,8 +42,17 @@ class JingleLuaLibrary extends LuaLibrary {
         ScriptStuff.addExtraFunction(this.script, functionName, wrapFunction(function));
     }
 
+    public void toggleResize(int width, int height) {
+        Resizing.toggleResize(width, height);
+    }
+
+    public boolean isInstanceActive() {
+        return Jingle.isInstanceActive();
+    }
+
     public void log(String message) {
         assert this.script != null;
         Jingle.log(Level.INFO, String.format("(%s) %s", this.script.getName(), message));
     }
+
 }
