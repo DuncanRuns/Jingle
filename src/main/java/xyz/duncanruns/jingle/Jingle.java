@@ -11,6 +11,7 @@ import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 import xyz.duncanruns.jingle.instance.StateTracker;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
+import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.MonitorUtil;
@@ -166,6 +167,9 @@ public final class Jingle {
     private static void onExitWorld() {
         PluginEvents.RunnableEventType.EXIT_WORLD.runAll();
         ScriptStuff.RunnableEventType.EXIT_WORLD.runAll();
+
+        // TODO: configurable
+        Resizing.undoResize();
     }
 
     private static void onEnterWorld() {
