@@ -13,15 +13,13 @@ import xyz.duncanruns.jingle.instance.StateTracker;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
 import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.ScriptStuff;
-import xyz.duncanruns.jingle.util.ExceptionUtil;
-import xyz.duncanruns.jingle.util.MonitorUtil;
-import xyz.duncanruns.jingle.util.OpenUtil;
-import xyz.duncanruns.jingle.util.WindowStateUtil;
+import xyz.duncanruns.jingle.util.*;
 import xyz.duncanruns.jingle.win32.User32;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -76,10 +74,22 @@ public final class Jingle {
         HotkeyManager.reload();
         HotkeyManager.start();
 
+        generateScript();
+
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Jingle v" + VERSION + " with java: " + usedJava);
 
         mainLoop();
+    }
+
+    private static void generateScript() {
+        try {
+            ResourceUtil.copyResourceToFile("/jingle-obs-link.lua", FOLDER.resolve("jingle-obs-link.lua"));
+            Jingle.log(Level.INFO,"Regenerated obs link script");
+        } catch (IOException e) {
+            Jingle.logError("Failed to write Script!", e);
+            Jingle.log(Level.ERROR, "You can download the script manually from https://github.com/DuncanRuns/Jingle/blob/main/src/main/resources/jingle-obs-link.lua");
+        }
     }
 
     private static void mainLoop() {
@@ -168,7 +178,7 @@ public final class Jingle {
         PluginEvents.RunnableEventType.EXIT_WORLD.runAll();
         ScriptStuff.RunnableEventType.EXIT_WORLD.runAll();
 
-        if(Jingle.options.revertWindowAfterReset) {
+        if (Jingle.options.revertWindowAfterReset) {
             Resizing.undoResize();
         }
     }
