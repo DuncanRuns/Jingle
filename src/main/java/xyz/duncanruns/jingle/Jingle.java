@@ -11,17 +11,16 @@ import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 import xyz.duncanruns.jingle.instance.StateTracker;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
-import xyz.duncanruns.jingle.script.ScriptEvents;
-import xyz.duncanruns.jingle.script.ScriptFile;
-import xyz.duncanruns.jingle.script.ScriptRegistries;
-import xyz.duncanruns.jingle.script.lua.LuaRunner;
-import xyz.duncanruns.jingle.util.*;
+import xyz.duncanruns.jingle.script.ScriptStuff;
+import xyz.duncanruns.jingle.util.ExceptionUtil;
+import xyz.duncanruns.jingle.util.MonitorUtil;
+import xyz.duncanruns.jingle.util.OpenUtil;
+import xyz.duncanruns.jingle.util.WindowStateUtil;
 import xyz.duncanruns.jingle.win32.User32;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -68,13 +67,12 @@ public final class Jingle {
         assert !started;
         log(Level.INFO, ".config/Jingle/options.json loaded.");
 
-        PluginEvents.RunnableEventType.OPTIONS_LOADED.runAll();
-
         started = true;
         running = true;
 
+        ScriptStuff.reloadScripts();
+        HotkeyManager.reload();
         HotkeyManager.start();
-        reloadScripts();
 
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Jingle v" + VERSION + " with java: " + usedJava);
@@ -138,9 +136,8 @@ public final class Jingle {
         }
     }
 
-    @Nullable
-    public static synchronized OpenedInstanceInfo getMainInstance() {
-        return mainInstance;
+    public static synchronized Optional<OpenedInstanceInfo> getMainInstance() {
+        return Optional.ofNullable(mainInstance);
     }
 
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
@@ -154,14 +151,25 @@ public final class Jingle {
     }
 
     private static void onInstanceStateChange(InstanceState previousState, InstanceState newState) {
-        if (previousState.equals(InstanceState.INWORLD) && !newState.equals(InstanceState.INWORLD)) {
+        boolean previouslyInWorld = previousState.equals(InstanceState.INWORLD);
+        boolean currentlyInWorld = newState.equals(InstanceState.INWORLD);
+        if (previouslyInWorld && !currentlyInWorld) {
             onExitWorld();
+        } else if (!previouslyInWorld && currentlyInWorld) {
+            onEnterWorld();
         }
         PluginEvents.RunnableEventType.STATE_CHANGE.runAll();
+        ScriptStuff.RunnableEventType.STATE_CHANGE.runAll();
     }
 
     private static void onExitWorld() {
         PluginEvents.RunnableEventType.EXIT_WORLD.runAll();
+        ScriptStuff.RunnableEventType.EXIT_WORLD.runAll();
+    }
+
+    private static void onEnterWorld() {
+        PluginEvents.RunnableEventType.ENTER_WORLD.runAll();
+        ScriptStuff.RunnableEventType.ENTER_WORLD.runAll();
     }
 
     private static void seeInstancePath(Path instancePath) {
@@ -203,43 +211,6 @@ public final class Jingle {
 
     public static boolean isRunning() {
         return running;
-    }
-
-    private static void reloadScripts() {
-        ScriptRegistries.clear();
-        ScriptEvents.clear();
-        Path scriptsFolder = FOLDER.resolve("scripts");
-        if (!Files.exists(scriptsFolder)) {
-            try {
-                Files.createDirectory(scriptsFolder);
-            } catch (IOException e) {
-                logError("Failed to create scripts folder:", e);
-                return;
-            }
-        }
-        try {
-            Files.list(scriptsFolder).filter(path -> path.getFileName().toString().endsWith(".lua")).forEach(path -> {
-                try {
-                    LuaRunner.runLuaScript(ScriptFile.loadFile(path));
-                } catch (Exception e) {
-                    logError("Failed to load script \"" + path.getFileName() + "\":", e);
-                }
-            });
-        } catch (Exception e) {
-            logError("Failed to load scripts:", e);
-        }
-        try {
-            for (String s : ResourceUtil.getResourcesFromFolder("defaultscripts")) {
-                try {
-                    LuaRunner.runLuaScript(ScriptFile.loadResource("/defaultscripts/" + s));
-                } catch (Exception e) {
-                    logError("Failed to load script \"" + s + "\":", e);
-                }
-            }
-        } catch (Exception e) {
-            logError("Failed to load default scripts:", e);
-        }
-        HotkeyManager.reload();
     }
 
     @SuppressWarnings("all")

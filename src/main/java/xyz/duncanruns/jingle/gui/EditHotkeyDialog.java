@@ -6,8 +6,8 @@ import com.intellij.uiDesigner.core.Spacer;
 import org.apache.commons.lang3.StringUtils;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.hotkey.Hotkey;
-import xyz.duncanruns.jingle.plugin.PluginRegistries;
-import xyz.duncanruns.jingle.script.ScriptRegistries;
+import xyz.duncanruns.jingle.plugin.PluginHotkeys;
+import xyz.duncanruns.jingle.script.ScriptStuff;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,8 +72,8 @@ public class EditHotkeyDialog extends JDialog {
     private static Vector<HotkeyTypeAndAction> getHotkeyOptions() {
         Vector<HotkeyTypeAndAction> options = new Vector<>();
         Jingle.getBuiltinHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("builtin", s)));
-        PluginRegistries.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("plugin", s)));
-        ScriptRegistries.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("script", s)));
+        PluginHotkeys.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("plugin", s)));
+        ScriptStuff.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("script", s)));
         return options;
     }
 

@@ -15,15 +15,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class LuaLibraries {
+public final class LuaLibraries {
     private static final List<BiFunction<ScriptFile, Globals, LuaLibrary>> LIBRARY_PROVIDERS = new ArrayList<>(Collections.singletonList(JingleLuaLibrary::new));
+
+    private LuaLibraries() {
+    }
 
     public static void registerLuaLibrary(BiFunction<ScriptFile, Globals, LuaLibrary> libraryProvider) {
         LIBRARY_PROVIDERS.add(libraryProvider);
-    }
-
-    public static List<BiFunction<ScriptFile, Globals, LuaLibrary>> getLibraryProviders() {
-        return LIBRARY_PROVIDERS;
     }
 
     static void addLibraries(ScriptFile script, Globals globals) {

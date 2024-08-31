@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,9 +30,9 @@ public final class Bopping {
                     paths = Jingle.options.seenPaths.keySet().stream()
                             .map(Paths::get);
                 } else {
-                    OpenedInstanceInfo mainInstance = Jingle.getMainInstance();
-                    assert mainInstance != null;
-                    paths = Stream.of(mainInstance.instancePath);
+                    Optional<OpenedInstanceInfo> mainInstance = Jingle.getMainInstance();
+                    assert mainInstance.isPresent();
+                    paths = Stream.of(mainInstance.get().instancePath);
                 }
                 List<Thread> clearWorldThreads = paths
                         .map(Path::toAbsolutePath)

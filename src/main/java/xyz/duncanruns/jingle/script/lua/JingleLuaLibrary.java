@@ -5,7 +5,7 @@ import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaFunction;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.script.ScriptFile;
-import xyz.duncanruns.jingle.script.ScriptRegistries;
+import xyz.duncanruns.jingle.script.ScriptStuff;
 
 
 @SuppressWarnings("unused")
@@ -20,7 +20,7 @@ class JingleLuaLibrary extends LuaLibrary {
         if (hotkeyName.contains(":")) {
             Jingle.log(Level.ERROR, "Can't add hotkey script: script name \"" + hotkeyName + "\" contains a colon!");
         }
-        ScriptRegistries.addHotkeyAction(this.script, hotkeyName,
+        ScriptStuff.addHotkeyAction(this.script, hotkeyName,
                 () -> {
                     synchronized (Jingle.class) {
                         function.call();

@@ -3,8 +3,8 @@ package xyz.duncanruns.jingle.hotkey;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 import xyz.duncanruns.jingle.Jingle;
-import xyz.duncanruns.jingle.plugin.PluginRegistries;
-import xyz.duncanruns.jingle.script.ScriptRegistries;
+import xyz.duncanruns.jingle.plugin.PluginHotkeys;
+import xyz.duncanruns.jingle.script.ScriptStuff;
 
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,10 +33,10 @@ public final class HotkeyManager {
             Optional<Runnable> hotkeyAction = Optional.empty();
             switch (savedHotkey.type) {
                 case "script":
-                    hotkeyAction = ScriptRegistries.getHotkeyAction(savedHotkey.action);
+                    hotkeyAction = ScriptStuff.getHotkeyAction(savedHotkey.action);
                     break;
                 case "plugin":
-                    hotkeyAction = PluginRegistries.getHotkeyAction(savedHotkey.action);
+                    hotkeyAction = PluginHotkeys.getHotkeyAction(savedHotkey.action);
                     break;
                 case "builtin":
                     hotkeyAction = Jingle.getBuiltinHotkeyAction(savedHotkey.action);

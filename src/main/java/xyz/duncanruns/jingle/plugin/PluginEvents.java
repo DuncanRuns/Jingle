@@ -12,8 +12,6 @@ public final class PluginEvents {
         START_TICK,
         // Runs at the end of the main loop tick
         END_TICK,
-        // Runs when Jingle's options.json is loaded, just before the start of the main loop
-        OPTIONS_LOADED,
         // Runs when Jingle is shutting down
         STOP,
         // Runs when the instance changes, can be null
@@ -21,7 +19,9 @@ public final class PluginEvents {
         // Runs when the instance's state changes
         STATE_CHANGE,
         // Runs when a world is exited
-        EXIT_WORLD;
+        EXIT_WORLD,
+        // Runs when a world is entered
+        ENTER_WORLD;
 
         private final List<Runnable> runnables = new LinkedList<>();
 
