@@ -20,6 +20,7 @@ public class JingleOptions {
     public Map<String, Long> seenPaths = new HashMap<>();
     public List<JsonObject> hotkeys = new ArrayList<>();
     public Set<String> disabledDefaultScripts = new HashSet<>();
+    public boolean revertWindowAfterReset = true;
 
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {

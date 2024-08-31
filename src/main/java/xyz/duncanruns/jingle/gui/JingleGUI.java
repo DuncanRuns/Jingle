@@ -18,6 +18,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class JingleGUI extends JFrame {
     private static final JingleGUI instance = new JingleGUI();
@@ -126,6 +127,8 @@ public class JingleGUI extends JFrame {
 
         this.openJingleFolderButton.addActionListener(a -> OpenUtil.openFile(Jingle.FOLDER.toString()));
 
+        setCheckBoxBoolean(revertWindowAfterResetCheckBox, Jingle.options.revertWindowAfterReset, b -> Jingle.options.revertWindowAfterReset = b);
+
         this.hotkeyListPanel.reload();
     }
 
@@ -176,7 +179,7 @@ public class JingleGUI extends JFrame {
         label1.setText("Basic Options");
         panel1.add(label1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         revertWindowAfterResetCheckBox = new JCheckBox();
-        revertWindowAfterResetCheckBox.setEnabled(false);
+        revertWindowAfterResetCheckBox.setEnabled(true);
         revertWindowAfterResetCheckBox.setText("Revert Window after Reset");
         panel1.add(revertWindowAfterResetCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         extraButtonsPanel = new JPanel();
@@ -265,5 +268,14 @@ public class JingleGUI extends JFrame {
     private void createUIComponents() {
         this.hotkeyListPanel = new HotkeyListPanel(this);
         this.scriptListPanel = new ScriptListPanel();
+    }
+
+    private void setCheckBoxBoolean(JCheckBox box, boolean initialValue, Consumer<Boolean> onToggle) {
+        box.setSelected(initialValue);
+        box.addActionListener(a -> {
+            synchronized (Jingle.class) {
+                onToggle.accept(box.isSelected());
+            }
+        });
     }
 }

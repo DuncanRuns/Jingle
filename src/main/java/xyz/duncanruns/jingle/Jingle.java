@@ -168,8 +168,9 @@ public final class Jingle {
         PluginEvents.RunnableEventType.EXIT_WORLD.runAll();
         ScriptStuff.RunnableEventType.EXIT_WORLD.runAll();
 
-        // TODO: configurable
-        Resizing.undoResize();
+        if(Jingle.options.revertWindowAfterReset) {
+            Resizing.undoResize();
+        }
     }
 
     private static void onEnterWorld() {
