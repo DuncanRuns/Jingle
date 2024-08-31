@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 import xyz.duncanruns.jingle.util.FileUtil;
 
+import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -21,6 +22,11 @@ public class JingleOptions {
     public List<JsonObject> hotkeys = new ArrayList<>();
     public Set<String> disabledDefaultScripts = new HashSet<>();
     public boolean revertWindowAfterReset = true;
+
+    public boolean projectorEnabled;
+    // null for auto, [x,y,w,h] for custom
+    @Nullable public int[] projectorPosition = null;
+    public String projectorWindowName = "* (Scene) - Jingle Mag";
 
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {

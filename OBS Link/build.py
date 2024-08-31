@@ -14,7 +14,7 @@ def build(out_file: io.TextIOWrapper) -> None:
         print("Adding " + lua_file_name + "...")
         out_file.write(get_src_file_string(lua_file_name))
 
-    for lua_file_name in [i for i in os.listdir("src") if (i not in build_order and i.endswith(".lua"))]:
+    for lua_file_name in [i for i in sorted(os.listdir("src")) if (i not in build_order and i.endswith(".lua"))]:
         print("Adding " + lua_file_name + "...")
         out_file.write(get_src_file_string(lua_file_name))
 

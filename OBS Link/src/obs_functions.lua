@@ -123,3 +123,12 @@ function delete_source(name)
         release_source(source)
     end
 end
+
+--- Returns true if created, otherwise false (scene will exist either way)
+function ensure_scene_exists(name)
+    if (false == scene_exists(name)) then
+        create_scene(name)
+        return true
+    end
+    return false
+end

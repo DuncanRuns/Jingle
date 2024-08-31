@@ -9,6 +9,7 @@ import xyz.duncanruns.jingle.util.ExceptionUtil;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,16 +30,23 @@ public final class LuaLibraries {
         LIBRARY_PROVIDERS.forEach(provider -> globals.load(provider.apply(script, globals)));
     }
 
-    public static void generateDocs(Path folder) {
+    public static void generateLuaDocs() {
+        Path libsFolder = Jingle.FOLDER.resolve("scripts").resolve("libs");
+        try {
+            Files.createDirectories(libsFolder);
+        } catch (Exception e) {
+            Jingle.logError("Failed to write lua documentation for libraries:", e);
+            return;
+        }
         LIBRARY_PROVIDERS.forEach(f -> {
             LuaLibrary library = f.apply(null, null);
-            File file = folder.resolve(library.getLibraryName() + ".lua").toAbsolutePath().toFile();
             try {
+                File file = libsFolder.resolve(library.getLibraryName() + ".lua").toAbsolutePath().toFile();
                 FileWriter writer = new FileWriter(file);
                 library.writeLuaFile(writer);
                 writer.close();
                 Jingle.log(Level.INFO, "Generated " + file.getName());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Jingle.log(Level.ERROR, "Failed to write lua documentation for library " + library.getLibraryName() + ": " + ExceptionUtil.toDetailedString(e));
             }
         });

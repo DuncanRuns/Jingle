@@ -24,8 +24,6 @@ public interface User32 extends com.sun.jna.platform.win32.User32 {
     int MOUSEEVENTF_XUP = 0x0100;
     int MOUSEEVENTF_HWHEEL = 0x01000;
 
-    boolean SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT flags);
-
     int GetWindowTextA(HWND hWnd, byte[] lpString, int nMaxCount);
 
     long GetWindowLongA(HWND hWnd, int nIndex);

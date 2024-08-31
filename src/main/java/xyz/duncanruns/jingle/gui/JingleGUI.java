@@ -8,6 +8,10 @@ import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
+import xyz.duncanruns.jingle.obs.OBSProjector;
+import xyz.duncanruns.jingle.script.ScriptStuff;
+import xyz.duncanruns.jingle.util.ExceptionUtil;
+import xyz.duncanruns.jingle.util.KeyboardUtil;
 import xyz.duncanruns.jingle.util.OpenUtil;
 
 import javax.swing.*;
@@ -19,6 +23,8 @@ import java.awt.event.WindowEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class JingleGUI extends JFrame {
     private static final JingleGUI instance = new JingleGUI();
@@ -42,6 +48,15 @@ public class JingleGUI extends JFrame {
     public ScriptListPanel scriptListPanel;
     private JButton reloadScriptsButton;
     private JButton openScriptsFolderButton;
+    private JButton copyScriptPathButton;
+    private JCheckBox projectorCheckBox;
+    private JCheckBox autoProjectorPosBox;
+    private JPanel projectorPositionPanel;
+    private JTextField projPosXField;
+    private JTextField projPosYField;
+    private JTextField projPosWField;
+    private JTextField projPosHField;
+    private JButton projPosApplyButton;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
     public RollingDocument logDocument = new RollingDocument();
@@ -127,9 +142,93 @@ public class JingleGUI extends JFrame {
 
         this.openJingleFolderButton.addActionListener(a -> OpenUtil.openFile(Jingle.FOLDER.toString()));
 
-        setCheckBoxBoolean(revertWindowAfterResetCheckBox, Jingle.options.revertWindowAfterReset, b -> Jingle.options.revertWindowAfterReset = b);
+        this.setCheckBoxBoolean(this.revertWindowAfterResetCheckBox, Jingle.options.revertWindowAfterReset, b -> Jingle.options.revertWindowAfterReset = b);
+
+        this.openScriptsFolderButton.addActionListener(a -> OpenUtil.openFile(Jingle.FOLDER.resolve("scripts").toString()));
+        this.reloadScriptsButton.addActionListener(a -> {
+            synchronized (Jingle.class) {
+                ScriptStuff.reloadScripts();
+                HotkeyManager.reload();
+                this.scriptListPanel.reload();
+            }
+        });
+
+        this.finalizeOBSComponents();
 
         this.hotkeyListPanel.reload();
+    }
+
+    private void finalizeOBSComponents() {
+        this.copyScriptPathButton.addActionListener(a -> {
+            try {
+                KeyboardUtil.copyToClipboard(Jingle.FOLDER.resolve("jingle-obs-link.lua").toString());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Failed to copy to clipboard: " + ExceptionUtil.toDetailedString(e));
+            }
+        });
+        JTextField[] ppFields = new JTextField[]{this.projPosXField, this.projPosYField, this.projPosWField, this.projPosHField};
+
+        if (Jingle.options.projectorPosition != null) {
+            for (int i = 0; i < 4; i++) {
+                ppFields[i].setText("" + Jingle.options.projectorPosition[i]);
+            }
+        }
+
+        this.refreshPPFields(ppFields);
+
+        this.setCheckBoxBoolean(this.projectorCheckBox, Jingle.options.projectorEnabled, b -> {
+            Jingle.options.projectorEnabled = b;
+            this.refreshPPFields(ppFields);
+        });
+        this.setCheckBoxBoolean(this.autoProjectorPosBox, Jingle.options.projectorPosition == null, b -> {
+            if (b) {
+                Jingle.options.projectorPosition = null;
+                for (JTextField ppField : ppFields) {
+                    ppField.setText("");
+                    ppField.setEditable(false);
+                    ppField.setEnabled(false);
+                    this.projPosApplyButton.setEnabled(false);
+                }
+            } else {
+                Rectangle pp = OBSProjector.getProjectorPosition();
+                Jingle.options.projectorPosition = new int[]{pp.x, pp.y, pp.width, pp.height};
+                for (int i = 0; i < 4; i++) {
+                    ppFields[i].setText("" + Jingle.options.projectorPosition[i]);
+                    ppFields[i].setEditable(true);
+                    ppFields[i].setEnabled(true);
+                }
+                this.projPosApplyButton.setEnabled(true);
+            }
+            OBSProjector.applyProjectorPosition();
+        });
+        this.projPosApplyButton.addActionListener(a -> {
+            int[] newPos = new int[4];
+            for (int i = 0; i < 4; i++) {
+                JTextField ppField = ppFields[i];
+                String text = ppField.getText();
+                char[] charArray = text.toCharArray();
+                boolean isNegative = text.startsWith("-");
+                String numbers = IntStream.range(0, charArray.length).mapToObj(ci -> charArray[ci])
+                        .filter(Character::isDigit)
+                        .map(String::valueOf)
+                        .collect(Collectors.joining());
+                int val = numbers.isEmpty() ? 0 : (isNegative ? -1 : 1) * Integer.parseInt(numbers);
+                ppField.setText("" + val);
+                newPos[i] = val;
+            }
+            OBSProjector.setProjectorPosition(newPos[0], newPos[1], newPos[2], newPos[3]);
+        });
+    }
+
+    private void refreshPPFields(JTextField[] ppFields) {
+        boolean projectorEnabled = Jingle.options.projectorEnabled;
+        this.autoProjectorPosBox.setEnabled(projectorEnabled);
+        boolean positionIsCustomizable = projectorEnabled && !(Jingle.options.projectorPosition == null);
+        for (JTextField ppField : ppFields) {
+            ppField.setEnabled(positionIsCustomizable);
+            ppField.setEditable(positionIsCustomizable);
+        }
+        this.projPosApplyButton.setEnabled(positionIsCustomizable);
     }
 
     private void jumpToEndOfLog() {
@@ -248,14 +347,71 @@ public class JingleGUI extends JFrame {
         panel6.add(reloadScriptsButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator4 = new JSeparator();
         panel5.add(separator4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JScrollPane scrollPane5 = new JScrollPane();
+        mainTabbedPane.addTab("OBS", scrollPane5);
+        final JPanel panel7 = new JPanel();
+        panel7.setLayout(new GridLayoutManager(10, 1, new Insets(5, 5, 5, 5), -1, -1));
+        scrollPane5.setViewportView(panel7);
+        final Spacer spacer5 = new Spacer();
+        panel7.add(spacer5, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("OBS Link Script Installation:");
+        panel7.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("1. Open OBS, at the top, click Tools, and then Scripts.");
+        panel7.add(label3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label4 = new JLabel();
+        label4.setText("2. Check if jingle-obs-link.lua is listed under \"Loaded Scripts\", in this case you are already done.");
+        panel7.add(label4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel8 = new JPanel();
+        panel8.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel7.add(panel8, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setText("3. Click on the + icon and paste this into the bottom bar:");
+        panel8.add(label5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        copyScriptPathButton = new JButton();
+        copyScriptPathButton.setText("Copy Script Path");
+        panel8.add(copyScriptPathButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label6 = new JLabel();
+        label6.setText("4. Press \"OK\" and then press \"Regenerate\"");
+        panel7.add(label6, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JSeparator separator5 = new JSeparator();
+        panel7.add(separator5, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        projectorCheckBox = new JCheckBox();
+        projectorCheckBox.setText("Enable Eye Measuring Projector");
+        panel7.add(projectorCheckBox, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        autoProjectorPosBox = new JCheckBox();
+        autoProjectorPosBox.setText("Automatically Position Eye Measuring Projector");
+        panel7.add(autoProjectorPosBox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        projectorPositionPanel = new JPanel();
+        projectorPositionPanel.setLayout(new GridLayoutManager(1, 7, new Insets(0, 0, 0, 0), -1, -1));
+        projectorPositionPanel.setEnabled(true);
+        panel7.add(projectorPositionPanel, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        projPosXField = new JTextField();
+        projectorPositionPanel.add(projPosXField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(30, -1), null, 0, false));
+        final JLabel label7 = new JLabel();
+        label7.setText("Position:");
+        projectorPositionPanel.add(label7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label8 = new JLabel();
+        label8.setText("Size:");
+        projectorPositionPanel.add(label8, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        projPosYField = new JTextField();
+        projectorPositionPanel.add(projPosYField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(30, -1), null, 0, false));
+        projPosWField = new JTextField();
+        projectorPositionPanel.add(projPosWField, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(30, -1), null, 0, false));
+        projPosHField = new JTextField();
+        projectorPositionPanel.add(projPosHField, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(30, -1), null, 0, false));
+        projPosApplyButton = new JButton();
+        projPosApplyButton.setText("Apply");
+        projectorPositionPanel.add(projPosApplyButton, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         pluginsTabbedPane = new JTabbedPane();
         mainTabbedPane.addTab("Plugins", pluginsTabbedPane);
         noPluginsLoadedTab = new JPanel();
         noPluginsLoadedTab.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pluginsTabbedPane.addTab("No Plugins Loaded", noPluginsLoadedTab);
-        final JLabel label2 = new JLabel();
-        label2.setText("No Plugins Loaded");
-        noPluginsLoadedTab.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label9 = new JLabel();
+        label9.setText("No Plugins Loaded");
+        noPluginsLoadedTab.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

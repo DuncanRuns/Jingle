@@ -10,6 +10,7 @@ import xyz.duncanruns.jingle.instance.InstanceChecker;
 import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 import xyz.duncanruns.jingle.instance.StateTracker;
+import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
 import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.ScriptStuff;
@@ -74,7 +75,7 @@ public final class Jingle {
         HotkeyManager.reload();
         HotkeyManager.start();
 
-        generateScript();
+        generateResources();
 
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Jingle v" + VERSION + " with java: " + usedJava);
@@ -82,13 +83,21 @@ public final class Jingle {
         mainLoop();
     }
 
-    private static void generateScript() {
+    private static void generateResources() {
         try {
             ResourceUtil.copyResourceToFile("/jingle-obs-link.lua", FOLDER.resolve("jingle-obs-link.lua"));
-            Jingle.log(Level.INFO,"Regenerated obs link script");
+            Jingle.log(Level.INFO, "Regenerated obs link script");
         } catch (IOException e) {
             Jingle.logError("Failed to write Script!", e);
             Jingle.log(Level.ERROR, "You can download the script manually from https://github.com/DuncanRuns/Jingle/blob/main/src/main/resources/jingle-obs-link.lua");
+        }
+        Path overlayPngPath = FOLDER.resolve("measuring_overlay.png");
+        if (Files.exists(overlayPngPath)) return;
+        try {
+            ResourceUtil.copyResourceToFile("/measuring_overlay.png", overlayPngPath);
+            Jingle.log(Level.INFO, "Created measuring_overlay.png");
+        } catch (IOException e) {
+            Jingle.logError("Failed to measuring_overlay.png!", e);
         }
     }
 
@@ -116,9 +125,20 @@ public final class Jingle {
         if (Math.abs(currentTime - lastInstanceCheck) > 500) {
             lastInstanceCheck = currentTime;
             updateMainInstance();
+            if (mainInstance != null) {
+                updateWindowTitle();
+            }
         }
         if (stateTracker != null) stateTracker.tryUpdate();
+        OBSProjector.tick();
         PluginEvents.RunnableEventType.END_TICK.runAll();
+    }
+
+    private static void updateWindowTitle() {
+        assert mainInstance != null;
+        if (!WindowTitleUtil.getHwndTitle(mainInstance.hwnd).equals("Minecraft* - Instance 1")) {
+            User32.INSTANCE.SetWindowTextA(mainInstance.hwnd, "Minecraft* - Instance 1");
+        }
     }
 
     public static synchronized boolean isInstanceActive() {
