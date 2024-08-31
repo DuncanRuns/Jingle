@@ -1,8 +1,15 @@
 function runThinBt()
-    jingle.toggleResize(250, 750);
+    if (not jingle.isInstanceActive()) then
+        return
+    end
+    jingle.toggleResize(250, 750)
 end
+
 function runPlanarAbuse()
-    jingle.toggleResize(1920, 300);
+    if (not jingle.isInstanceActive()) then
+        return
+    end
+    jingle.toggleResize(1920, 300)
 end
 
 function customize()
