@@ -12,6 +12,7 @@ import java.util.*;
 public final class ScriptStuff {
     private static final Map<String, Runnable> HOTKEYS_ACTIONS = new HashMap<>(); // Example: "test.lua:run" -> (runHotkey, cancellingFunction)
     private static final Map<String, Runnable> CUSTOMIZATION_FUNCTIONS = new HashMap<>(); // Example: "test.lua" -> (function)
+    private static final Map<String, Map<String, Runnable>> EXTRA_FUNCTIONS = new HashMap<>();
     private static final List<ScriptFile> LOADED_SCRIPTS = new ArrayList<>();
 
     private ScriptStuff() {
@@ -29,13 +30,18 @@ public final class ScriptStuff {
         return Optional.ofNullable(CUSTOMIZATION_FUNCTIONS.getOrDefault(scriptName, null));
     }
 
+    public static Optional<Map<String, Runnable>> getExtraFunctions(String scriptName) {
+        return Optional.ofNullable(EXTRA_FUNCTIONS.getOrDefault(scriptName, null)).map(HashMap::new);
+    }
+
     public static List<ScriptFile> getLoadedScripts() {
         return Collections.unmodifiableList(LOADED_SCRIPTS);
     }
 
-    public static void clear() {
+    private static void clear() {
         HOTKEYS_ACTIONS.clear();
         CUSTOMIZATION_FUNCTIONS.clear();
+        EXTRA_FUNCTIONS.clear();
         LOADED_SCRIPTS.clear();
         for (RunnableEventType runnableEventType : RunnableEventType.values()) {
             runnableEventType.clear();
@@ -46,7 +52,7 @@ public final class ScriptStuff {
         HOTKEYS_ACTIONS.put(script.getName() + ":" + hotkeyName, hotkeyFunction);
     }
 
-    public static void addCustomization(ScriptFile scriptFile, Runnable customizationFunction) {
+    public static void setCustomization(ScriptFile scriptFile, Runnable customizationFunction) {
         CUSTOMIZATION_FUNCTIONS.put(scriptFile.getName(), customizationFunction);
     }
 
@@ -81,7 +87,9 @@ public final class ScriptStuff {
             for (String s : ResourceUtil.getResourcesFromFolder("defaultscripts")) {
                 try {
                     ScriptFile script = ScriptFile.loadResource("/defaultscripts/" + s);
-                    LuaRunner.runLuaScript(script);
+                    if (!Jingle.options.disabledDefaultScripts.contains(s.substring(0, s.length() - 4))) {
+                        LuaRunner.runLuaScript(script);
+                    }
                     LOADED_SCRIPTS.add(script);
                 } catch (Exception e) {
                     Jingle.logError("Failed to load script \"" + s + "\":", e);
@@ -90,6 +98,10 @@ public final class ScriptStuff {
         } catch (Exception e) {
             Jingle.logError("Failed to load default scripts:", e);
         }
+    }
+
+    public static void addExtraFunction(ScriptFile script, String functionName, Runnable runnable) {
+        EXTRA_FUNCTIONS.computeIfAbsent(script.getName(), s -> new HashMap<>()).put(functionName, runnable);
     }
 
     public enum RunnableEventType {

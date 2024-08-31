@@ -19,6 +19,7 @@ public class JingleOptions {
     public int[] lastPosition = new int[]{50, 50};
     public Map<String, Long> seenPaths = new HashMap<>();
     public List<JsonObject> hotkeys = new ArrayList<>();
+    public Set<String> disabledDefaultScripts = new HashSet<>();
 
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {

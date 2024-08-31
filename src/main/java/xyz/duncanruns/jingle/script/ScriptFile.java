@@ -15,16 +15,17 @@ import java.util.stream.Collectors;
 public class ScriptFile {
     public final String contents;
     public final String name;
+    public final boolean fromFolder;
 
-
-    public ScriptFile(String name, String contents) {
+    private ScriptFile(String name, String contents, boolean fromFolder) {
         this.name = name;
         this.contents = contents;
+        this.fromFolder = fromFolder;
     }
 
     public static ScriptFile loadFile(Path path) throws IOException {
         String contents = FileUtil.readString(path);
-        return new ScriptFile(path.getFileName().toString(), contents);
+        return new ScriptFile(path.getFileName().toString(), contents, true);
     }
 
     public static ScriptFile loadResource(String resourceLocation) throws IOException {
@@ -36,7 +37,8 @@ public class ScriptFile {
                     // Remove .lua for resource loaded script
                     contents.substring(0, contents.length() - 4),
                     // Read the contents of the resource stream to get lua script contents
-                    IOUtils.toString(stream, Charset.defaultCharset())
+                    IOUtils.toString(stream, Charset.defaultCharset()),
+                    false
             );
         }
     }

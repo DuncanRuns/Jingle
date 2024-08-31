@@ -14,19 +14,31 @@ class JingleLuaLibrary extends LuaLibrary {
         super("jingle", script, globals);
     }
 
+    private static Runnable wrapFunction(LuaFunction function) {
+        return () -> {
+            synchronized (Jingle.class) {
+                function.call();
+            }
+        };
+    }
+
     public void addHotkey(String hotkeyName, LuaFunction function) {
         assert this.script != null;
         assert this.globals != null;
         if (hotkeyName.contains(":")) {
             Jingle.log(Level.ERROR, "Can't add hotkey script: script name \"" + hotkeyName + "\" contains a colon!");
         }
-        ScriptStuff.addHotkeyAction(this.script, hotkeyName,
-                () -> {
-                    synchronized (Jingle.class) {
-                        function.call();
-                    }
-                }
-        );
+        ScriptStuff.addHotkeyAction(this.script, hotkeyName, wrapFunction(function));
+    }
+
+    public void setCustomization(LuaFunction function) {
+        assert this.script != null;
+        ScriptStuff.setCustomization(this.script, wrapFunction(function));
+    }
+
+    public void addExtraFunction(String functionName, LuaFunction function) {
+        assert this.script != null;
+        ScriptStuff.addExtraFunction(this.script, functionName, wrapFunction(function));
     }
 
     public void log(String message) {

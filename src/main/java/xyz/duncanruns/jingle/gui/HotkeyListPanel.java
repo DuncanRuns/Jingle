@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class HotkeyListPanel extends JPanel {
@@ -47,7 +48,11 @@ public class HotkeyListPanel extends JPanel {
         this.removeAll();
         GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 1, 0, 17, 0, new Insets(0, 10, 5, 10), 0, 0);
 
-        for (final SavedHotkey hotkey : Jingle.options == null ? Collections.<SavedHotkey>emptyList() : Jingle.options.copySavedHotkeys()) {
+        List<SavedHotkey> savedHotkeys;
+        synchronized (Jingle.class) {
+            savedHotkeys = Jingle.options == null ? Collections.emptyList() : Jingle.options.copySavedHotkeys();
+        }
+        for (final SavedHotkey hotkey : savedHotkeys) {
             constraints.gridy++;
             this.add(new JLabel(String.format("%s (%s)", Jingle.formatAction(hotkey.action), StringUtils.capitalize(hotkey.type))), constraints.clone());
             this.add(new JLabel((hotkey.ignoreModifiers ? "* " : "") + Hotkey.formatKeys(hotkey.keys)), constraints.clone());
@@ -95,9 +100,9 @@ public class HotkeyListPanel extends JPanel {
 
                 Jingle.options.setSavedHotkeys(Jingle.options.copySavedHotkeys().stream().map(h -> h.equals(hotkey) ? new SavedHotkey(dialog.type, dialog.action, dialog.keys, dialog.ignoreModifiers) : h).collect(Collectors.toList()));
 
-                this.reload();
                 HotkeyManager.reload();
             }
+            this.reload();
             this.fixGhostBug();
         });
         return editButton;
