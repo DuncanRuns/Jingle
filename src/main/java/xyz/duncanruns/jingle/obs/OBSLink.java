@@ -33,9 +33,10 @@ public class OBSLink {
     }
 
     private static String createOutput() {
+        long requestProjectorTime = OBSProjector.getRequestProjectorTime();
         return String.join("|",
                 Jingle.getMainInstance().map(i -> i.stateTracker.isCurrentState(InstanceState.WALL)).orElse(false) ? "W" : "P", // 1: Wall vs Playing ('W' vs 'P')
-                OBSProjector.shouldRequestProjector() ? "Y" : "N" // 2: Should open projector ('Y' for yes)
+                requestProjectorTime == -1L ? "N" : "Y" + requestProjectorTime  // 2: Should open projector ('N' for no, any other arbitrary string for requesting)
         );
     }
 }

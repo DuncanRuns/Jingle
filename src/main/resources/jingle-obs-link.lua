@@ -367,7 +367,7 @@ function loop()
     local projector_request = state_args[2]
     if projector_request ~= last_projector_request then
         last_projector_request = projector_request
-        if projector_request == 'Y' and scene_exists("Jingle Mag") then
+        if projector_request ~= 'N' and scene_exists("Jingle Mag") then
             obs.obs_frontend_open_projector("Scene", -1, "", "Jingle Mag")
         end
     end

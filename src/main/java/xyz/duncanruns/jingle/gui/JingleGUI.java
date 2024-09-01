@@ -57,6 +57,7 @@ public class JingleGUI extends JFrame {
     private JTextField projPosWField;
     private JTextField projPosHField;
     private JButton projPosApplyButton;
+    private JButton openPluginsFolderButton;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
     public RollingDocument logDocument = new RollingDocument();
@@ -154,6 +155,8 @@ public class JingleGUI extends JFrame {
         });
 
         this.finalizeOBSComponents();
+
+        this.openPluginsFolderButton.addActionListener(a -> OpenUtil.openFile(Jingle.FOLDER.resolve("plugins").toString()));
 
         this.hotkeyListPanel.reload();
     }
@@ -404,14 +407,23 @@ public class JingleGUI extends JFrame {
         projPosApplyButton = new JButton();
         projPosApplyButton.setText("Apply");
         projectorPositionPanel.add(projPosApplyButton, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel9 = new JPanel();
+        panel9.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        mainTabbedPane.addTab("Plugins", panel9);
         pluginsTabbedPane = new JTabbedPane();
-        mainTabbedPane.addTab("Plugins", pluginsTabbedPane);
+        panel9.add(pluginsTabbedPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         noPluginsLoadedTab = new JPanel();
         noPluginsLoadedTab.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pluginsTabbedPane.addTab("No Plugins Loaded", noPluginsLoadedTab);
         final JLabel label9 = new JLabel();
         label9.setText("No Plugins Loaded");
         noPluginsLoadedTab.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel10 = new JPanel();
+        panel10.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 5, 5), -1, -1));
+        panel9.add(panel10, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        openPluginsFolderButton = new JButton();
+        openPluginsFolderButton.setText("Open Plugins Folder");
+        panel10.add(openPluginsFolderButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

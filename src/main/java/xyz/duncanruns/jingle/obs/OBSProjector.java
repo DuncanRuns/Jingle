@@ -22,9 +22,9 @@ public class OBSProjector {
     private static WinDef.HWND projectorHwnd = null;
 
     private static long lastCheck = 0;
-    private static boolean requestProjector = false;
+    private static long requestProjector = -1L;
 
-    public static boolean shouldRequestProjector() {
+    public static long getRequestProjectorTime() {
         return requestProjector;
     }
 
@@ -57,12 +57,12 @@ public class OBSProjector {
         long currentTime = System.currentTimeMillis();
         boolean projectorEnabled = Jingle.options.projectorEnabled;
         if (!projectorEnabled) {
-            requestProjector = false;
+            requestProjector = -1L;
             projectorHwnd = null;
             return;
         }
         if (Math.abs(currentTime - lastCheck) > 500) {
-            requestProjector = false;
+            requestProjector = -1L;
             if (projectorHwnd != null && !User32.INSTANCE.IsWindow(projectorHwnd)) {
                 projectorHwnd = null;
             }
@@ -87,7 +87,7 @@ public class OBSProjector {
                 }
             }
             if (projectorHwnd == null) {
-                requestProjector = true;
+                requestProjector = currentTime;
             }
         }
     }
