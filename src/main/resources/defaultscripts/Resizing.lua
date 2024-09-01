@@ -17,7 +17,7 @@ function runEyeMeasuring()
         return
     end
     if (jingle.toggleResize(384, 16384)) then
-        jingle.ensureOBSProjectorZ()
+        jingle.bringOBSProjectorToTop()
     else
         jingle.dumpOBSProjector()
     end

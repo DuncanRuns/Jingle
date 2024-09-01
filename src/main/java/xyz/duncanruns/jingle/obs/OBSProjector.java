@@ -22,7 +22,7 @@ public class OBSProjector {
     private static long lastCheck = 0;
     private static boolean shouldRequestProjector = false;
 
-    public static Rectangle getProjectorPosition() {
+    public static synchronized Rectangle getProjectorPosition() {
         synchronized (Jingle.class) {
             assert Jingle.options != null;
             int[] pp = Jingle.options.projectorPosition;
@@ -37,7 +37,7 @@ public class OBSProjector {
         }
     }
 
-    public static void setProjectorPosition(int x, int y, int w, int h) {
+    public static synchronized void setProjectorPosition(int x, int y, int w, int h) {
         synchronized (Jingle.class) {
             assert Jingle.options != null;
             Jingle.options.projectorPosition = new int[]{x, y, w, h};
@@ -47,7 +47,7 @@ public class OBSProjector {
         }
     }
 
-    public static void tick() {
+    public static synchronized void tick() {
         long currentTime = System.currentTimeMillis();
         boolean projectorEnabled = Jingle.options.projectorEnabled;
         if (!projectorEnabled) {
@@ -78,30 +78,29 @@ public class OBSProjector {
         }
     }
 
-    public static void applyProjectorPosition() {
+    public static synchronized void applyProjectorPosition() {
         WindowStateUtil.setHwndBorderless(projectorHwnd);
         WindowStateUtil.setHwndRectangle(projectorHwnd, getProjectorPosition());
     }
 
-    public static void ensureOBSProjectorZ() {
+    public static synchronized void bringOBSProjectorToTop() {
         if (projectorHwnd != null) {
-            User32.INSTANCE.SetWindowPos(projectorHwnd,
-                    new WinDef.HWND(new Pointer(-1)),
-                    0, 0, 0, 0, // Does not matter due to flags
-                    User32.SWP_NOSIZE | User32.SWP_NOMOVE | User32.SWP_NOACTIVATE
-
-            );
+            setProjectorZOrder(0);
+            setProjectorZOrder(-1);
         }
     }
 
-    public static void dumpOBSProjector() {
-        if (projectorHwnd != null) {
-            User32.INSTANCE.SetWindowPos(projectorHwnd,
-                    new WinDef.HWND(new Pointer(-2)),
-                    0, 0, 0, 0, // Does not matter due to flags
-                    User32.SWP_NOSIZE | User32.SWP_NOMOVE | User32.SWP_NOACTIVATE
+    private static void setProjectorZOrder(int hwndInsertAfter) {
+        User32.INSTANCE.SetWindowPos(projectorHwnd,
+                new WinDef.HWND(new Pointer(hwndInsertAfter)),
+                0, 0, 0, 0, // Does not matter due to flags
+                User32.SWP_NOSIZE | User32.SWP_NOMOVE | User32.SWP_NOACTIVATE
+        );
+    }
 
-            );
+    public static synchronized void dumpOBSProjector() {
+        if (projectorHwnd != null) {
+            setProjectorZOrder(1);
         }
     }
 

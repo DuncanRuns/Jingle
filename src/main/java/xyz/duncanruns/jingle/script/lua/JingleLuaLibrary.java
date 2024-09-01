@@ -8,6 +8,7 @@ import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.ScriptFile;
 import xyz.duncanruns.jingle.script.ScriptStuff;
+import xyz.duncanruns.jingle.util.MouseUtil;
 
 
 @SuppressWarnings("unused")
@@ -58,8 +59,8 @@ class JingleLuaLibrary extends LuaLibrary {
     }
 
     @LuaDocumentation(description = "Sets the OBS eye measuring projector to be directly behind the instance, bringing it above everything except for the game itself.")
-    public void ensureOBSProjectorZ() {
-        OBSProjector.ensureOBSProjectorZ();
+    public void bringOBSProjectorToTop() {
+        OBSProjector.bringOBSProjectorToTop();
     }
 
     @LuaDocumentation(description = "Dumps the OBS eye measuring projector to the bottom of the window Z order.")
