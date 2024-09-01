@@ -1,7 +1,11 @@
 package xyz.duncanruns.jingle.script.lua;
 
+import com.sun.jna.platform.win32.WinDef;
 import org.apache.logging.log4j.Level;
-import org.luaj.vm2.*;
+import org.luaj.vm2.Globals;
+import org.luaj.vm2.LuaFunction;
+import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.gui.JingleGUI;
@@ -13,6 +17,8 @@ import xyz.duncanruns.jingle.script.CustomizableManager;
 import xyz.duncanruns.jingle.script.ScriptFile;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.*;
+import xyz.duncanruns.jingle.win32.User32;
+import xyz.duncanruns.jingle.win32.Win32Con;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -143,10 +149,10 @@ class JingleLuaLibrary extends LuaLibrary {
         Bopping.bop(clearFromAllSeenInstances);
     }
 
-    // TODO
-//    @LuaDocumentation(description = "Closes the instance.")
-//    public void closeInstance() {
-//    }
+    @LuaDocumentation(description = "Closes the instance.")
+    public void closeInstance() {
+        Jingle.getMainInstance().ifPresent(instance -> User32.INSTANCE.SendNotifyMessageA(instance.hwnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0)));
+    }
 
 
     @LuaDocumentation(description = "Replicates a hotkey action exactly. For example, jingle.replicateHotkey('script','test.lua:Test Hotkey')")
@@ -161,10 +167,9 @@ class JingleLuaLibrary extends LuaLibrary {
         OpenUtil.openFile(filePath);
     }
 
-    // TODO
-//    @LuaDocumentation(description = "Opens the currently active instance's world to lan.", paramTypes = "boolean|nil")
-//    public void openInstanceToLan(Boolean enableCheats) {
-//    }
+    @LuaDocumentation(description = "Opens the currently active instance's world to lan.", paramTypes = "boolean|nil")
+    public void openInstanceToLan(Boolean enableCheats) {
+    }
 
     @LuaDocumentation(description = "Sleeps for the specified amount of milliseconds.")
     public void sleep(long millis) {
@@ -174,22 +179,22 @@ class JingleLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Gets the current state of the instance. Returns \"WAITING\", \"INWORLD\", \"TITLE\", \"GENERATING\", \"WALL\", or \"PREVIEWING\".")
     @Nullable
     public String getInstanceState() {
-        return Jingle.stateTracker == null ? null : Jingle.stateTracker.getInstanceState().name();
+        return Jingle.getMainInstance().map(i -> i.stateTracker.getInstanceState().name()).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets a more detailed state of the \"INWORLD\" state. Returns \"UNPAUSED\", \"PAUSED\", or \"GAMESCREENOPEN\".")
     public String getInstanceInWorldState(int instanceNum) {
-        return Jingle.stateTracker == null ? null : Jingle.stateTracker.getInWorldState().name();
+        return Jingle.getMainInstance().map(i -> i.stateTracker.getInWorldState().name()).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets the last time the specified state started. Input values are equal to return values given by jingle.getInstanceInWorldState().")
     public Long getLastStateStartOf(String stateName) {
-        return Jingle.stateTracker == null ? null : Jingle.stateTracker.getLastStartOf(InstanceState.valueOf(stateName));
+        return Jingle.getMainInstance().map(i -> i.stateTracker.getLastStartOf(InstanceState.valueOf(stateName))).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets the last time the specified state ended. Input values are equal to return values given by jingle.getInstanceInWorldState().")
     public Long getLastStateOccurrenceOf(String stateName) {
-        return Jingle.stateTracker == null ? null : Jingle.stateTracker.getLastOccurrenceOf(InstanceState.valueOf(stateName));
+        return Jingle.getMainInstance().map(i -> i.stateTracker.getLastOccurrenceOf(InstanceState.valueOf(stateName))).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets the current time in milliseconds.")
@@ -227,7 +232,7 @@ class JingleLuaLibrary extends LuaLibrary {
 //    }
 
     // TODO
-//    @LuaDocumentation(description = "Checks if an instance has a mod of the specified modid.")
+//    @LuaDocumentation(description = "Checks if the instance has a mod of the specified modid.")
 //    public boolean hasFabricMod(int instanceNum, String modid) {
 //        return getFabricJarInfos(instanceNum).stream().anyMatch(i -> i.id.equalsIgnoreCase(modid));
 //    }
@@ -237,17 +242,15 @@ class JingleLuaLibrary extends LuaLibrary {
         return VersionUtil.tryCompare(a, b, onFailure);
     }
 
-    // TODO
-//    @LuaDocumentation(description = "Retrieves a value from the instance's options.txt.")
-//    public String getInstanceOption(String optionName) {
-//        assert Jingle.getMainInstance().isPresent();
-//    }
+    @LuaDocumentation(description = "Retrieves a value from the instance's options.txt.")
+    public String getInstanceOption(String optionName) {
+        return Jingle.getMainInstance().flatMap(i -> i.optionsTxt.getOption(optionName)).orElse(null);
+    }
 
-    // TODO
-//    @LuaDocumentation(description = "Retrieves a value from an instance's standard options.")
-//    public String getInstanceStandardOption(int instanceNum, String optionName) {
-//        return GameOptionsUtil.tryGetStandardOption(getInstanceFromInt(instanceNum).getPath(), optionName);
-//    }
+    @LuaDocumentation(description = "Retrieves a value from the instance's standard options.")
+    public String getInstanceStandardOption(int instanceNum, String optionName) {
+        return Jingle.getMainInstance().flatMap(i -> i.standardSettings.getOption(optionName)).orElse(null);
+    }
 
     // TODO
 //    @LuaDocumentation(description = "Retrieves a minecraft key option from the instance's standard options or options.txt and converts it into a Windows key integer.")
@@ -261,17 +264,17 @@ class JingleLuaLibrary extends LuaLibrary {
         Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyToHwnd(instance.hwnd, key));
     }
 
-    @LuaDocumentation(description = "Sends a key down message to an instance.")
+    @LuaDocumentation(description = "Sends a key down message to the instance.")
     public void sendKeyDownToInstance(int key) {
         Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyDownToHwnd(instance.hwnd, key));
     }
 
-    @LuaDocumentation(description = "Sends a key up message to an instance.")
+    @LuaDocumentation(description = "Sends a key up message to the instance.")
     public void sendKeyUpToInstance(int key) {
         Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyUpToHwnd(instance.hwnd, key));
     }
 
-    @LuaDocumentation(description = "Sends a key down and up message to an instance with a specified delay between.")
+    @LuaDocumentation(description = "Sends a key down and up message to the instance with a specified delay between.")
     public void sendKeyHoldToInstance(int instanceNum, int key, long millis) {
         Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyToHwnd(instance.hwnd, key, millis));
     }

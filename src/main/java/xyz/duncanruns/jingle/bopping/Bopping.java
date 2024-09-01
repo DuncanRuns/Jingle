@@ -3,6 +3,7 @@ package xyz.duncanruns.jingle.bopping;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.gui.JingleGUI;
+import xyz.duncanruns.jingle.instance.OpenedInstance;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 
 import java.io.File;
@@ -30,7 +31,7 @@ public final class Bopping {
                     paths = Jingle.options.seenPaths.keySet().stream()
                             .map(Paths::get);
                 } else {
-                    Optional<OpenedInstanceInfo> mainInstance = Jingle.getMainInstance();
+                    Optional<OpenedInstance> mainInstance = Jingle.getMainInstance();
                     assert mainInstance.isPresent();
                     paths = Stream.of(mainInstance.get().instancePath);
                 }

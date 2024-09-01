@@ -20,6 +20,16 @@ function script_load()
     update_scene_size()
 end
 
+function script_update(settings)
+    if timers_activated then
+        return
+    end
+
+    timers_activated = true
+    obs.timer_add(loop, 20)
+    obs.timer_add(update_scene_size, 5000)
+end
+
 function update_scene_size()
     local video_info = get_video_info()
 
@@ -98,4 +108,42 @@ function get_or_create_game_capture()
     obs.obs_data_release(settings)
 
     return source
+end
+
+function loop()
+    local state = get_state_file_string()
+
+    if (state == last_state or state == nil) then
+        return
+    end
+
+    last_state = state
+
+    local state_args = split_string(state, '|')
+
+    local current_scene_name = get_active_scene_name()
+
+    if (#state_args == 0) then
+        return;
+    end
+
+    local desired_scene = state_args[1]
+    if desired_scene == 'P' and current_scene_name == "Walling" then
+        switch_to_scene("Playing")
+    end
+    if desired_scene == 'W' and current_scene_name == "Playing" then
+        switch_to_scene("Playing")
+    end
+
+    if #state_args == 1 then
+        return;
+    end
+
+    local projector_request = state_args[2]
+    if projector_request ~= last_projector_request then
+        last_projector_request = projector_request
+        if projector_request == 'Y' and scene_exists("Jingle Mag") then
+            obs.obs_frontend_open_projector("Scene", -1, "", "Jingle Mag")
+        end
+    end
 end

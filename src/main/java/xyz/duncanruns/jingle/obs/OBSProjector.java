@@ -8,9 +8,11 @@ import xyz.duncanruns.jingle.util.PidUtil;
 import xyz.duncanruns.jingle.util.WindowStateUtil;
 import xyz.duncanruns.jingle.util.WindowTitleUtil;
 import xyz.duncanruns.jingle.win32.User32;
+import xyz.duncanruns.jingle.win32.Win32Con;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class OBSProjector {
@@ -75,6 +77,14 @@ public class OBSProjector {
                     }
                     return true;
                 }, null);
+                // Close extra projectors
+                if (projectorHwnd != null) {
+                    User32.INSTANCE.EnumWindows((hWnd, data) -> {
+                        if (Objects.equals(hWnd, projectorHwnd) || !isProjectorMagnifier(hWnd)) return true;
+                        User32.INSTANCE.SendNotifyMessageA(hWnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0));
+                        return true;
+                    }, null);
+                }
             }
             if (projectorHwnd == null) {
                 requestProjector = true;

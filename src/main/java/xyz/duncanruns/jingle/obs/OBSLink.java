@@ -1,5 +1,6 @@
 package xyz.duncanruns.jingle.obs;
 
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.util.FileUtil;
@@ -20,20 +21,20 @@ public class OBSLink {
         if (Math.abs(currentTime - lastUpdate) > 10) {
             lastUpdate = currentTime;
             String output = createOutput();
-            if (!Objects.equals(output, last)) {
-                last = output;
-                try {
-                    FileUtil.writeString(OUT, output);
-                } catch (IOException e) {
-                    Jingle.logError("Failed to write obs-link-state:", e);
-                }
+            if (Objects.equals(output, last)) return;
+            last = output;
+            try {
+                FileUtil.writeString(OUT, output);
+                Jingle.log(Level.DEBUG, "New OBS Link state: " + output);
+            } catch (IOException e) {
+                Jingle.logError("Failed to write obs-link-state:", e);
             }
         }
     }
 
     private static String createOutput() {
         return String.join("|",
-                Jingle.stateTracker != null && Jingle.stateTracker.isCurrentState(InstanceState.WALL) ? "W" : "P", // 1: Wall vs Playing ('W' vs 'P')
+                Jingle.getMainInstance().map(i -> i.stateTracker.isCurrentState(InstanceState.WALL)).orElse(false) ? "W" : "P", // 1: Wall vs Playing ('W' vs 'P')
                 OBSProjector.shouldRequestProjector() ? "Y" : "N" // 2: Should open projector ('Y' for yes)
         );
     }

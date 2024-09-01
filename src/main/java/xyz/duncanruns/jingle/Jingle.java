@@ -6,10 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
-import xyz.duncanruns.jingle.instance.InstanceChecker;
-import xyz.duncanruns.jingle.instance.InstanceState;
-import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
-import xyz.duncanruns.jingle.instance.StateTracker;
+import xyz.duncanruns.jingle.instance.*;
 import xyz.duncanruns.jingle.obs.OBSLink;
 import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
@@ -31,6 +28,7 @@ import java.util.*;
 import static xyz.duncanruns.jingle.util.SleepUtil.sleep;
 
 public final class Jingle {
+    public static final Path FOLDER = Paths.get(System.getProperty("user.home")).resolve(".config").resolve("Jingle").toAbsolutePath();
     public static final String VERSION = Optional.ofNullable(Jingle.class.getPackage().getImplementationVersion()).orElse("DEV");
     public static final Logger LOGGER = LogManager.getLogger("Jingle");
 
@@ -41,10 +39,11 @@ public final class Jingle {
 
     public static JingleOptions options = null;
 
-    @Nullable public static OpenedInstanceInfo mainInstance = null;
-    @Nullable public static StateTracker stateTracker = null;
+    @Nullable private static OpenedInstance mainInstance = null;
+
     @Nullable public static WinDef.HWND activeHwnd = null;
-    public static final Path FOLDER = Paths.get(System.getProperty("user.home")).resolve(".config").resolve("Jingle").toAbsolutePath();
+
+    private static boolean openedToLan = false;
 
     private Jingle() {
     }
@@ -127,34 +126,34 @@ public final class Jingle {
         if (Math.abs(currentTime - lastInstanceCheck) > 500) {
             lastInstanceCheck = currentTime;
             updateMainInstance();
-            if (mainInstance != null) {
-                updateWindowTitle();
-            }
+            getMainInstance().ifPresent(i -> {
+                updateWindowTitle(i);
+                i.standardSettings.tryUpdate();
+                i.optionsTxt.tryUpdate();
+            });
         }
-        if (stateTracker != null) stateTracker.tryUpdate();
+        getMainInstance().ifPresent(i -> i.stateTracker.tryUpdate());
         OBSProjector.tick();
         OBSLink.tick();
         PluginEvents.RunnableEventType.END_TICK.runAll();
         ScriptStuff.RunnableEventType.END_TICK.runAll();
     }
 
-    private static void updateWindowTitle() {
-        assert mainInstance != null;
-        if (!WindowTitleUtil.getHwndTitle(mainInstance.hwnd).equals("Minecraft* - Instance 1")) {
-            User32.INSTANCE.SetWindowTextA(mainInstance.hwnd, "Minecraft* - Instance 1");
+    private static void updateWindowTitle(OpenedInstance instance) {
+        if (!WindowTitleUtil.getHwndTitle(instance.hwnd).equals("Minecraft* - Instance 1")) {
+            User32.INSTANCE.SetWindowTextA(instance.hwnd, "Minecraft* - Instance 1");
         }
     }
 
     public static synchronized boolean isInstanceActive() {
-        if (mainInstance == null) return false;
-        return Objects.equals(mainInstance.hwnd, activeHwnd);
+        return getMainInstance().map(i -> Objects.equals(i.hwnd, activeHwnd)).orElse(false);
     }
 
     private static void updateMainInstance() {
         if (isInstanceActive()) return;
-        final boolean mainInstancePreviouslyExists = mainInstance != null;
+        final boolean mainInstancePreviouslyExists = getMainInstance().isPresent();
 
-        if (mainInstancePreviouslyExists && mainInstance.hwnd == activeHwnd) return;
+        if (mainInstancePreviouslyExists && getMainInstance().get().hwnd == activeHwnd) return;
 
         Set<OpenedInstanceInfo> allOpenedInstances = InstanceChecker.getAllOpenedInstances();
         if (allOpenedInstances.isEmpty()) {
@@ -167,24 +166,28 @@ public final class Jingle {
             setMainInstance(newActiveInstance.get());
             return;
         }
-        if (!(mainInstancePreviouslyExists && User32.INSTANCE.IsWindow(mainInstance.hwnd))) {
+        if (!(mainInstancePreviouslyExists && User32.INSTANCE.IsWindow(getMainInstance().get().hwnd))) {
             setMainInstance(allOpenedInstances.stream().findAny().orElse(null));
         }
     }
 
-    public static synchronized Optional<OpenedInstanceInfo> getMainInstance() {
+    public static synchronized Optional<OpenedInstance> getMainInstance() {
         return Optional.ofNullable(mainInstance);
     }
 
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         if (mainInstance == instance) return;
-        mainInstance = instance;
-        stateTracker = instance == null ? null : new StateTracker(instance.instancePath.resolve("wpstateout.txt"), Jingle::onInstanceStateChange);
+        mainInstance = instance == null ? null : new OpenedInstance(instance, Jingle::onInstanceStateChange);
+        resetStates();
         JingleGUI.get().setInstance(instance);
         if (instance != null) seeInstancePath(instance.instancePath);
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath));
         PluginEvents.RunnableEventType.MAIN_INSTANCE_CHANGED.runAll();
         ScriptStuff.RunnableEventType.MAIN_INSTANCE_CHANGED.runAll();
+    }
+
+    private static void resetStates() {
+        openedToLan = false;
     }
 
     private static void onInstanceStateChange(InstanceState previousState, InstanceState newState) {
@@ -206,6 +209,8 @@ public final class Jingle {
         if (Jingle.options.revertWindowAfterReset) {
             Resizing.undoResize();
         }
+
+        openedToLan = false;
     }
 
     private static void onEnterWorld() {
@@ -234,20 +239,17 @@ public final class Jingle {
     }
 
     public static synchronized void goBorderless() {
-        if (mainInstance != null) {
+        getMainInstance().ifPresent(mainInstance -> {
             WindowStateUtil.ensureNotMinimized(mainInstance.hwnd);
             WindowStateUtil.setHwndBorderless(mainInstance.hwnd);
             Rectangle pBounds = MonitorUtil.getPrimaryMonitor().getPBounds();
             WindowStateUtil.setHwndRectangle(mainInstance.hwnd, new Rectangle(pBounds.x, pBounds.y, pBounds.width, pBounds.height - 1));
             WindowStateUtil.setHwndRectangle(mainInstance.hwnd, pBounds);
-        }
+        });
     }
 
     public static void openInstanceFolder() {
-        OpenedInstanceInfo instance = mainInstance;
-        if (instance != null) {
-            OpenUtil.openFile(instance.instancePath.toString());
-        }
+        getMainInstance().ifPresent(instance -> OpenUtil.openFile(instance.instancePath.toString()));
     }
 
     public static boolean isRunning() {
@@ -271,5 +273,41 @@ public final class Jingle {
         if (!action.contains(":")) return action;
         int i = action.indexOf(':');
         return String.format("%s - %s", action.substring(0, i), action.substring(i + 1));
+    }
+
+    public static void openToLan(boolean alreadyPaused, boolean enableCheats) {
+        if (!getMainInstance().isPresent()) return;
+
+        WinDef.HWND hwnd = getMainInstance().get().hwnd;
+
+        if (openedToLan) {
+            return;
+        } else {
+            if (!getMainInstance().get().stateTracker.isCurrentState(InstanceState.INWORLD)) {
+                return;
+            } else if (WindowTitleUtil.getHwndTitle(hwnd).endsWith("(LAN)")) {
+                openedToLan = true;
+                return;
+            }
+        }
+
+        KeyPresser keyPresser = getMainInstance().get().keyPresser;
+        keyPresser.releaseAllModifiers();
+        if (!alreadyPaused) {
+            keyPresser.pressEsc();
+        }
+        keyPresser.pressTab(7);
+        keyPresser.pressEnter();
+        keyPresser.pressShiftTab(1);
+        String versionString = getMainInstance().get().versionString;
+        if (MCVersionUtil.isNewerThan(versionString, "1.16.5")) {
+            keyPresser.pressTab(2);
+        }
+        if (enableCheats) {
+            keyPresser.pressEnter();
+        }
+        keyPresser.pressTab(MCVersionUtil.isNewerThan(versionString, "1.19.2") ? 2 : 1);
+        keyPresser.pressEnter();
+        openedToLan = true;
     }
 }

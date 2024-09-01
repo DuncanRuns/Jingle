@@ -36,6 +36,9 @@ obs = obslua
 
 jingle_dir = os.getenv("UserProfile"):gsub("\\", "/") .. "/.config/Jingle/"
 
+timers_activated = false
+last_state = ''
+last_projector_request = 'N'
 total_width = 0
 total_height = 0
 
@@ -214,6 +217,12 @@ function ensure_scene_exists(name)
     return false
 end
 
+function get_active_scene_name()
+    local current_scene_source = obs.obs_frontend_get_current_scene()
+    local current_scene_name = obs.obs_source_get_name(current_scene_source)
+    release_source(current_scene_source)
+end
+
 ---- Script Functions ----
 
 -- TODO: Add loop that checks jingle state for walling vs playing and also open projector requests
@@ -234,6 +243,16 @@ end
 
 function script_load()
     update_scene_size()
+end
+
+function script_update(settings)
+    if timers_activated then
+        return
+    end
+
+    timers_activated = true
+    obs.timer_add(loop, 20)
+    obs.timer_add(update_scene_size, 5000)
 end
 
 function update_scene_size()
@@ -314,5 +333,43 @@ function get_or_create_game_capture()
     obs.obs_data_release(settings)
 
     return source
+end
+
+function loop()
+    local state = get_state_file_string()
+
+    if (state == last_state or state == nil) then
+        return
+    end
+
+    last_state = state
+
+    local state_args = split_string(state, '|')
+
+    local current_scene_name = get_active_scene_name()
+
+    if (#state_args == 0) then
+        return;
+    end
+
+    local desired_scene = state_args[1]
+    if desired_scene == 'P' and current_scene_name == "Walling" then
+        switch_to_scene("Playing")
+    end
+    if desired_scene == 'W' and current_scene_name == "Playing" then
+        switch_to_scene("Playing")
+    end
+
+    if #state_args == 1 then
+        return;
+    end
+
+    local projector_request = state_args[2]
+    if projector_request ~= last_projector_request then
+        last_projector_request = projector_request
+        if projector_request == 'Y' and scene_exists("Jingle Mag") then
+            obs.obs_frontend_open_projector("Scene", -1, "", "Jingle Mag")
+        end
+    end
 end
 
