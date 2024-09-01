@@ -208,16 +208,16 @@ class JingleLuaLibrary extends LuaLibrary {
         return ScriptStuff.getLoadedScripts().stream().anyMatch(sf -> sf.name.equals(scriptName));
     }
 
-    @LuaDocumentation(description = "Gets a table of all modids for the instance.")
-    public LuaTable getFabricMods() {
-        LuaTable table = tableOf();
-        int i = 0;
-        // TODO
+    // TODO
+//    @LuaDocumentation(description = "Gets a table of all modids for the instance.")
+//    public LuaTable getFabricMods() {
+//        LuaTable table = tableOf();
+//        int i = 0;
 //        for (FabricJarUtil.FabricJarInfo jar : getFabricJarInfos(instanceNum)) {
 //            table.set(valueOf(++i), valueOf(jar.id));
 //        }
-        return table;
-    }
+//        return table;
+//    }
 
     // TODO
 //    @LuaDocumentation(description = "Gets the version of a fabric mod installed on the instance.")
