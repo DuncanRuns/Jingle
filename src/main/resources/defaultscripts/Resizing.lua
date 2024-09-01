@@ -34,7 +34,7 @@ function runEyeMeasuring()
 end
 
 function checkUndoDirties()
-    if(projector_dirty) then
+    if (projector_dirty) then
         jingle.dumpOBSProjector()
         projector_dirty = false
     end
@@ -51,4 +51,5 @@ end
 jingle.addHotkey("Thin BT", runThinBt)
 jingle.addHotkey("Planar Abuse", runPlanarAbuse)
 jingle.addHotkey("Eye Measuring", runEyeMeasuring)
+jingle.listen("EXIT_WORLD", checkUndoDirties)
 jingle.setCustomization(customize)

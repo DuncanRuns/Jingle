@@ -10,6 +10,7 @@ import xyz.duncanruns.jingle.instance.InstanceChecker;
 import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 import xyz.duncanruns.jingle.instance.StateTracker;
+import xyz.duncanruns.jingle.obs.OBSLink;
 import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
 import xyz.duncanruns.jingle.resizing.Resizing;
@@ -132,6 +133,7 @@ public final class Jingle {
         }
         if (stateTracker != null) stateTracker.tryUpdate();
         OBSProjector.tick();
+        OBSLink.tick();
         PluginEvents.RunnableEventType.END_TICK.runAll();
         ScriptStuff.RunnableEventType.END_TICK.runAll();
     }
@@ -225,7 +227,7 @@ public final class Jingle {
             options.save();
             log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {
-            logError("Failed to shutdown: ", t);
+            logError("Failed to shutdown:", t);
             System.exit(1);
         }
         System.exit(0);

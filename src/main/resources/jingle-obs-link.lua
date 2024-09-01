@@ -61,11 +61,22 @@ end
 -- end
 
 function get_state_file_string()
-    local success, result = pcall(read_first_line, jingle_dir .. "state")
+    local success, result = pcall(read_first_line, jingle_dir .. "obs-link-state")
     if success then
         return result
     end
     return nil
+end
+
+---- Misc Functions ----
+
+function split_string(input_string, split_char)
+    local out = {}
+    -- https://stackoverflow.com/questions/1426954/split-string-in-lua
+    for str in input_string.gmatch(input_string, "([^" .. split_char .. "]+)") do
+        table.insert(out, str)
+    end
+    return out
 end
 
 ---- Obs Functions ----

@@ -18,7 +18,7 @@ end
 -- end
 
 function get_state_file_string()
-    local success, result = pcall(read_first_line, jingle_dir .. "state")
+    local success, result = pcall(read_first_line, jingle_dir .. "obs-link-state")
     if success then
         return result
     end

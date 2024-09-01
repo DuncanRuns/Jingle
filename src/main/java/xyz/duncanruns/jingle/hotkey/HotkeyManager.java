@@ -30,20 +30,29 @@ public final class HotkeyManager {
             SavedHotkey savedHotkey = savedHotkeyOpt.get();
             if (savedHotkey.keys.isEmpty()) continue;
 
-            Optional<Runnable> hotkeyAction = Optional.empty();
-            switch (savedHotkey.type) {
-                case "script":
-                    hotkeyAction = ScriptStuff.getHotkeyAction(savedHotkey.action);
-                    break;
-                case "plugin":
-                    hotkeyAction = PluginHotkeys.getHotkeyAction(savedHotkey.action);
-                    break;
-                case "builtin":
-                    hotkeyAction = Jingle.getBuiltinHotkeyAction(savedHotkey.action);
-                    break;
-            }
+            Optional<Runnable> hotkeyAction = findHotkeyAction(savedHotkey);
             hotkeyAction.ifPresent(runnable -> addHotkey(Hotkey.of(savedHotkey.keys, savedHotkey.ignoreModifiers), runnable));
         }
+    }
+
+    public static Optional<Runnable> findHotkeyAction(SavedHotkey savedHotkey) {
+        return findHotkeyAction(savedHotkey.type, savedHotkey.action);
+    }
+
+    public static Optional<Runnable> findHotkeyAction(String type, String action) {
+        Optional<Runnable> hotkeyAction = Optional.empty();
+        switch (type) {
+            case "script":
+                hotkeyAction = ScriptStuff.getHotkeyAction(action);
+                break;
+            case "plugin":
+                hotkeyAction = PluginHotkeys.getHotkeyAction(action);
+                break;
+            case "builtin":
+                hotkeyAction = Jingle.getBuiltinHotkeyAction(action);
+                break;
+        }
+        return hotkeyAction;
     }
 
     public static void addHotkey(Hotkey hotkey, Runnable onHotkeyPress) {
