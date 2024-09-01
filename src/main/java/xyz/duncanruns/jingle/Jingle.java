@@ -120,6 +120,7 @@ public final class Jingle {
 
     private static synchronized void tick() {
         PluginEvents.RunnableEventType.START_TICK.runAll();
+        ScriptStuff.RunnableEventType.START_TICK.runAll();
         activeHwnd = User32.INSTANCE.GetForegroundWindow();
         long currentTime = System.currentTimeMillis();
         if (Math.abs(currentTime - lastInstanceCheck) > 500) {
@@ -132,6 +133,7 @@ public final class Jingle {
         if (stateTracker != null) stateTracker.tryUpdate();
         OBSProjector.tick();
         PluginEvents.RunnableEventType.END_TICK.runAll();
+        ScriptStuff.RunnableEventType.END_TICK.runAll();
     }
 
     private static void updateWindowTitle() {
@@ -180,6 +182,7 @@ public final class Jingle {
         if (instance != null) seeInstancePath(instance.instancePath);
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath));
         PluginEvents.RunnableEventType.MAIN_INSTANCE_CHANGED.runAll();
+        ScriptStuff.RunnableEventType.MAIN_INSTANCE_CHANGED.runAll();
     }
 
     private static void onInstanceStateChange(InstanceState previousState, InstanceState newState) {

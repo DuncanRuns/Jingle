@@ -2,6 +2,7 @@ package xyz.duncanruns.jingle.win32;
 
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
+import com.sun.jna.ptr.IntByReference;
 
 /**
  * JNA interface with Window's user32.dll.
@@ -51,6 +52,10 @@ public interface User32 extends com.sun.jna.platform.win32.User32 {
     BOOL GetCursorInfo(CURSORINFO pci);
 
     boolean GetPhysicalCursorPos(POINT p);
+
+    void SystemParametersInfoA(int uiAction, int uiParam, IntByReference pvParam, int fWinIni);
+
+    boolean SystemParametersInfoA(int uiAction, int uiParam, int pvParam, int fWinIni);
 
     // This may somehow cause a system exit, removed for safety.
     // int GetKeyNameTextA(LONG lParam, LPSTR lpString, int cchSize);

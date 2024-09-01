@@ -68,6 +68,14 @@ class JingleLuaLibrary extends LuaLibrary {
         OBSProjector.dumpOBSProjector();
     }
 
+    public int getCursorSpeed() {
+        return MouseUtil.getCurrentCursorSpeed();
+    }
+
+    public void setCursorSpeed(int speed) {
+        MouseUtil.setCursorSpeed(speed);
+    }
+
     @LuaDocumentation(description = "Logs a message to the Jingle log.")
     public void log(String message) {
         assert this.script != null;

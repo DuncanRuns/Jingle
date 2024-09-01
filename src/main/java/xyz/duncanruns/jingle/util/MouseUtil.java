@@ -6,6 +6,7 @@ import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinUser;
+import com.sun.jna.ptr.IntByReference;
 import xyz.duncanruns.jingle.win32.User32;
 
 import java.awt.*;
@@ -89,5 +90,15 @@ public final class MouseUtil {
         WinDef.POINT p = new WinDef.POINT();
         User32.INSTANCE.GetPhysicalCursorPos(p);
         return new Point(p.x, p.y);
+    }
+
+    public static int getCurrentCursorSpeed() {
+        IntByReference ref = new IntByReference(0);
+        User32.INSTANCE.SystemParametersInfoA(0x70, 0, ref, 0);
+        return ref.getValue();
+    }
+
+    public static void setCursorSpeed(int speed) {
+        User32.INSTANCE.SystemParametersInfoA(0x71, 0, speed, 0);
     }
 }
