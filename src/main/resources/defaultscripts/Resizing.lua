@@ -1,3 +1,7 @@
+normal_cursor_speed = 0;
+cursor_dirty = false
+projector_dirty = false
+
 function runThinBt()
     if (not jingle.isInstanceActive()) then
         return
@@ -10,13 +14,9 @@ function runPlanarAbuse()
     if (not jingle.isInstanceActive()) then
         return
     end
-    checkUndoCursor()
+    checkUndoDirties()
     jingle.toggleResize(1920, 300)
 end
-
-normal_cursor_speed = 0;
-cursor_dirty = false
-projector_dirty = false
 
 function runEyeMeasuring()
     if (not jingle.isInstanceActive()) then
