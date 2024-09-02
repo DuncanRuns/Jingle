@@ -98,7 +98,7 @@ public final class JingleUpdater {
         }
 
         // Update available!!!
-        int ans = JOptionPane.showConfirmDialog(JingleGUI.get(), String.format("A new version of Jingle is available! Current version: %s, new version: %s.", currentVersion, foundLatestVersion), "Jingle: Update available", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, new ImageIcon(JingleGUI.getLogo()));
+        int ans = JOptionPane.showConfirmDialog(JingleGUI.get(), String.format("A new version of Jingle is available! Current version: %s, new version: %s.", currentVersion, foundLatestVersion), "Jingle: Update available", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (ans != 0) return;
 

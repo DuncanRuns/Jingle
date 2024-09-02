@@ -237,7 +237,7 @@ public class JingleGUI extends JFrame {
             try {
                 Desktop.getDesktop().browse(URI.create("https://ko-fi.com/duncanruns"));
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Failed to open link. Donations can be done at https://ko-fi.com/duncanruns.", "Jingle: Failed to open link", JOptionPane.ERROR_MESSAGE, new ImageIcon(getLogo()));
+                JOptionPane.showMessageDialog(this, "Failed to open link. Donations can be done at https://ko-fi.com/duncanruns.", "Jingle: Failed to open link", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -249,7 +249,7 @@ public class JingleGUI extends JFrame {
                 }
             } catch (IOException e) {
                 Jingle.logError("Preparing File Submission Failed:", e);
-                JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", 0, new ImageIcon(this.getIconImage()));
+                JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", JOptionPane.ERROR_MESSAGE);
             }
         }));
 
