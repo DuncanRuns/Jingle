@@ -22,7 +22,8 @@ public class JingleOptions {
     public List<JsonObject> hotkeys = new ArrayList<>();
     public Set<String> disabledDefaultScripts = new HashSet<>();
     public boolean revertWindowAfterReset = true;
-    public boolean usePreReleases = true;
+    public boolean checkForUpdates = true;
+    public boolean usePreReleases = false;
     public String lastCheckedVersion = "";
 
     public boolean projectorEnabled;

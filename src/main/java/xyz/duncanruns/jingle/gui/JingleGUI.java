@@ -75,6 +75,7 @@ public class JingleGUI extends JFrame {
     private JLabel supporter3Label;
     private JButton packageSubmissionFilesButton;
     private JCheckBox preReleaseCheckBox;
+    private JCheckBox checkForUpdatesCheckBox;
     public boolean jingleUpdating = false;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
@@ -178,9 +179,21 @@ public class JingleGUI extends JFrame {
                 Jingle.options.revertWindowAfterReset = b;
             }
         });
+        this.setCheckBoxBoolean(this.checkForUpdatesCheckBox, Jingle.options.checkForUpdates, b -> {
+            synchronized (Jingle.class) {
+                Jingle.options.checkForUpdates = b;
+            }
+            this.preReleaseCheckBox.setEnabled(b);
+            if (b) {
+                new Thread(JingleUpdater::checkForUpdates, "update-checker").start();
+            }
+        });
+        this.preReleaseCheckBox.setEnabled(Jingle.options.checkForUpdates);
         this.setCheckBoxBoolean(this.preReleaseCheckBox, Jingle.options.usePreReleases, b -> {
-            Jingle.options.usePreReleases = b;
-            JingleUpdater.checkForUpdates();
+            synchronized (Jingle.class) {
+                Jingle.options.usePreReleases = b;
+            }
+            new Thread(JingleUpdater::checkForUpdates, "update-checker").start();
         });
 
         this.openScriptsFolderButton.addActionListener(a -> OpenUtil.openFile(Jingle.FOLDER.resolve("scripts").toString()));
@@ -312,7 +325,7 @@ public class JingleGUI extends JFrame {
         mainTabbedPane.setTabLayoutPolicy(1);
         mainPanel.add(mainTabbedPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, new Dimension(0, 0), null, 0, false));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(8, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel1.setLayout(new GridLayoutManager(9, 1, new Insets(5, 5, 5, 5), -1, -1));
         panel1.setEnabled(true);
         panel1.putClientProperty("html.disable", Boolean.FALSE);
         mainTabbedPane.addTab("Jingle", panel1);
@@ -343,7 +356,7 @@ public class JingleGUI extends JFrame {
         panel1.add(revertWindowAfterResetCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         extraButtonsPanel = new JPanel();
         extraButtonsPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.add(extraButtonsPanel, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel1.add(extraButtonsPanel, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         clearWorldsFromAllButton = new JButton();
         clearWorldsFromAllButton.setText("Clear Worlds from All Instances");
         extraButtonsPanel.add(clearWorldsFromAllButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -353,12 +366,15 @@ public class JingleGUI extends JFrame {
         final JSeparator separator1 = new JSeparator();
         panel1.add(separator1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JSeparator separator2 = new JSeparator();
-        panel1.add(separator2, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel1.add(separator2, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        panel1.add(spacer1, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel1.add(spacer1, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         preReleaseCheckBox = new JCheckBox();
         preReleaseCheckBox.setText("Enable Pre-Release Updates");
-        panel1.add(preReleaseCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel1.add(preReleaseCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        checkForUpdatesCheckBox = new JCheckBox();
+        checkForUpdatesCheckBox.setText("Check for Updates");
+        panel1.add(checkForUpdatesCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(2, 2, new Insets(5, 5, 5, 5), -1, -1));
         mainTabbedPane.addTab("Log", panel2);

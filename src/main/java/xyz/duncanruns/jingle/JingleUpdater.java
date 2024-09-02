@@ -52,7 +52,12 @@ public final class JingleUpdater {
     }
 
     public synchronized static void checkForUpdates() {
-        String currentVersion = Jingle.VERSION;
+        String currentVersion;
+
+        synchronized (Jingle.class) {
+            if (!Jingle.options.checkForUpdates) return;
+            currentVersion = Jingle.VERSION;
+        }
 
         if (currentVersion.equals("DEV")) {
             return;
