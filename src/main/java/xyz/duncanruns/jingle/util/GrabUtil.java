@@ -89,7 +89,7 @@ public final class GrabUtil {
         return GSON.fromJson(grab(origin), JsonObject.class);
     }
 
-    public static void download(String origin, Path destination, Consumer<Integer> bytesReadConsumer) throws IOException {
+    public static void download(String origin, Path destination, Consumer<Integer> bytesReadConsumer, int consumeInterval) throws IOException {
         HttpGet request = new HttpGet(origin);
         try (CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(request);
              BufferedInputStream sourceStream = new BufferedInputStream(response.getEntity().getContent());
@@ -102,7 +102,9 @@ public final class GrabUtil {
                 while ((bytesRead = sourceStream.read(dataBuffer, 0, bufferSize)) != -1) {
                     destinationStream.write(dataBuffer, 0, bytesRead);
                     totalBytesRead += bytesRead;
-                    bytesReadConsumer.accept(totalBytesRead);
+                    if (totalBytesRead % consumeInterval == 0) {
+                        bytesReadConsumer.accept(totalBytesRead);
+                    }
                 }
             }
         }
@@ -110,7 +112,7 @@ public final class GrabUtil {
 
     public static void download(String origin, Path destination) throws IOException {
         download(origin, destination, integer -> {
-        });
+        }, 1024);
     }
 
     /**
