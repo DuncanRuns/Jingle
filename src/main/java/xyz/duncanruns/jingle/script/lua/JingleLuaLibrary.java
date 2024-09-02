@@ -98,7 +98,7 @@ class JingleLuaLibrary extends LuaLibrary {
         ScriptStuff.RunnableEventType.valueOf(eventName).register(wrapFunction(listenFunction));
     }
 
-    @LuaDocumentation(description = "Sets and stores a customizable string.\nValues stored are only accessible to runs of this script and are persistent through Julti restarts.")
+    @LuaDocumentation(description = "Sets and stores a customizable string.\nValues stored are only accessible to runs of this script and are persistent through Jingle restarts.")
     public void setCustomizable(String key, String value) {
         assert this.script != null;
         CustomizableManager.set(this.script.getName(), key, value);
@@ -140,7 +140,7 @@ class JingleLuaLibrary extends LuaLibrary {
         boolean invalidInput = false;
         assert this.script != null;
         while (true) {
-            Object o = JOptionPane.showInputDialog(JingleGUI.get(), invalidInput ? "Your input was invalid!\n" + message : message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
+            Object o = JOptionPane.showInputDialog(JingleGUI.get(), invalidInput ? "Your input was invalid!\n" + message : message, "Jingle Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
             if (o == null) {
                 return null;
             }
@@ -158,7 +158,7 @@ class JingleLuaLibrary extends LuaLibrary {
     }
 
     // TODO
-//    @LuaDocumentation(description = "Sends a chat message in the active instance. A slash needs to be given if executing a command (eg. julti.sendChatMessage(\"/kill\")).")
+//    @LuaDocumentation(description = "Sends a chat message in the active instance. A slash needs to be given if executing a command (eg. jingle.sendChatMessage(\"/kill\")).")
 //    public void sendChatMessage(String message) {
 //    }
 
