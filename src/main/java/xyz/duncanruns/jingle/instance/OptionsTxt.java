@@ -2,6 +2,8 @@ package xyz.duncanruns.jingle.instance;
 
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.FileUtil;
+import xyz.duncanruns.jingle.util.MCKeyUtil;
+import xyz.duncanruns.jingle.util.MCVersionUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,11 +13,14 @@ import java.util.Optional;
 
 public class OptionsTxt {
     private final Path path;
+    private final boolean pre113;
+
     private long mTime = 0L;
     private final HashMap<String, String> options = new HashMap<>();
 
-    public OptionsTxt(Path optionsTxtPath) {
+    public OptionsTxt(Path optionsTxtPath, String versionString) {
         this.path = optionsTxtPath;
+        this.pre113 = MCVersionUtil.isOlderThan(versionString, "1.13");
         this.tryUpdate();
     }
 
@@ -45,5 +50,13 @@ public class OptionsTxt {
 
     public Optional<String> getOption(String optionName) {
         return Optional.ofNullable(this.options.getOrDefault(optionName, null));
+    }
+
+    public Optional<Integer> getKeyOption(String optionName) {
+        if (this.pre113) {
+            return this.getOption(optionName).map(MCKeyUtil::getVkFromLWJGL);
+        } else {
+            return this.getOption(optionName).map(MCKeyUtil::getVkFromMCTranslation);
+        }
     }
 }

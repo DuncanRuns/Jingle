@@ -7,12 +7,14 @@ public class OpenedInstance extends OpenedInstanceInfo {
     public final KeyPresser keyPresser;
     public final OptionsTxt optionsTxt;
     public final StandardSettings standardSettings;
+    public final FabricModFolder fabricModFolder;
 
     public OpenedInstance(OpenedInstanceInfo openedInstanceInfo, BiConsumer<InstanceState, InstanceState> onStateChange) {
         super(openedInstanceInfo, openedInstanceInfo.hwnd);
         this.stateTracker = new StateTracker(this.instancePath.resolve("wpstateout.txt"), onStateChange);
         this.keyPresser = new KeyPresser(this.hwnd);
-        this.optionsTxt = new OptionsTxt(this.instancePath.resolve("options.txt"));
+        this.optionsTxt = new OptionsTxt(this.instancePath.resolve("options.txt"),this.versionString);
         this.standardSettings = new StandardSettings(this.instancePath);
+        this.fabricModFolder = new FabricModFolder(this.instancePath.resolve("mods"));
     }
 }

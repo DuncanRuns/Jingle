@@ -126,14 +126,22 @@ function customize()
     askSizeCustomization("planar_abuse", "Enter your planar abuse size (or cancel to skip):", 1920, 300)
     local ans = jingle.askYesNo("Set cursor speed to 1 while eye measuring?")
     if (ans ~= nil) then
-        jingle.setCustomizable("change_cursor_speed", "true")
-        reload()
         if (ans) then
+            jingle.setCustomizable("change_cursor_speed", "true")
+        else
+            jingle.setCustomizable("change_cursor_speed", "false")
+        end
+        reload()
+        if ans then
             local current_cursor_speed = tostring(jingle.getCursorSpeed())
             local ans = jingle.askYesNo("Revert cursor speed to " ..
                     current_cursor_speed .. " after undoing eye measuring?")
-            if (ans ~= nil and ans) then
-                jingle.setCustomizable("permanent_normal_cursor_speed", current_cursor_speed)
+            if ans ~= nil then
+                if ans then
+                    jingle.setCustomizable("permanent_normal_cursor_speed", current_cursor_speed)
+                else
+                    jingle.setCustomizable("permanent_normal_cursor_speed", nil)
+                end
             end
         end
     end

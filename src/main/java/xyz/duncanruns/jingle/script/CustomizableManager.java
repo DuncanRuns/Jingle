@@ -2,10 +2,12 @@ package xyz.duncanruns.jingle.script;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.FileUtil;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,10 +42,11 @@ public class CustomizableManager {
             json.add(scriptName, new JsonObject());
         }
         JsonObject scriptSpace = json.getAsJsonObject(scriptName);
-        scriptSpace.addProperty(key, val.toString());
+        scriptSpace.addProperty(key, val == null ? null : val.toString());
         save();
     }
 
+    @Nullable
     public synchronized static String get(String scriptName, String key) {
         if (!json.has(scriptName)) {
             return null;
@@ -52,6 +55,7 @@ public class CustomizableManager {
         if (!scriptSpace.has(key)) {
             return null;
         }
-        return scriptSpace.get(key).getAsString();
+        JsonElement element = scriptSpace.get(key);
+        return element.isJsonNull() ? null : element.getAsString();
     }
 }

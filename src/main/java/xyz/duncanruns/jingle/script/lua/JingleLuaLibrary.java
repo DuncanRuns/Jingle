@@ -2,15 +2,14 @@ package xyz.duncanruns.jingle.script.lua;
 
 import com.sun.jna.platform.win32.WinDef;
 import org.apache.logging.log4j.Level;
-import org.luaj.vm2.Globals;
-import org.luaj.vm2.LuaFunction;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
+import org.luaj.vm2.*;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
+import xyz.duncanruns.jingle.instance.FabricModFolder;
 import xyz.duncanruns.jingle.instance.InstanceState;
+import xyz.duncanruns.jingle.instance.OpenedInstance;
 import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.CustomizableManager;
@@ -157,10 +156,22 @@ class JingleLuaLibrary extends LuaLibrary {
         return this.script.getName();
     }
 
-    // TODO
-//    @LuaDocumentation(description = "Sends a chat message in the active instance. A slash needs to be given if executing a command (eg. jingle.sendChatMessage(\"/kill\")).")
-//    public void sendChatMessage(String message) {
-//    }
+    @LuaDocumentation(description = "Sends a chat message in the instance. A slash needs to be given if executing a command (eg. jingle.sendChatMessage(\"/kill\")). Returns true if successful.")
+    public boolean sendChatMessage(String message) {
+        Optional<OpenedInstance> instanceOpt = Jingle.getMainInstance();
+        if (!instanceOpt.isPresent()) return false;
+        OpenedInstance instance = instanceOpt.get();
+
+        Optional<Integer> chatKey = instance.optionsTxt.getKeyOption("key_key.chat");
+        if (!chatKey.isPresent()) return false;
+        instance.keyPresser.pressKey(chatKey.get());
+        SleepUtil.sleep(100);
+        for (char c : message.toCharArray()) {
+            KeyboardUtil.sendCharToHwnd(instance.hwnd, c);
+        }
+        instance.keyPresser.pressEnter();
+        return true;
+    }
 
     @LuaDocumentation(description = "Clears all but the last 5 worlds the instance, or for all instances ever seen if clearFromAllSeenInstances is set to true.")
     public void clearWorlds(boolean clearFromAllSeenInstances) {
@@ -185,8 +196,9 @@ class JingleLuaLibrary extends LuaLibrary {
         OpenUtil.openFile(filePath);
     }
 
-    @LuaDocumentation(description = "Opens the currently active instance's world to lan.", paramTypes = "boolean|nil")
-    public void openInstanceToLan(Boolean enableCheats) {
+    @LuaDocumentation(description = "Opens the instance's world to lan.", paramTypes = "boolean|nil")
+    public void openToLan(boolean alreadyPaused, boolean enableCheats) {
+        Jingle.openToLan(alreadyPaused, enableCheats);
     }
 
     @LuaDocumentation(description = "Sleeps for the specified amount of milliseconds.")
@@ -231,29 +243,28 @@ class JingleLuaLibrary extends LuaLibrary {
         return ScriptStuff.getLoadedScripts().stream().anyMatch(sf -> sf.name.equals(scriptName));
     }
 
-    // TODO
-//    @LuaDocumentation(description = "Gets a table of all modids for the instance.")
-//    public LuaTable getFabricMods() {
-//        LuaTable table = tableOf();
-//        int i = 0;
-//        for (FabricJarUtil.FabricJarInfo jar : getFabricJarInfos(instanceNum)) {
-//            table.set(valueOf(++i), valueOf(jar.id));
-//        }
-//        return table;
-//    }
+    @LuaDocumentation(description = "Gets a table of all modids for the instance.")
+    public LuaTable getFabricMods() {
+        LuaTable table = tableOf();
+        Jingle.getMainInstance().ifPresent(instance -> {
+            int i = 0;
+            for (FabricModFolder.FabricJarInfo jar : instance.fabricModFolder.getInfos()) {
+                table.set(valueOf(++i), valueOf(jar.id));
+            }
+        });
+        return table;
+    }
 
-    // TODO
-//    @LuaDocumentation(description = "Gets the version of a fabric mod installed on the instance.")
-//    @Nullable
-//    public String getFabricModVersion(String modid) {
-//        return getFabricJarInfos(instanceNum).stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst().map(i -> i.version).orElse(null);
-//    }
+    @LuaDocumentation(description = "Gets the version of a fabric mod installed on the instance.")
+    @Nullable
+    public String getFabricModVersion(String modid) {
+        return Jingle.getMainInstance().flatMap(instance -> instance.fabricModFolder.getInfos().stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst().map(i -> i.version)).orElse(null);
+    }
 
-    // TODO
-//    @LuaDocumentation(description = "Checks if the instance has a mod of the specified modid.")
-//    public boolean hasFabricMod(int instanceNum, String modid) {
-//        return getFabricJarInfos(instanceNum).stream().anyMatch(i -> i.id.equalsIgnoreCase(modid));
-//    }
+    @LuaDocumentation(description = "Checks if the instance has a mod of the specified modid.")
+    public boolean hasFabricMod(String modid) {
+        return Jingle.getMainInstance().flatMap(instance -> instance.fabricModFolder.getInfos().stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst()).isPresent();
+    }
 
     @LuaDocumentation(description = "Compares two version strings. Examples:\njinglecompareVersionStrings(\"1.0.0\", \"1.0.1\") -> -1\njinglecompareVersionStrings(\"1.1.0\", \"1.0.1\") -> 1\njinglecompareVersionStrings(\"1.1.0\", \"1.1.0\") -> 0\njinglecompareVersionStrings(\"mario\", \"1.1.0\", 100) -> 100")
     public int compareVersionStrings(String a, String b, Integer onFailure) {
@@ -266,16 +277,14 @@ class JingleLuaLibrary extends LuaLibrary {
     }
 
     @LuaDocumentation(description = "Retrieves a value from the instance's standard options.")
-    public String getInstanceStandardOption(int instanceNum, String optionName) {
+    public String getInstanceStandardOption(String optionName) {
         return Jingle.getMainInstance().flatMap(i -> i.standardSettings.getOption(optionName)).orElse(null);
     }
 
-    // TODO
-//    @LuaDocumentation(description = "Retrieves a minecraft key option from the instance's standard options or options.txt and converts it into a Windows key integer.")
-//    public Integer getInstanceKeyOption(int instanceNum, String keyOptionName) {
-//        MinecraftInstance instance = getInstanceFromInt(instanceNum);
-//        return GameOptionsUtil.getKey(instance.getPath(), keyOptionName, MCVersionUtil.isOlderThan(instance.getVersionString(), "1.13"));
-//    }
+    @LuaDocumentation(description = "Retrieves a minecraft key option from the instance's standard options or options.txt and converts it into a Windows key integer.")
+    public Integer getInstanceKeyOption(String keyOptionName) {
+        return Jingle.getMainInstance().flatMap(i -> i.optionsTxt.getKeyOption(keyOptionName)).orElse(null);
+    }
 
     @LuaDocumentation(description = "Sends a key down and up message to the instance with no delay between.")
     public void sendKeyToInstance(int key) {
@@ -293,7 +302,7 @@ class JingleLuaLibrary extends LuaLibrary {
     }
 
     @LuaDocumentation(description = "Sends a key down and up message to the instance with a specified delay between.")
-    public void sendKeyHoldToInstance(int instanceNum, int key, long millis) {
+    public void sendKeyHoldToInstance(int key, long millis) {
         Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyToHwnd(instance.hwnd, key, millis));
     }
 

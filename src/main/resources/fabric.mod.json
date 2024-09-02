@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "fabric-crasher",
+  "version": "0.0.0",
+  "name": "This will crash your game!!!",
+  "description": "Crashes the game to let people know that this isn't a mod.",
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "xyz.duncanruns.jingle.util.FabricCrashUtil::onInitialize"
+    ]
+  }
+}
