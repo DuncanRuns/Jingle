@@ -41,13 +41,20 @@ end
 
 function regenerate()
     local game_cap = get_or_create_game_capture()
+    local game_cap_pos = obs.vec2()
+    game_cap_pos.x = total_width / 2
+    game_cap_pos.y = total_height / 2
 
     if (ensure_scene_exists("Walling")) then
-        obs.obs_scene_add(get_scene("Walling"), game_cap)
+        local item = obs.obs_scene_add(get_scene("Walling"), game_cap)
+        obs.obs_sceneitem_set_alignment(item, 0)
+        obs.obs_sceneitem_set_pos(item, game_cap_pos)
     end
 
     if (ensure_scene_exists("Playing")) then
-        obs.obs_scene_add(get_scene("Playing"), game_cap)
+        local item = obs.obs_scene_add(get_scene("Playing"), game_cap)
+        obs.obs_sceneitem_set_alignment(item, 0)
+        obs.obs_sceneitem_set_pos(item, game_cap_pos)
     end
 
     if (ensure_scene_exists("Jingle Mag")) then
