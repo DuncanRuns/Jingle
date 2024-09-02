@@ -69,7 +69,6 @@ public class ScriptListPanel extends JPanel {
             JLabel nameLabel = new JLabel(loadedScript.name);
             this.add(nameLabel, constraints.clone());
             if (disabledDefaultScripts.contains(loadedScript.name)) {
-                System.out.println(loadedScript.name);
                 nameLabel.setForeground(new Color(128, 128, 128));
             }
             this.add(getCustomizeButton(loadedScript), constraints.clone());
