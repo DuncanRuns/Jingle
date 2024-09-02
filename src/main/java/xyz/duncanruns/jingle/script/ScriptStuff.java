@@ -61,6 +61,7 @@ public final class ScriptStuff {
      */
     public static void reloadScripts() {
         clear();
+        CustomizableManager.load();
         Path scriptsFolder = Jingle.FOLDER.resolve("scripts");
         if (!Files.exists(scriptsFolder)) {
             try {
