@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -78,11 +79,14 @@ public final class Jingle {
 
         loadSupporters();
         loadLegalMods();
+        new Thread(JingleUpdater::checkForUpdates, "update-checker").start();
 
         generateResources();
 
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Jingle v" + VERSION + " with java: " + usedJava);
+
+        JingleUpdater.checkDeleteOldJar();
 
         mainLoop();
     }
@@ -174,7 +178,7 @@ public final class Jingle {
                 Jingle.log(Level.WARN, "Warning: Mod " + jar.name + " is not a legal mod!");
             }
         }
-        Jingle.log(Level.INFO,"Finished checking legal mods for this instance.");
+        Jingle.log(Level.INFO, "Finished checking legal mods for this instance.");
         legalModCheckNeeded = false;
     }
 
@@ -264,7 +268,7 @@ public final class Jingle {
         options.seenPaths.put(instancePath.toAbsolutePath().toString(), System.currentTimeMillis());
     }
 
-    public synchronized static void stop() {
+    public synchronized static void stop(boolean doSystemExit) {
         try {
             running = false;
             assert options != null;
@@ -273,9 +277,9 @@ public final class Jingle {
             log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {
             logError("Failed to shutdown:", t);
-            System.exit(1);
+            if (doSystemExit) System.exit(1);
         }
-        System.exit(0);
+        if (doSystemExit) System.exit(0);
     }
 
     public static synchronized void goBorderless() {
@@ -349,5 +353,18 @@ public final class Jingle {
         keyPresser.pressTab(MCVersionUtil.isNewerThan(versionString, "1.19.2") ? 2 : 1);
         keyPresser.pressEnter();
         openedToLan = true;
+    }
+
+    /**
+     * Returns the path of the "code source".
+     * <p>
+     * This will be a path to the jar file when running as a jar, and a root directory of the compiled classes when ran in a development environment.
+     */
+    public static Path getSourcePath() {
+        try {
+            return Paths.get(Jingle.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -68,7 +68,11 @@ public class JingleAppLaunch {
             lockStuff = LockUtil.lock(LOCK_FILE);
             Jingle.log(Level.DEBUG, "Obtained Lock");
         }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> LockUtil.releaseLock(lockStuff)));
+        Runtime.getRuntime().addShutdownHook(new Thread(JingleAppLaunch::releaseLock));
+    }
+
+    public static void releaseLock() {
+        LockUtil.releaseLock(lockStuff);
     }
 
 
