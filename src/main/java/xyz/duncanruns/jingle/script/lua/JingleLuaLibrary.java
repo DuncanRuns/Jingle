@@ -201,7 +201,7 @@ class JingleLuaLibrary extends LuaLibrary {
     }
 
     @LuaDocumentation(description = "Gets a more detailed state of the \"INWORLD\" state. Returns \"UNPAUSED\", \"PAUSED\", or \"GAMESCREENOPEN\".")
-    public String getInstanceInWorldState(int instanceNum) {
+    public String getInstanceInWorldState() {
         return Jingle.getMainInstance().map(i -> i.stateTracker.getInWorldState().name()).orElse(null);
     }
 
