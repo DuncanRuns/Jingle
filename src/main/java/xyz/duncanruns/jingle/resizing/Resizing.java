@@ -58,13 +58,15 @@ public final class Resizing {
             User32.INSTANCE.SetWindowPos(hwnd, new WinDef.HWND(new Pointer(0)), newRectangle.x, newRectangle.y, newRectangle.width, newRectangle.height, 0x0400);
             return (currentlyResized = true);
         } else {
-            return undoResize();
+            undoResize();
+            return false;
         }
 
     }
 
-    public static boolean undoResize() {
+    public static void undoResize() {
         assert Jingle.getMainInstance().isPresent();
+        if (!currentlyResized) return;
         OpenedInstanceInfo instance = Jingle.getMainInstance().get();
         WinDef.HWND hwnd = instance.hwnd;
         Rectangle previousRectangle = WindowStateUtil.getHwndRectangle(hwnd);
@@ -77,6 +79,6 @@ public final class Resizing {
         User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_STYLE, new WinDef.LONG(previousStyle));
         User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_EXSTYLE, new WinDef.LONG(previousExStyle));
         User32.INSTANCE.SetWindowPos(hwnd, new WinDef.HWND(new Pointer(0)), newRectangle.x, newRectangle.y, newRectangle.width, newRectangle.height, 0x0400);
-        return (currentlyResized = false);
+        currentlyResized = false;
     }
 }
