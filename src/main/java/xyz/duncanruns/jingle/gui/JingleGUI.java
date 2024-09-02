@@ -13,6 +13,7 @@ import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.KeyboardUtil;
 import xyz.duncanruns.jingle.util.OpenUtil;
+import xyz.duncanruns.jingle.util.ResourceUtil;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -20,6 +21,7 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -68,8 +70,8 @@ public class JingleGUI extends JFrame {
         this.setTitle("Jingle v" + Jingle.VERSION);
         this.setContentPane(this.mainPanel);
         this.setPreferredSize(new Dimension(600, 400));
-        this.pack();
         this.setLocation(Jingle.options.lastPosition[0], Jingle.options.lastPosition[1]);
+        this.setIconImage(getLogo());
         this.setInstance(null);
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -81,6 +83,7 @@ public class JingleGUI extends JFrame {
         });
 
         this.setVisible(true);
+        this.pack();
     }
 
     public static JingleGUI get() {
@@ -90,6 +93,14 @@ public class JingleGUI extends JFrame {
     @SuppressWarnings("unused")
     public static void addPluginTab(String name, JPanel panel) {
         JingleGUI.get().addPluginTabInternal(name, panel);
+    }
+
+    public static Image getLogo() {
+        try {
+            return ResourceUtil.getImageResource("/logo.png");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setInstance(OpenedInstanceInfo instance) {
