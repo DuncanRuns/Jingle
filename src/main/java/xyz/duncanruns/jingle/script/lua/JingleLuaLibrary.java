@@ -42,25 +42,25 @@ class JingleLuaLibrary extends LuaLibrary {
     }
 
     @LuaDocumentation(description = "Registers a hotkey action. If a user sets up a hotkey with the given hotkey action name and then presses their set hotkey, the given function will be ran.")
-    public void addHotkey(String hotkeyName, LuaFunction function) {
+    public void addHotkey(String hotkeyName, LuaFunction hotkeyFunction) {
         assert this.script != null;
         assert this.globals != null;
         if (hotkeyName.contains(":")) {
             Jingle.log(Level.ERROR, "Can't add hotkey script: script name \"" + hotkeyName + "\" contains a colon!");
         }
-        ScriptStuff.addHotkeyAction(this.script, hotkeyName, wrapFunction(function));
+        ScriptStuff.addHotkeyAction(this.script, hotkeyName, wrapFunction(hotkeyFunction));
     }
 
     @LuaDocumentation(description = "Registers the customization function for this script. If a user presses the \"Customize\" button for this script, the given function will be ran.")
-    public void setCustomization(LuaFunction function) {
+    public void setCustomization(LuaFunction customizationFunction) {
         assert this.script != null;
-        ScriptStuff.setCustomization(this.script, wrapFunction(function));
+        ScriptStuff.setCustomization(this.script, wrapFunction(customizationFunction));
     }
 
     @LuaDocumentation(description = "Registers an extra function for this script. If a user presses the button of the given name found next to this script, the given function will be ran.")
-    public void addExtraFunction(String functionName, LuaFunction function) {
+    public void addExtraFunction(String functionName, LuaFunction extraFunction) {
         assert this.script != null;
-        ScriptStuff.addExtraFunction(this.script, functionName, wrapFunction(function));
+        ScriptStuff.addExtraFunction(this.script, functionName, wrapFunction(extraFunction));
     }
 
     @LuaDocumentation(description = "Runs a resize toggle of the given width and height. Returns true if the size is applied, and returns false if the size is undone.")
@@ -94,8 +94,8 @@ class JingleLuaLibrary extends LuaLibrary {
     }
 
     @LuaDocumentation(description = "Registers a function to an event.\nEvents: START_TICK, END_TICK, MAIN_INSTANCE_CHANGED, STATE_CHANGE, EXIT_WORLD, ENTER_WORLD")
-    public void listen(String eventName, LuaFunction function) {
-        ScriptStuff.RunnableEventType.valueOf(eventName).register(wrapFunction(function));
+    public void listen(String eventName, LuaFunction listenFunction) {
+        ScriptStuff.RunnableEventType.valueOf(eventName).register(wrapFunction(listenFunction));
     }
 
     @LuaDocumentation(description = "Sets and stores a customizable string.\nValues stored are only accessible to runs of this script and are persistent through Julti restarts.")
@@ -132,6 +132,24 @@ class JingleLuaLibrary extends LuaLibrary {
     public void showMessageBox(String message) {
         assert this.script != null;
         JOptionPane.showMessageDialog(JingleGUI.get(), message, "Jingle Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null);
+    }
+
+    @LuaDocumentation(description = "Presents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil", paramTypes = {"string", "string|nil", "(fun(input: string): boolean)|nil"})
+    @Nullable
+    public String askTextBox(String message, String startingVal, LuaFunction validator) {
+        boolean invalidInput = false;
+        assert this.script != null;
+        while (true) {
+            Object o = JOptionPane.showInputDialog(JingleGUI.get(), invalidInput ? "Your input was invalid!\n" + message : message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
+            if (o == null) {
+                return null;
+            }
+            String string = o.toString();
+            if (validator == null || validator.call(valueOf(string)).checkboolean()) {
+                return string;
+            }
+            invalidInput = true;
+        }
     }
 
     public String getScriptName() {
