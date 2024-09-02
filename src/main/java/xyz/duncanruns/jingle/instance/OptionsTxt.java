@@ -28,6 +28,8 @@ public class OptionsTxt {
     }
 
     public void update() throws IOException {
+        if (!Files.exists(this.path)) return;
+
         long newMTime = Files.getLastModifiedTime(this.path).toMillis();
         if (newMTime == this.mTime) return;
         this.mTime = newMTime;

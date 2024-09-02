@@ -52,18 +52,19 @@ public class StandardSettings {
     }
 
     public void update() throws IOException, JsonSyntaxException {
-        Path usedFile = this.getUsedFile();
-        long newFileMTime = Files.getLastModifiedTime(usedFile).toMillis();
+        Path usedFilePath = this.getUsedFilePath();
+        if (!Files.exists(usedFilePath)) return;
+        long newFileMTime = Files.getLastModifiedTime(usedFilePath).toMillis();
         if (newFileMTime == this.fileMTime) return;
         this.fileMTime = newFileMTime;
         // Gather values before assigning in case of error!
-        JsonObject json = FileUtil.readJson(usedFile);
+        JsonObject json = FileUtil.readJson(usedFilePath);
         boolean enabled = this.json.has("toggleStandardSettings") && this.json.get("toggleStandardSettings").getAsBoolean();
         this.json = json;
         this.enabled = enabled;
     }
 
-    public Path getUsedFile() throws IOException {
+    public Path getUsedFilePath() throws IOException {
         Path globalFilePath = this.instancePath.resolve("config").resolve("mcsr").resolve("standardsettings.global");
         Path regularLocationPath = globalFilePath.resolveSibling("standardsettings.json");
         if (!Files.exists(globalFilePath)) {
@@ -81,7 +82,6 @@ public class StandardSettings {
             } catch (Exception ignored) {
             }
         }
-
-        return Optional.ofNullable(this.redirectPath).orElse(regularLocationPath);
+        return this.redirectPath == null ? regularLocationPath : this.redirectPath;
     }
 }
