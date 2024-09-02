@@ -3,8 +3,6 @@ package xyz.duncanruns.jingle.instance;
 import java.util.function.BiConsumer;
 
 public class OpenedInstance extends OpenedInstanceInfo {
-
-
     public final StateTracker stateTracker;
     public final KeyPresser keyPresser;
     public final OptionsTxt optionsTxt;
