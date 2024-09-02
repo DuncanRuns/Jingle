@@ -90,7 +90,7 @@ public final class Packaging {
             }
         } catch (FileSystemException e) {
             String message = "Cannot package files - a world appears to be open! Please press Options > Stop Resets & Quit in your instance.";
-            JOptionPane.showMessageDialog(JingleGUI.get(), message, "Julti: Package Files Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(JingleGUI.get(), message, "Jingle: Package Files Error", JOptionPane.ERROR_MESSAGE);
             Jingle.log(Level.ERROR, message);
             return null;
         }
