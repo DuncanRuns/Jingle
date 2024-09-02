@@ -12,12 +12,14 @@ import javax.swing.*;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public class JingleAppLaunch {
+public final class JingleAppLaunch {
     private static final Path LOCK_FILE = Jingle.FOLDER.resolve("LOCK");
     private static LockUtil.LockStuff lockStuff = null;
-
     public static String[] args;
     public static boolean launchedWithDevPlugin = false;
+
+    private JingleAppLaunch() {
+    }
 
     @SuppressWarnings("unused")
     public static void launchWithDevPlugin(String[] args, PluginManager.JinglePluginData pluginData, Runnable pluginInitializer) {

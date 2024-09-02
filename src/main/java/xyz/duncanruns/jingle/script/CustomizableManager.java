@@ -12,10 +12,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class CustomizableManager {
+public final class CustomizableManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static JsonObject json = new JsonObject();
     private static final Path STORAGE_PATH = Jingle.FOLDER.resolve("scripts").resolve("customizable.storage");
+
+    private CustomizableManager() {
+    }
 
     public synchronized static void load() {
         if (Files.exists(STORAGE_PATH)) {

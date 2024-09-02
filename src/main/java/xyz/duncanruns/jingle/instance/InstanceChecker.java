@@ -14,7 +14,7 @@ import java.util.Set;
  * When it finds new instances, it will send an InstancesFoundQMessage to Jingle.
  * Additionally, it will remember all opened Minecraft instances on the computer for whenever needed (redetect instances).
  */
-public class InstanceChecker {
+public final class InstanceChecker {
 
     private static final Set<OpenedInstanceInfo> OPENED_INSTANCE_INFOS = new HashSet<>();
     private static Set<HWND> lastCheckedWindows = new HashSet<>();

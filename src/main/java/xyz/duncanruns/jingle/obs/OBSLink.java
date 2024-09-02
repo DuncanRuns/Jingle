@@ -9,12 +9,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class OBSLink {
+public final class OBSLink {
     private static final Path OUT = Jingle.FOLDER.resolve("obs-link-state");
 
     private static long lastUpdate = 0;
 
     private static String last = "";
+
+    private OBSLink() {
+    }
 
     public static void tick() {
         long currentTime = System.currentTimeMillis();

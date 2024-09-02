@@ -15,7 +15,7 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class OBSProjector {
+public final class OBSProjector {
     private static final Pattern OBS_EXECUTABLE_PATTERN = Pattern.compile("^.+(\\/|\\\\)obs\\d\\d.exe$");
 
     @Nullable
@@ -23,6 +23,9 @@ public class OBSProjector {
 
     private static long lastCheck = 0;
     private static long requestProjector = -1L;
+
+    private OBSProjector() {
+    }
 
     public static long getRequestProjectorTime() {
         return requestProjector;
