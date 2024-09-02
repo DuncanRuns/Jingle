@@ -9,6 +9,7 @@ import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 import xyz.duncanruns.jingle.obs.OBSProjector;
+import xyz.duncanruns.jingle.packaging.Packaging;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.KeyboardUtil;
@@ -23,6 +24,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -67,6 +69,7 @@ public class JingleGUI extends JFrame {
     private JLabel supporter1Label;
     private JLabel supporter2Label;
     private JLabel supporter3Label;
+    private JButton packageSubmissionFilesButton;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
     public RollingDocument logDocument = new RollingDocument();
@@ -115,6 +118,7 @@ public class JingleGUI extends JFrame {
         this.clearWorldsButton.setEnabled(instanceExists);
         this.goBorderlessButton.setEnabled(instanceExists);
         this.openMinecraftFolderButton.setEnabled(instanceExists);
+        this.packageSubmissionFilesButton.setEnabled(instanceExists);
         if (instanceExists) {
             this.instanceLabel.setText("Instance: " + instance.instancePath);
         } else {
@@ -182,6 +186,20 @@ public class JingleGUI extends JFrame {
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, "Failed to open link. Donations can be done at https://ko-fi.com/duncanruns.", "Jingle: Failed to open link", JOptionPane.ERROR_MESSAGE, new ImageIcon(getLogo()));
             }
+        });
+
+        this.packageSubmissionFilesButton.addActionListener(a -> {
+            Jingle.getMainInstance().ifPresent(i -> {
+                try {
+                    Path path = Packaging.prepareSubmission(i);
+                    if (path != null) {
+                        OpenUtil.openFile(path.toString());
+                    }
+                } catch (IOException e) {
+                    Jingle.logError("Preparing File Submission Failed:", e);
+                    JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", 0, new ImageIcon(this.getIconImage()));
+                }
+            });
         });
 
         this.hotkeyListPanel.reload();
@@ -285,20 +303,23 @@ public class JingleGUI extends JFrame {
         panel1.putClientProperty("html.disable", Boolean.FALSE);
         mainTabbedPane.addTab("Jingle", panel1);
         instancePanel = new JPanel();
-        instancePanel.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
+        instancePanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(instancePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         instanceLabel = new JLabel();
         instanceLabel.setText("Instance: No instances opened!");
-        instancePanel.add(instanceLabel, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        instancePanel.add(instanceLabel, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         clearWorldsButton = new JButton();
         clearWorldsButton.setText("Clear Worlds");
         instancePanel.add(clearWorldsButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         goBorderlessButton = new JButton();
         goBorderlessButton.setText("Go Borderless");
         instancePanel.add(goBorderlessButton, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        packageSubmissionFilesButton = new JButton();
+        packageSubmissionFilesButton.setText("Package Submission Files");
+        instancePanel.add(packageSubmissionFilesButton, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         openMinecraftFolderButton = new JButton();
         openMinecraftFolderButton.setText("Open Minecraft Folder");
-        instancePanel.add(openMinecraftFolderButton, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        instancePanel.add(openMinecraftFolderButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
         label1.setText("Basic Options");
         panel1.add(label1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
