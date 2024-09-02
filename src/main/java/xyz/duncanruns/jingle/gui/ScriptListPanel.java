@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,8 +64,14 @@ public class ScriptListPanel extends JPanel {
 
         List<ScriptFile> loadedScripts = ScriptStuff.getLoadedScripts();
         loadedScripts = Stream.concat(loadedScripts.stream().filter(s -> !s.fromFolder), loadedScripts.stream().filter(s -> s.fromFolder)).collect(Collectors.toList());
+        Set<String> disabledDefaultScripts = Jingle.options.disabledDefaultScripts;
         for (ScriptFile loadedScript : loadedScripts) {
-            this.add(new JLabel(loadedScript.name), constraints.clone());
+            JLabel nameLabel = new JLabel(loadedScript.name);
+            this.add(nameLabel, constraints.clone());
+            if (disabledDefaultScripts.contains(loadedScript.name)) {
+                System.out.println(loadedScript.name);
+                nameLabel.setForeground(new Color(128, 128, 128));
+            }
             this.add(getCustomizeButton(loadedScript), constraints.clone());
             this.add(getMoreButton(loadedScript), constraints.clone());
 
