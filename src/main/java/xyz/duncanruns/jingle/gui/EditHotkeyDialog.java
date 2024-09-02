@@ -3,11 +3,8 @@ package xyz.duncanruns.jingle.gui;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.apache.commons.lang3.StringUtils;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.hotkey.Hotkey;
-import xyz.duncanruns.jingle.plugin.PluginHotkeys;
-import xyz.duncanruns.jingle.script.ScriptStuff;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +13,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Vector;
 
 public class EditHotkeyDialog extends JDialog {
@@ -24,7 +20,7 @@ public class EditHotkeyDialog extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JCheckBox imBox;
-    private JComboBox<HotkeyTypeAndAction> selectedActionBox;
+    private JComboBox<Hotkey.HotkeyTypeAndAction> selectedActionBox;
     private JButton keyButton;
 
     boolean cancelled;
@@ -69,17 +65,9 @@ public class EditHotkeyDialog extends JDialog {
         this.setLocation(new Point(owner.getX() + (owner.getWidth() - this.getWidth()) / 2, owner.getY() + (owner.getHeight() - this.getHeight()) / 2));
     }
 
-    private static Vector<HotkeyTypeAndAction> getHotkeyOptions() {
-        Vector<HotkeyTypeAndAction> options = new Vector<>();
-        Jingle.getBuiltinHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("builtin", s)));
-        PluginHotkeys.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("plugin", s)));
-        ScriptStuff.getHotkeyActionNames().stream().sorted().forEach(s -> options.add(new HotkeyTypeAndAction("script", s)));
-        return options;
-    }
-
     private void finalizeComponents() {
-        this.selectedActionBox.setModel(new DefaultComboBoxModel<>(getHotkeyOptions()));
-        this.selectedActionBox.setSelectedItem(new HotkeyTypeAndAction(this.type, this.action));
+        this.selectedActionBox.setModel(new DefaultComboBoxModel<>(new Vector<>(Hotkey.getHotkeyActions())));
+        this.selectedActionBox.setSelectedItem(new Hotkey.HotkeyTypeAndAction(this.type, this.action));
         this.keyButton.setText(Hotkey.formatKeys(this.keys));
         if (this.keyButton.getText().isEmpty()) this.keyButton.setText("Set Hotkey Here...");
         this.keyButton.addActionListener(a -> {
@@ -101,7 +89,7 @@ public class EditHotkeyDialog extends JDialog {
     }
 
     private void onOK() {
-        HotkeyTypeAndAction selectedItem = (HotkeyTypeAndAction) this.selectedActionBox.getSelectedItem();
+        Hotkey.HotkeyTypeAndAction selectedItem = (Hotkey.HotkeyTypeAndAction) this.selectedActionBox.getSelectedItem();
         assert selectedItem != null;
         this.action = selectedItem.action;
         this.type = selectedItem.type;
@@ -160,28 +148,4 @@ public class EditHotkeyDialog extends JDialog {
         return contentPane;
     }
 
-    private static class HotkeyTypeAndAction {
-        private final String type;
-        private final String action;
-
-        private HotkeyTypeAndAction(String type, String action) {
-            this.type = type;
-            this.action = action;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || this.getClass() != o.getClass()) return false;
-
-            HotkeyTypeAndAction that = (HotkeyTypeAndAction) o;
-            return Objects.equals(this.type, that.type) && Objects.equals(this.action, that.action);
-        }
-
-        @Override
-        public String toString() {
-            if (this.action.equalsIgnoreCase("none")) return "";
-            return String.format("%s (%s)", Jingle.formatAction(this.action), StringUtils.capitalize(this.type));
-        }
-    }
 }

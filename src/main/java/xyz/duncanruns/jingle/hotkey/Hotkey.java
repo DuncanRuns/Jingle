@@ -1,8 +1,13 @@
 package xyz.duncanruns.jingle.hotkey;
 
+import com.google.common.collect.Streams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import org.apache.commons.lang3.StringUtils;
+import xyz.duncanruns.jingle.Jingle;
+import xyz.duncanruns.jingle.plugin.PluginHotkeys;
+import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.KeyboardUtil;
 
 import java.util.ArrayList;
@@ -92,6 +97,14 @@ public class Hotkey {
         JsonArray ja = new JsonArray();
         keys.forEach(ja::add);
         return ja;
+    }
+
+    public static List<HotkeyTypeAndAction> getHotkeyActions() {
+        return Streams.concat(
+                Jingle.getBuiltinHotkeyActionNames().stream().sorted(),
+                PluginHotkeys.getHotkeyActionNames().stream().sorted(),
+                ScriptStuff.getHotkeyActionNames().stream().sorted()
+        ).map(s -> new HotkeyTypeAndAction("script", s)).collect(Collectors.toList());
     }
 
     /**
@@ -209,6 +222,31 @@ public class Hotkey {
                 }
             }
             return true;
+        }
+    }
+
+    public static class HotkeyTypeAndAction {
+        public final String type;
+        public final String action;
+
+        public HotkeyTypeAndAction(String type, String action) {
+            this.type = type;
+            this.action = action;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || this.getClass() != o.getClass()) return false;
+
+            HotkeyTypeAndAction that = (HotkeyTypeAndAction) o;
+            return Objects.equals(this.type, that.type) && Objects.equals(this.action, that.action);
+        }
+
+        @Override
+        public String toString() {
+            if (this.action.equalsIgnoreCase("none")) return "";
+            return String.format("%s (%s)", Jingle.formatAction(this.action), StringUtils.capitalize(this.type));
         }
     }
 }

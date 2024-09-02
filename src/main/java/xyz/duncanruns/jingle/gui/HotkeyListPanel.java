@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HotkeyListPanel extends JPanel {
@@ -46,16 +47,28 @@ public class HotkeyListPanel extends JPanel {
 
     public void reload() {
         this.removeAll();
-        GridBagConstraints constraints = new GridBagConstraints(-1, 0, 1, 1, 1, 0, 17, 0, new Insets(0, 10, 5, 10), 0, 0);
+        GridBagConstraints constraints = new GridBagConstraints(-1, 1, 1, 1, 1, 0, 17, 0, new Insets(0, 10, 5, 10), 0, 0);
+
+        List<Hotkey.HotkeyTypeAndAction> possibleActions = Hotkey.getHotkeyActions();
 
         List<SavedHotkey> savedHotkeys;
         synchronized (Jingle.class) {
             savedHotkeys = Jingle.options == null ? Collections.emptyList() : Jingle.options.copySavedHotkeys();
         }
+        boolean hasInvalidHotkeys = false;
+
         for (final SavedHotkey hotkey : savedHotkeys) {
             constraints.gridy++;
-            this.add(new JLabel(String.format("%s (%s)", Jingle.formatAction(hotkey.action), StringUtils.capitalize(hotkey.type))), constraints.clone());
-            this.add(new JLabel((hotkey.ignoreModifiers ? "* " : "") + Hotkey.formatKeys(hotkey.keys)), constraints.clone());
+
+            JLabel actionLabel = new JLabel(String.format("%s (%s)", Jingle.formatAction(hotkey.action), StringUtils.capitalize(hotkey.type)));
+            this.add(actionLabel, constraints.clone());
+            JLabel setHotkeyLabel = new JLabel((hotkey.ignoreModifiers ? "* " : "") + Hotkey.formatKeys(hotkey.keys));
+            this.add(setHotkeyLabel, constraints.clone());
+            if (possibleActions.stream().noneMatch(h -> Objects.equals(h.action, hotkey.action) && Objects.equals(h.type, hotkey.type))) {
+                actionLabel.setForeground(new Color(255, 0, 0));
+//                setHotkeyLabel.setForeground(new Color(255, 0, 0));
+                hasInvalidHotkeys = true;
+            }
 
             JPanel buttonsPanel = new JPanel();
             buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
@@ -70,7 +83,15 @@ public class HotkeyListPanel extends JPanel {
         if (constraints.gridy == 0) {
             this.add(new JLabel("No hotkeys added!"));
         } else {
-            constraints.gridy = 0;
+            if (hasInvalidHotkeys) {
+                constraints.gridy = 0;
+                constraints.gridwidth = 4;
+                JLabel warningLabel = new JLabel("Warning: some of your hotkeys have an invalid action");
+                warningLabel.setForeground(new Color(255, 0, 0));
+                this.add(warningLabel, constraints.clone());
+                constraints.gridwidth = 1;
+            }
+            constraints.gridy = 1;
             this.add(new JLabel("Action"), constraints.clone());
             this.add(new JLabel("Hotkey"), constraints.clone());
         }
