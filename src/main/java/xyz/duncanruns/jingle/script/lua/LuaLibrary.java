@@ -89,7 +89,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
 
     @NotALuaFunction
     public void writeLuaFile(Writer writer) throws IOException {
-        writer.write("-- Java methods defined by the \"" + this.libraryName + "\" library  automatically converted to lua functions for scripting environment usage.");
+        writer.write("-- Java methods defined by the \"" + this.libraryName + "\" library automatically converted to lua functions for scripting environment usage.");
         writer.write("\n\n" + this.getLibraryName() + " = {}");
         for (Method method : this.getClass().getDeclaredMethods()) {
             if (method.isSynthetic() || Modifier.isStatic(method.getModifiers()) || method.isAnnotationPresent(NotALuaFunction.class)) {
