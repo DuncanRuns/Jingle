@@ -1,37 +1,23 @@
 package xyz.duncanruns.jingle.plugin;
 
-import java.util.LinkedList;
-import java.util.List;
+import xyz.duncanruns.jingle.event.RunnableEventType;
 
 public final class PluginEvents {
+    // Runs at the start of the main loop tick
+    public static RunnableEventType START_TICK = new RunnableEventType();
+    // Runs at the end of the main loop tick
+    public static RunnableEventType END_TICK = new RunnableEventType();
+    // Runs when Jingle is shutting down
+    public static RunnableEventType STOP = new RunnableEventType();
+    // Runs when the instance changes, can be null
+    public static RunnableEventType MAIN_INSTANCE_CHANGED = new RunnableEventType();
+    // Runs when the instance's state changes
+    public static RunnableEventType STATE_CHANGE = new RunnableEventType();
+    // Runs when a world is exited
+    public static RunnableEventType EXIT_WORLD = new RunnableEventType();
+    // Runs when a world is entered
+    public static RunnableEventType ENTER_WORLD = new RunnableEventType();
+
     private PluginEvents() {
-    }
-
-    public enum RunnableEventType {
-        // Runs at the start of the main loop tick
-        START_TICK,
-        // Runs at the end of the main loop tick
-        END_TICK,
-        // Runs when Jingle is shutting down
-        STOP,
-        // Runs when the instance changes, can be null
-        MAIN_INSTANCE_CHANGED,
-        // Runs when the instance's state changes
-        STATE_CHANGE,
-        // Runs when a world is exited
-        EXIT_WORLD,
-        // Runs when a world is entered
-        ENTER_WORLD;
-
-        private final List<Runnable> runnables = new LinkedList<>();
-
-        @SuppressWarnings("unused")
-        public void register(Runnable runnable) {
-            this.runnables.add(runnable);
-        }
-
-        public void runAll() {
-            this.runnables.forEach(Runnable::run);
-        }
     }
 }

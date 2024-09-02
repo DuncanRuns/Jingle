@@ -92,9 +92,9 @@ class JingleLuaLibrary extends LuaLibrary {
         MouseUtil.setCursorSpeed(speed);
     }
 
-    @LuaDocumentation(description = "Registers a function to an event.\nEvents: START_TICK, END_TICK, MAIN_INSTANCE_CHANGED, STATE_CHANGE, EXIT_WORLD, ENTER_WORLD")
-    public void listen(String eventName, LuaFunction listenFunction) {
-        ScriptStuff.RunnableEventType.valueOf(eventName).register(wrapFunction(listenFunction));
+    @LuaDocumentation(description = "Registers a function to an event. Returns true if successfully added.\nEvents: START_TICK, END_TICK, MAIN_INSTANCE_CHANGED, STATE_CHANGE, EXIT_WORLD, ENTER_WORLD")
+    public boolean listen(String eventName, LuaFunction listenFunction) {
+        return ScriptStuff.registerEventListener(eventName, wrapFunction(listenFunction));
     }
 
     @LuaDocumentation(description = "Sets and stores a customizable string.\nValues stored are only accessible to runs of this script and are persistent through Jingle restarts.")

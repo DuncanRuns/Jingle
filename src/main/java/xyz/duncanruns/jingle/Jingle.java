@@ -119,8 +119,8 @@ public final class Jingle {
     }
 
     private static synchronized void tick() {
-        PluginEvents.RunnableEventType.START_TICK.runAll();
-        ScriptStuff.RunnableEventType.START_TICK.runAll();
+        PluginEvents.START_TICK.runAll();
+        ScriptStuff.START_TICK.runAll();
         activeHwnd = User32.INSTANCE.GetForegroundWindow();
         long currentTime = System.currentTimeMillis();
         if (Math.abs(currentTime - lastInstanceCheck) > 500) {
@@ -135,8 +135,8 @@ public final class Jingle {
         getMainInstance().ifPresent(i -> i.stateTracker.tryUpdate());
         OBSProjector.tick();
         OBSLink.tick();
-        PluginEvents.RunnableEventType.END_TICK.runAll();
-        ScriptStuff.RunnableEventType.END_TICK.runAll();
+        PluginEvents.END_TICK.runAll();
+        ScriptStuff.END_TICK.runAll();
     }
 
     private static void updateWindowTitle(OpenedInstance instance) {
@@ -182,8 +182,8 @@ public final class Jingle {
         JingleGUI.get().setInstance(instance);
         if (instance != null) seeInstancePath(instance.instancePath);
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath));
-        PluginEvents.RunnableEventType.MAIN_INSTANCE_CHANGED.runAll();
-        ScriptStuff.RunnableEventType.MAIN_INSTANCE_CHANGED.runAll();
+        PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
+        ScriptStuff.MAIN_INSTANCE_CHANGED.runAll();
     }
 
     private static void resetStates() {
@@ -198,13 +198,13 @@ public final class Jingle {
         } else if (!previouslyInWorld && currentlyInWorld) {
             onEnterWorld();
         }
-        PluginEvents.RunnableEventType.STATE_CHANGE.runAll();
-        ScriptStuff.RunnableEventType.STATE_CHANGE.runAll();
+        PluginEvents.STATE_CHANGE.runAll();
+        ScriptStuff.STATE_CHANGE.runAll();
     }
 
     private static void onExitWorld() {
-        PluginEvents.RunnableEventType.EXIT_WORLD.runAll();
-        ScriptStuff.RunnableEventType.EXIT_WORLD.runAll();
+        PluginEvents.EXIT_WORLD.runAll();
+        ScriptStuff.EXIT_WORLD.runAll();
 
         if (Jingle.options.revertWindowAfterReset) {
             Resizing.undoResize();
@@ -214,8 +214,8 @@ public final class Jingle {
     }
 
     private static void onEnterWorld() {
-        PluginEvents.RunnableEventType.ENTER_WORLD.runAll();
-        ScriptStuff.RunnableEventType.ENTER_WORLD.runAll();
+        PluginEvents.ENTER_WORLD.runAll();
+        ScriptStuff.ENTER_WORLD.runAll();
     }
 
     private static void seeInstancePath(Path instancePath) {
@@ -228,7 +228,7 @@ public final class Jingle {
         try {
             running = false;
             assert options != null;
-            PluginEvents.RunnableEventType.STOP.runAll();
+            PluginEvents.STOP.runAll();
             options.save();
             log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {

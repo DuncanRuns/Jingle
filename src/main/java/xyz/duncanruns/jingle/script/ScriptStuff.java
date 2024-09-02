@@ -1,6 +1,7 @@
 package xyz.duncanruns.jingle.script;
 
 import xyz.duncanruns.jingle.Jingle;
+import xyz.duncanruns.jingle.event.RunnableEventType;
 import xyz.duncanruns.jingle.script.lua.LuaRunner;
 import xyz.duncanruns.jingle.util.ResourceUtil;
 
@@ -14,6 +15,24 @@ public final class ScriptStuff {
     private static final Map<String, Runnable> CUSTOMIZATION_FUNCTIONS = new HashMap<>(); // Example: "test.lua" -> (function)
     private static final Map<String, Map<String, Runnable>> EXTRA_FUNCTIONS = new HashMap<>();
     private static final List<ScriptFile> LOADED_SCRIPTS = new ArrayList<>();
+
+    public static final RunnableEventType START_TICK = new RunnableEventType();
+    public static final RunnableEventType END_TICK = new RunnableEventType();
+    public static final RunnableEventType MAIN_INSTANCE_CHANGED = new RunnableEventType();
+    public static final RunnableEventType STATE_CHANGE = new RunnableEventType();
+    public static final RunnableEventType EXIT_WORLD = new RunnableEventType();
+    public static final RunnableEventType ENTER_WORLD = new RunnableEventType();
+
+    private static final Map<String, RunnableEventType> SCRIPT_EVENTS = new HashMap<>();
+
+    static {
+        SCRIPT_EVENTS.put("START_TICK", START_TICK);
+        SCRIPT_EVENTS.put("END_TICK", END_TICK);
+        SCRIPT_EVENTS.put("MAIN_INSTANCE_CHANGED", MAIN_INSTANCE_CHANGED);
+        SCRIPT_EVENTS.put("STATE_CHANGE", STATE_CHANGE);
+        SCRIPT_EVENTS.put("EXIT_WORLD", EXIT_WORLD);
+        SCRIPT_EVENTS.put("ENTER_WORLD", ENTER_WORLD);
+    }
 
     private ScriptStuff() {
     }
@@ -43,9 +62,7 @@ public final class ScriptStuff {
         CUSTOMIZATION_FUNCTIONS.clear();
         EXTRA_FUNCTIONS.clear();
         LOADED_SCRIPTS.clear();
-        for (RunnableEventType runnableEventType : RunnableEventType.values()) {
-            runnableEventType.clear();
-        }
+        SCRIPT_EVENTS.values().forEach(RunnableEventType::clear);
     }
 
     public static void addHotkeyAction(ScriptFile script, String hotkeyName, Runnable hotkeyFunction) {
@@ -105,33 +122,10 @@ public final class ScriptStuff {
         EXTRA_FUNCTIONS.computeIfAbsent(script.getName(), s -> new LinkedHashMap<>()).put(functionName, runnable);
     }
 
-    public enum RunnableEventType {
-        // Runs at the start of the main loop tick
-        START_TICK,
-        // Runs at the end of the main loop tick
-        END_TICK,
-        // Runs when the instance changes, can be null
-        MAIN_INSTANCE_CHANGED,
-        // Runs when the instance's state changes
-        STATE_CHANGE,
-        // Runs when a world is exited
-        EXIT_WORLD,
-        // Runs when a world is entered
-        ENTER_WORLD;
-
-        private final List<Runnable> runnables = new LinkedList<>();
-
-        @SuppressWarnings("unused")
-        public void register(Runnable runnable) {
-            this.runnables.add(runnable);
-        }
-
-        public void runAll() {
-            this.runnables.forEach(Runnable::run);
-        }
-
-        void clear() {
-            this.runnables.clear();
-        }
+    public static boolean registerEventListener(String eventName, Runnable runnable) {
+        return Optional.ofNullable(SCRIPT_EVENTS.get(eventName)).map(e -> {
+            e.register(runnable);
+            return true;
+        }).orElse(false);
     }
 }
