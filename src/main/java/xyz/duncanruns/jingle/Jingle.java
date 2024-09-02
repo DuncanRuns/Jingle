@@ -36,6 +36,7 @@ public final class Jingle {
     private static boolean running = false;
 
     private static long lastInstanceCheck = 0;
+    private static boolean legalModCheckNeeded = false;
 
     public static JingleOptions options = null;
 
@@ -76,6 +77,7 @@ public final class Jingle {
         HotkeyManager.start();
 
         loadSupporters();
+        loadLegalMods();
 
         generateResources();
 
@@ -83,6 +85,17 @@ public final class Jingle {
         log(Level.INFO, "You are running Jingle v" + VERSION + " with java: " + usedJava);
 
         mainLoop();
+    }
+
+    private static void loadLegalMods() {
+        new Thread(() -> {
+            try {
+                LegalModsUtil.updateLegalMods();
+                log(Level.INFO, "Successfully obtained legal mods");
+            } catch (IOException e) {
+                logError("Failed to update legal mods!", e);
+            }
+        }, "legal-mods-checker").start();
     }
 
     private static void loadSupporters() {
@@ -142,6 +155,9 @@ public final class Jingle {
                 updateWindowTitle(i);
                 i.standardSettings.tryUpdate();
                 i.optionsTxt.tryUpdate();
+                if (legalModCheckNeeded && LegalModsUtil.hasUpdated()) {
+                    checkLegalMods();
+                }
             });
         }
         getMainInstance().ifPresent(i -> i.stateTracker.tryUpdate());
@@ -149,6 +165,17 @@ public final class Jingle {
         OBSLink.tick();
         PluginEvents.END_TICK.runAll();
         ScriptStuff.END_TICK.runAll();
+    }
+
+    private static void checkLegalMods() {
+        assert getMainInstance().isPresent();
+        for (FabricModFolder.FabricJarInfo jar : getMainInstance().get().fabricModFolder.getInfos()) {
+            if (!LegalModsUtil.isLegalMod(jar.id)) {
+                Jingle.log(Level.WARN, "Warning: Mod " + jar.name + " is not a legal mod!");
+            }
+        }
+        Jingle.log(Level.INFO,"Finished checking legal mods for this instance.");
+        legalModCheckNeeded = false;
     }
 
     private static void updateWindowTitle(OpenedInstance instance) {
@@ -190,6 +217,7 @@ public final class Jingle {
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         if (mainInstance == instance) return;
         mainInstance = instance == null ? null : new OpenedInstance(instance, Jingle::onInstanceStateChange);
+        legalModCheckNeeded = instance != null;
         resetStates();
         JingleGUI.get().setInstance(instance);
         if (instance != null) seeInstancePath(instance.instancePath);

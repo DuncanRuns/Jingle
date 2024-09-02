@@ -4,7 +4,7 @@ import com.sun.jna.platform.win32.Shell32;
 
 import java.nio.file.Paths;
 
-public class OpenUtil {
+public final class OpenUtil {
     private OpenUtil() {
     }
 

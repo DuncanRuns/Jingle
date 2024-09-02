@@ -188,19 +188,17 @@ public class JingleGUI extends JFrame {
             }
         });
 
-        this.packageSubmissionFilesButton.addActionListener(a -> {
-            Jingle.getMainInstance().ifPresent(i -> {
-                try {
-                    Path path = Packaging.prepareSubmission(i);
-                    if (path != null) {
-                        OpenUtil.openFile(path.toString());
-                    }
-                } catch (IOException e) {
-                    Jingle.logError("Preparing File Submission Failed:", e);
-                    JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", 0, new ImageIcon(this.getIconImage()));
+        this.packageSubmissionFilesButton.addActionListener(a -> Jingle.getMainInstance().ifPresent(i -> {
+            try {
+                Path path = Packaging.prepareSubmission(i);
+                if (path != null) {
+                    OpenUtil.openFile(path.toString());
                 }
-            });
-        });
+            } catch (IOException e) {
+                Jingle.logError("Preparing File Submission Failed:", e);
+                JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", 0, new ImageIcon(this.getIconImage()));
+            }
+        }));
 
         this.hotkeyListPanel.reload();
     }
