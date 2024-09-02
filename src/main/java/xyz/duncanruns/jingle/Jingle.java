@@ -75,12 +75,24 @@ public final class Jingle {
         HotkeyManager.reload();
         HotkeyManager.start();
 
+        loadSupporters();
+
         generateResources();
 
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Jingle v" + VERSION + " with java: " + usedJava);
 
         mainLoop();
+    }
+
+    private static void loadSupporters() {
+        new Thread(() -> {
+            try {
+                JingleGUI.get().showSupporters(GrabUtil.grab("https://raw.githubusercontent.com/DuncanRuns/Jingle/main/supporters.txt").split(", "));
+            } catch (Exception e) {
+                logError("Failed to obtain list of supporters!", e);
+            }
+        }, "supporter-loader").start();
     }
 
     private static void generateResources() {
