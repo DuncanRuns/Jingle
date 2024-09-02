@@ -25,10 +25,6 @@ public class FabricModFolder {
         this.infos = this.tryGetFabricJarInfos();
     }
 
-    public List<FabricJarInfo> getInfos() {
-        return Collections.unmodifiableList(this.infos);
-    }
-
     private static FabricJarInfo getJarInfo(List<FabricJarInfo> infos, String id) {
         // Filter for any jars with the correct id
         return infos.stream().filter(info -> id.equals(info.id)).findAny().orElse(null);
@@ -47,6 +43,10 @@ public class FabricModFolder {
         } catch (NoSuchFileException e) {
             return Optional.empty();
         }
+    }
+
+    public List<FabricJarInfo> getInfos() {
+        return Collections.unmodifiableList(this.infos);
     }
 
     private List<FabricJarInfo> tryGetFabricJarInfos() {

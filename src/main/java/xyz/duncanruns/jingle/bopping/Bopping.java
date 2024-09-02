@@ -4,7 +4,6 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.instance.OpenedInstance;
-import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 
 import java.io.File;
 import java.io.IOException;
