@@ -25,6 +25,7 @@ public class JingleOptions {
     public boolean checkForUpdates = true;
     public boolean usePreReleases = false;
     public String lastCheckedVersion = "";
+    public boolean minimizeToTray = false;
 
     public boolean projectorEnabled;
     // null for auto, [x,y,w,h] for custom
