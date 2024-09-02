@@ -101,10 +101,10 @@ public class Hotkey {
 
     public static List<HotkeyTypeAndAction> getHotkeyActions() {
         return Streams.concat(
-                Jingle.getBuiltinHotkeyActionNames().stream().sorted(),
-                PluginHotkeys.getHotkeyActionNames().stream().sorted(),
-                ScriptStuff.getHotkeyActionNames().stream().sorted()
-        ).map(s -> new HotkeyTypeAndAction("script", s)).collect(Collectors.toList());
+                Jingle.getBuiltinHotkeyActionNames().stream().sorted().map(s -> new HotkeyTypeAndAction("builtin", s)),
+                PluginHotkeys.getHotkeyActionNames().stream().sorted().map(s -> new HotkeyTypeAndAction("plugin", s)),
+                ScriptStuff.getHotkeyActionNames().stream().sorted().map(s -> new HotkeyTypeAndAction("script", s))
+        ).collect(Collectors.toList());
     }
 
     /**
