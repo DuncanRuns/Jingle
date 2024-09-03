@@ -17,5 +17,6 @@ pub fn main() !void {
             .allocator = allocator,
             .argv = &argv,
         });
+        break;
     }
 }
