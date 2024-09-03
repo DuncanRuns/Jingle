@@ -11,8 +11,6 @@ import java.awt.*;
 
 // Thanks to Priffin and Draconix for their work on eye zoom and resize stuff
 public final class Resizing {
-    private static final long WINDOWS_LONG_MASK = 0xffffffffffffffffL >> (WinDef.LONG.SIZE * 8);
-
     private static boolean currentlyResized = false;
     private static int previousWidth = 0;
     private static int previousHeight = 0;
@@ -77,13 +75,9 @@ public final class Resizing {
 
         Rectangle newRectangle = WindowStateUtil.withTopLeftToCenter(new Rectangle(centerX, centerY, previousWidth, previousHeight));
 
-        User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_STYLE, toWindowsLong(previousStyle));
-        User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_EXSTYLE, toWindowsLong(previousExStyle));
+        User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_STYLE, previousStyle);
+        User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_EXSTYLE, previousExStyle);
         User32.INSTANCE.SetWindowPos(hwnd, new WinDef.HWND(new Pointer(0)), newRectangle.x, newRectangle.y, newRectangle.width, newRectangle.height, 0x0400);
         currentlyResized = false;
-    }
-
-    private static WinDef.LONG toWindowsLong(long val) {
-        return new WinDef.LONG(val & WINDOWS_LONG_MASK);
     }
 }

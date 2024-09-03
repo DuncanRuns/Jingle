@@ -29,7 +29,7 @@ public interface User32 extends com.sun.jna.platform.win32.User32 {
 
     long GetWindowLongA(HWND hWnd, int nIndex);
 
-    LONG SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong);
+    LONG SetWindowLongA(HWND hWnd, int nIndex, long dwNewLong);
 
     boolean PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 

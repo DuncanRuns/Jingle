@@ -70,7 +70,7 @@ public final class WindowStateUtil {
     }
 
     public static void setHwndStyle(HWND hwnd, int style) {
-        User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_STYLE, new LONG(style));
+        User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_STYLE, style);
     }
 
     public static void undoHwndBorderless(HWND hwnd) {
