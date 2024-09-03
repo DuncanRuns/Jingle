@@ -104,7 +104,6 @@ end
 function get_or_create_game_capture()
     local source = get_source("Minecraft Capture 1")
     if (source ~= nil) then
-        release_source(source)
         return source
     end
 
