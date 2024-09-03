@@ -122,3 +122,4 @@ src/test/
 OBS Link/obslua.lua
 *.pyc
 update-meta.py
+Launcher/.zig*
