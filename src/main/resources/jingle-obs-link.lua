@@ -385,7 +385,7 @@ function loop()
         switch_to_scene("Playing")
     end
     if desired_scene == 'W' and current_scene_name == "Playing" then
-        switch_to_scene("Playing")
+        switch_to_scene("Walling")
     end
 
     if #state_args == 1 then
