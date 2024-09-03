@@ -156,10 +156,10 @@ function loop()
     end
 
     local desired_scene = state_args[1]
-    if desired_scene == 'P' and current_scene_name == "Walling" then
+    if desired_scene == 'P' and (current_scene_name == "Walling" or current_scene_name == "Jingle Mag") then
         switch_to_scene("Playing")
     end
-    if desired_scene == 'W' and current_scene_name == "Playing" then
+    if desired_scene == 'W' and (current_scene_name == "Playing" or current_scene_name == "Jingle Mag") then
         switch_to_scene("Walling")
     end
 

@@ -137,4 +137,5 @@ function get_active_scene_name()
     local current_scene_source = obs.obs_frontend_get_current_scene()
     local current_scene_name = obs.obs_source_get_name(current_scene_source)
     release_source(current_scene_source)
+    return current_scene_name
 end
