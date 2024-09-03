@@ -76,6 +76,7 @@ public final class OBSProjector {
                     if (isProjectorMagnifier(hWnd)) {
                         projectorHwnd = hWnd;
                         applyProjectorPosition();
+                        setProjectorZOrder(1);
                         return false;
                     }
                     return true;
