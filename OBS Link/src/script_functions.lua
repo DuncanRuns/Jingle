@@ -77,6 +77,13 @@ function regenerate()
         obs.obs_sceneitem_set_scale_filter(mag_item, obs.OBS_SCALE_POINT)
 
         release_source(mag_source)
+
+        local cover_source = get_or_create_cover()
+        local cover_item = obs.obs_scene_add(scene, cover_source)
+
+        set_position_with_bounds(cover_item, 0, 0, total_width, total_height, false)
+
+        release_source(cover_source)
     end
 
     release_source(game_cap)
@@ -111,6 +118,21 @@ function get_or_create_game_capture()
         '{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance 1:GLFW30:javaw.exe"}')
 
     source = obs.obs_source_create("game_capture", "Minecraft Capture 1", settings, nil)
+    obs.obs_data_release(settings)
+
+    return source
+end
+
+function get_or_create_cover()
+    local source = get_source("Jingle Mag Cover")
+    if source ~= nil then
+        release_source(source)
+    end
+
+    local settings = obs.obs_data_create_from_json('{"color": 4278190080}')
+
+
+    source = obs.obs_source_create("color_source", "Jingle Mag Cover", settings, nil)
     obs.obs_data_release(settings)
 
     return source
@@ -151,5 +173,15 @@ function loop()
         if projector_request ~= 'N' and scene_exists("Jingle Mag") then
             obs.obs_frontend_open_projector("Scene", -1, "", "Jingle Mag")
         end
+    end
+
+    if #state_args == 2 then
+        return;
+    end
+
+    local cover_reqest = state_args[3]
+    local item = obs.obs_scene_find_source_recursive(get_scene("Jingle Mag"), "Jingle Mag Cover")
+    if item ~= nil then
+        obs.obs_sceneitem_set_visible(item, cover_reqest == 'Y')
     end
 end

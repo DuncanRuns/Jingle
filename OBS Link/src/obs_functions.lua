@@ -81,7 +81,7 @@ function set_position_with_bounds(scene_item, x, y, width, height, center_align)
     end
 
     -- set alignment of the scene item to: center_align ? CENTER : TOP_LEFT
-    obs.obs_sceneitem_set_alignment(scene_item, center_align and ALIGN_CENTER or ALIGN_TOP_LEFT)
+    obs.obs_sceneitem_set_alignment(scene_item, center_align and 0 or 5)
 
     set_position(scene_item, x + (center_align and total_width / 2 or 0), y + (center_align and total_height / 2 or 0))
 end

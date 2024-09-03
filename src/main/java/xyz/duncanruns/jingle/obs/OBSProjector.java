@@ -24,7 +24,13 @@ public final class OBSProjector {
     private static long lastCheck = 0;
     private static long requestProjector = -1L;
 
+    private static boolean coverJultiMag = true;
+
     private OBSProjector() {
+    }
+
+    public static boolean shouldCoverJultiMag() {
+        return coverJultiMag;
     }
 
     public static long getRequestProjectorTime() {
@@ -103,6 +109,7 @@ public final class OBSProjector {
 
     public static synchronized void bringOBSProjectorToTop() {
         if (projectorHwnd != null) {
+            coverJultiMag = false;
             setProjectorZOrder(0);
             setProjectorZOrder(-1);
         }
@@ -120,6 +127,7 @@ public final class OBSProjector {
         if (projectorHwnd != null) {
             setProjectorZOrder(1);
         }
+        coverJultiMag = true;
     }
 
     private static boolean isProjectorMagnifier(WinDef.HWND hwnd) {
