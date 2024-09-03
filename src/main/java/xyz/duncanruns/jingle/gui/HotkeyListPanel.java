@@ -80,7 +80,7 @@ public class HotkeyListPanel extends JPanel {
             buttonsPanel.add(removeButton);
             this.add(buttonsPanel, constraints.clone());
         }
-        if (constraints.gridy == 0) {
+        if (constraints.gridy == 1) {
             this.add(new JLabel("No hotkeys added!"));
         } else {
             if (hasInvalidHotkeys) {
