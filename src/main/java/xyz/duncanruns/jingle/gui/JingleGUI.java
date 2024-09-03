@@ -114,7 +114,12 @@ public class JingleGUI extends JFrame {
 
     @SuppressWarnings("unused")
     public static void addPluginTab(String name, JPanel panel) {
-        JingleGUI.get().addPluginTabInternal(name, panel);
+        addPluginTab(name, panel, () -> {
+        });
+    }
+
+    public static void addPluginTab(String name, JPanel panel, Runnable onSwitchTo) {
+        JingleGUI.get().addPluginTabInternal(name, panel, onSwitchTo);
     }
 
     public static Image getLogo() {
@@ -140,9 +145,13 @@ public class JingleGUI extends JFrame {
         }
     }
 
-    private void addPluginTabInternal(String name, JPanel panel) {
+    private void addPluginTabInternal(String name, JPanel panel, Runnable onSwitchTo) {
         this.pluginsTabbedPane.remove(this.noPluginsLoadedTab);
-        this.pluginsTabbedPane.add(name, new JScrollPane(panel));
+        JScrollPane tab = new JScrollPane(panel);
+        this.pluginsTabbedPane.add(name, tab);
+        this.pluginsTabbedPane.addChangeListener(e -> {
+            if (this.pluginsTabbedPane.getSelectedComponent() == tab) onSwitchTo.run();
+        });
     }
 
     private void finalizeComponents() {
