@@ -59,7 +59,7 @@ public final class JingleUpdater {
             currentVersion = Jingle.VERSION;
         }
 
-        if (currentVersion.equals("DEV")) {
+        if (currentVersion.equals("DEV") || JingleAppLaunch.launchedWithDevPlugin) {
             return;
         }
 
