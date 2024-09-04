@@ -23,6 +23,7 @@ public final class OBSProjector {
 
     private static long lastCheck = 0;
     private static long requestProjector = -1L;
+    private static int requestSlowerifier = 0;
 
     private static boolean coverJultiMag = true;
 
@@ -67,11 +68,11 @@ public final class OBSProjector {
         boolean projectorEnabled = Jingle.options.projectorEnabled;
         if (!projectorEnabled) {
             requestProjector = -1L;
+            requestSlowerifier = 0;
             projectorHwnd = null;
             return;
         }
         if (Math.abs(currentTime - lastCheck) > 500) {
-            requestProjector = -1L;
             if (projectorHwnd != null && !User32.INSTANCE.IsWindow(projectorHwnd)) {
                 projectorHwnd = null;
             }
@@ -83,6 +84,8 @@ public final class OBSProjector {
                         projectorHwnd = hWnd;
                         applyProjectorPosition();
                         setProjectorZOrder(1);
+                        requestProjector = -1L;
+                        requestSlowerifier = 0;
                         return false;
                     }
                     return true;
@@ -97,9 +100,16 @@ public final class OBSProjector {
                 }
             }
             if (projectorHwnd == null) {
-                requestProjector = currentTime;
+                if (isPowerOfTwo(requestSlowerifier++)) {
+                    requestProjector = currentTime;
+                }
+                if (requestSlowerifier == 33) requestSlowerifier -= 16;
             }
         }
+    }
+
+    private static boolean isPowerOfTwo(int x) {
+        return (x & (x - 1)) == 0;
     }
 
     public static synchronized void applyProjectorPosition() {
