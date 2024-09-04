@@ -63,7 +63,12 @@ end
 reload()
 
 function should_run()
-    return jingle.isInstanceActive() and (currently_resized or jingle.getInstanceState() == 'INWORLD')
+    if not jingle.isInstanceActive() then
+        return false
+    end
+    return currently_resized or
+            (not jingle.hasFabricMod('state-output')) or
+            (jingle.getInstanceState() == 'INWORLD' and jingle.getInstanceInWorldState() ~= 'GAMESCREENOPEN')
 end
 
 function run_thin_bt()
