@@ -12,7 +12,7 @@ function save_enter_world_time()
 end
 
 function run_reset_before_20s()
-    if (not jingle.isInstanceActive()) or (jingle.getInstanceState() ~= "INWORLD") or (jingle.getCurrentTime() - last_enter_world > 20000) then
+    if (not jingle.isInstanceActive()) or (jingle.getInstanceState() ~= "INWORLD" or jingle.getInstanceInWorldState() == "GAMESCREENOPEN") or (jingle.getCurrentTime() - last_enter_world > 20000) then
         return
     end
     local key = jingle.getInstanceKeyOption("key_Create New World") or
