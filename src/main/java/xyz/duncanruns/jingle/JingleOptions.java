@@ -30,7 +30,7 @@ public class JingleOptions {
     public boolean projectorEnabled;
     // null for auto, [x,y,w,h] for custom
     @Nullable public int[] projectorPosition = null;
-    public String projectorWindowName = "* (Scene) - Jingle Mag";
+    public String projectorWindowPattern = "*- Jingle Mag";
 
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {

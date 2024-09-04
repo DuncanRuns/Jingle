@@ -135,7 +135,7 @@ public final class OBSProjector {
     }
 
     private static boolean isProjectorTitle(String title) {
-        String regex = '^' + Jingle.options.projectorWindowName.trim().toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
+        String regex = '^' + Jingle.options.projectorWindowPattern.trim().toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
         return Pattern.compile(regex).matcher(title.toLowerCase()).matches();
     }
 }
