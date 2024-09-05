@@ -301,6 +301,7 @@ function regenerate()
 
         local mag_item = obs.obs_scene_add(scene, mag_source)
         obs.obs_sceneitem_set_scale_filter(mag_item, obs.OBS_SCALE_POINT)
+        set_position_with_bounds(mag_item, 0, 0, total_width, total_height, false)
 
         release_source(mag_source)
 
