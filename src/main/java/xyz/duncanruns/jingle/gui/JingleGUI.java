@@ -85,6 +85,7 @@ public class JingleGUI extends JFrame {
     private JPanel logJPanel;
     private JPanel scriptsJPanel;
     private JTextField projWindowPatternField;
+    private JPanel pluginsTab;
     public boolean jingleUpdating = false;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
@@ -191,6 +192,10 @@ public class JingleGUI extends JFrame {
         this.pluginsTabbedPane.add(name, tab);
         this.pluginsTabbedPane.addChangeListener(e -> {
             if (this.pluginsTabbedPane.getSelectedComponent() == tab) onSwitchTo.run();
+        });
+        this.mainTabbedPane.addChangeListener(e -> {
+            if (this.mainTabbedPane.getSelectedComponent() == this.pluginsTab && this.pluginsTabbedPane.getSelectedComponent() == tab)
+                onSwitchTo.run();
         });
     }
 
