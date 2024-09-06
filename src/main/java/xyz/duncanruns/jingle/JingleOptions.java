@@ -21,7 +21,6 @@ public class JingleOptions {
     public Map<String, Long> seenPaths = new HashMap<>();
     public List<JsonObject> hotkeys = new ArrayList<>();
     public Set<String> disabledDefaultScripts = new HashSet<>(Collections.singletonList("Coop Mode"));
-    public boolean revertWindowAfterReset = true;
     public boolean checkForUpdates = true;
     public boolean usePreReleases = false;
     public String lastCheckedVersion = "";

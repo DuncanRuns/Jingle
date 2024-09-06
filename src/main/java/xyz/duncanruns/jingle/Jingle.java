@@ -250,10 +250,6 @@ public final class Jingle {
         PluginEvents.EXIT_WORLD.runAll();
         ScriptStuff.EXIT_WORLD.runAll();
 
-        if (Jingle.options.revertWindowAfterReset) {
-            Resizing.undoResize();
-        }
-
         openedToLan = false;
     }
 

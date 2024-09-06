@@ -46,6 +46,7 @@ function reload()
     planar_abuse_width, planar_abuse_height = get_size_customization("planar_abuse", 1920, 300)
     change_cursor_speed = jingle.getCustomizable("change_cursor_speed", tostring(false)) == "true"
     permanent_normal_cursor_speed = to_number_or_else(jingle.getCustomizable("permanent_normal_cursor_speed"), nil)
+    undo_resize_on_reset = jingle.getCustomizable("undo_resize_on_reset", "true") == "true"
 end
 
 reload()
@@ -102,6 +103,13 @@ function run_eye_measuring()
     end
 end
 
+function on_exit_world()
+    if currently_resized and undo_resize_on_reset then
+        jingle.undoResize()
+    end
+    check_undo_dirties()
+end
+
 function check_undo_dirties()
     if projector_dirty then
         jingle.dumpOBSProjector()
@@ -114,6 +122,8 @@ function check_undo_dirties()
 end
 
 function customize()
+    jingle.addCustomizationMenuCheckBox("undo_resize_on_reset", true, "Undo Resizing after Reset")
+    jingle.addCustomizationMenuText(" ")
     jingle.addCustomizationMenuText("Enter your eye measuring size:")
     jingle.addCustomizationMenuTextField("eye_measuring", "384x16384", is_size_string)
     jingle.addCustomizationMenuCheckBox("change_cursor_speed", true, "Change Cursor Speed to 1 when Measuring")
@@ -150,5 +160,5 @@ end
 jingle.addHotkey("Thin BT", run_thin_bt)
 jingle.addHotkey("Planar Abuse", run_planar_abuse)
 jingle.addHotkey("Eye Measuring", run_eye_measuring)
-jingle.listen("EXIT_WORLD", check_undo_dirties)
+jingle.listen("EXIT_WORLD", on_exit_world)
 jingle.setCustomization(customize)
