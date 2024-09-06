@@ -22,11 +22,15 @@ import xyz.duncanruns.jingle.win32.Win32Con;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
 @SuppressWarnings("unused")
 class JingleLuaLibrary extends LuaLibrary {
+    private final List<CustomizationMenu.Element> customizationMenuElements = new ArrayList<>();
+
     public JingleLuaLibrary(ScriptFile script, Globals globals) {
         super("jingle", script, globals);
     }
@@ -111,7 +115,6 @@ class JingleLuaLibrary extends LuaLibrary {
         return out == null ? def : out;
     }
 
-
     @LuaDocumentation(description = "Presents the user with a message and Yes/No/Cancel buttons. Returns true for yes, false for no, and nil for cancel or if the user closes the window.", returnTypes = "boolean|nil")
     @Nullable
     public Boolean askYesNo(String message) {
@@ -182,7 +185,6 @@ class JingleLuaLibrary extends LuaLibrary {
     public void closeInstance() {
         Jingle.getMainInstance().ifPresent(instance -> User32.INSTANCE.SendNotifyMessageA(instance.hwnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0)));
     }
-
 
     @LuaDocumentation(description = "Replicates a hotkey action exactly. For example, jingle.replicateHotkey('script','test.lua:Test Hotkey')")
     public boolean replicateHotkey(String type, String action) {
@@ -306,10 +308,40 @@ class JingleLuaLibrary extends LuaLibrary {
         Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyToHwnd(instance.hwnd, key, millis));
     }
 
-
     @LuaDocumentation(description = "Logs a message to the Jingle log.")
     public void log(String message) {
         assert this.script != null;
         Jingle.log(Level.INFO, String.format("(%s) %s", this.script.getName(), message));
+    }
+
+    @LuaDocumentation(description = "Adds a text to the customization menu. Should be eventually followed by jingle.showCustomizationMenu().")
+    public void addCustomizationMenuText(String text) {
+        this.customizationMenuElements.add(new CustomizationMenu.TextElement(text));
+    }
+
+    @LuaDocumentation(description = "Adds a check box to the customization menu. Should be eventually followed by jingle.showCustomizationMenu().")
+    public void addCustomizationMenuCheckBox(String key, boolean defaultVal, String checkBoxLabel) {
+        this.customizationMenuElements.add(new CustomizationMenu.CheckBoxElement(key, defaultVal, checkBoxLabel));
+    }
+
+    @LuaDocumentation(description = "Adds a text field to the customization menu. Should be eventually followed by jingle.showCustomizationMenu().")
+    public void addCustomizationMenuTextField(String key, String defaultVal, LuaFunction validator) {
+        this.customizationMenuElements.add(new CustomizationMenu.TextFieldElement(key, defaultVal, validator));
+    }
+
+
+    @LuaDocumentation(description = "Shows the customization menu with all added elements since the last call to showCustomizationMenu.")
+    public boolean showCustomizationMenu() {
+        if (this.customizationMenuElements.isEmpty()) return false;
+
+        CustomizationMenu customizationMenu = new CustomizationMenu(this, this.customizationMenuElements);
+        this.customizationMenuElements.clear();
+        customizationMenu.pack();
+        JingleGUI owner = JingleGUI.get();
+        customizationMenu.setLocation(new Point(owner.getX() + (owner.getWidth() - customizationMenu.getWidth()) / 2, owner.getY() + (owner.getHeight() - customizationMenu.getHeight()) / 2));
+        customizationMenu.setVisible(true);
+        if (customizationMenu.cancelled) return false;
+        customizationMenu.values.forEach((key, val) -> CustomizableManager.set(this.getScriptName(), key, val));
+        return true;
     }
 }
