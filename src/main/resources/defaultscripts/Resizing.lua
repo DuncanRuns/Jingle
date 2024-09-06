@@ -1,15 +1,3 @@
-function ask_size_customization(customize_name, message, default_width, default_height)
-    local ans = jingle.askTextBox(
-            message,
-            jingle.getCustomizable(customize_name, tostring(default_width) .. "x" .. tostring(default_height)),
-            is_size_string
-    )
-    if ans ~= nil then
-        jingle.setCustomizable(customize_name, ans)
-        reload()
-    end
-end
-
 ---@param customize_name string
 ---@param default_width integer
 ---@param default_height integer
@@ -126,41 +114,37 @@ function check_undo_dirties()
 end
 
 function customize()
-    jingle.showMessageBox(
-            "Customization for this script can be found in the \"More...\" button. Cursor customization is in \"Customize Eye Measuring\".")
-end
+    jingle.addCustomizationMenuText("Enter your eye measuring size:")
+    jingle.addCustomizationMenuTextField("eye_measuring", "384x16384", is_size_string)
+    jingle.addCustomizationMenuCheckBox("change_cursor_speed", true, "Change Cursor Speed to 1 when Measuring")
+    jingle.addCustomizationMenuText(" ")
+    jingle.addCustomizationMenuText("Enter your thin bt size:")
+    jingle.addCustomizationMenuTextField("thin_bt", "250x750", is_size_string)
+    jingle.addCustomizationMenuText(" ")
+    jingle.addCustomizationMenuText("Enter your planar abuse size:")
+    jingle.addCustomizationMenuTextField("planar_abuse", "1920x300", is_size_string)
 
-function customize_eye_measuring()
-    ask_size_customization("eye_measuring", "Enter your eye measuring size:", 384, 16384)
-    local ans = jingle.askYesNo("Set cursor speed to 1 while eye measuring?")
-    if (ans ~= nil) then
-        if (ans) then
-            jingle.setCustomizable("change_cursor_speed", "true")
-        else
-            jingle.setCustomizable("change_cursor_speed", "false")
-        end
+    if not jingle.showCustomizationMenu() then
+        return
+    end
+
+    if jingle.getCustomizable("change_cursor_speed", tostring(false)) ~= "true" then
         reload()
+        return
+    end
+
+    local current_cursor_speed = tostring(jingle.getCursorSpeed())
+    local ans = jingle.askYesNo("Always revert cursor speed to " ..
+            current_cursor_speed .. " after undoing eye measuring? (Otherwise revert to the speed from before measuring)")
+    if ans ~= nil then
         if ans then
-            local current_cursor_speed = tostring(jingle.getCursorSpeed())
-            local ans = jingle.askYesNo("Revert cursor speed to " ..
-                    current_cursor_speed .. " after undoing eye measuring?")
-            if ans ~= nil then
-                if ans then
-                    jingle.setCustomizable("permanent_normal_cursor_speed", current_cursor_speed)
-                else
-                    jingle.setCustomizable("permanent_normal_cursor_speed", nil)
-                end
-            end
+            jingle.setCustomizable("permanent_normal_cursor_speed", current_cursor_speed)
+        else
+            jingle.setCustomizable("permanent_normal_cursor_speed", nil)
         end
     end
-end
 
-function customize_thin_bt()
-    ask_size_customization("thin_bt", "Enter your thin bt size:", 250, 750)
-end
-
-function customize_planar_abuse()
-    ask_size_customization("planar_abuse", "Enter your planar abuse size:", 1920, 300)
+    reload();
 end
 
 jingle.addHotkey("Thin BT", run_thin_bt)
@@ -168,6 +152,3 @@ jingle.addHotkey("Planar Abuse", run_planar_abuse)
 jingle.addHotkey("Eye Measuring", run_eye_measuring)
 jingle.listen("EXIT_WORLD", check_undo_dirties)
 jingle.setCustomization(customize)
-jingle.addExtraFunction("Customize Eye Measuring", customize_eye_measuring)
-jingle.addExtraFunction("Customize Thin BT", customize_thin_bt)
-jingle.addExtraFunction("Customize Planar Abuse", customize_planar_abuse)
