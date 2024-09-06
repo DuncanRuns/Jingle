@@ -92,11 +92,7 @@ public final class OBSProjector {
                 }, null);
                 // Close extra projectors
                 if (projectorHwnd != null) {
-                    User32.INSTANCE.EnumWindows((hWnd, data) -> {
-                        if (Objects.equals(hWnd, projectorHwnd) || !isProjectorMagnifier(hWnd)) return true;
-                        User32.INSTANCE.SendNotifyMessageA(hWnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0));
-                        return true;
-                    }, null);
+                    closeExtraProjectors();
                 }
             }
             if (projectorHwnd == null) {
@@ -147,5 +143,19 @@ public final class OBSProjector {
     private static boolean isProjectorTitle(String title) {
         String regex = '^' + Jingle.options.projectorWindowPattern.trim().toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
         return Pattern.compile(regex).matcher(title.toLowerCase()).matches();
+    }
+
+    public static void closeAnyMeasuringProjectors() {
+        projectorHwnd = null;
+        closeExtraProjectors();
+    }
+
+    private static void closeExtraProjectors() {
+        User32.INSTANCE.EnumWindows((hWnd, data) -> {
+            if ((projectorHwnd != null && Objects.equals(hWnd, projectorHwnd)) || !isProjectorMagnifier(hWnd))
+                return true;
+            User32.INSTANCE.SendNotifyMessageA(hWnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0));
+            return true;
+        }, null);
     }
 }

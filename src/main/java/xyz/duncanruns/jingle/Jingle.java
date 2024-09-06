@@ -10,7 +10,6 @@ import xyz.duncanruns.jingle.instance.*;
 import xyz.duncanruns.jingle.obs.OBSLink;
 import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
-import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.*;
 import xyz.duncanruns.jingle.win32.User32;
@@ -269,6 +268,10 @@ public final class Jingle {
             running = false;
             assert options != null;
             PluginEvents.STOP.runAll();
+            try {
+                OBSProjector.closeAnyMeasuringProjectors();
+            } catch (Throwable ignored) { // We really don't care if this fails lol
+            }
             options.save();
             log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {
