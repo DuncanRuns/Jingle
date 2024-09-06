@@ -79,6 +79,7 @@ public class ScriptListPanel extends JPanel {
             }
             constraints.gridy++;
         }
+        this.revalidate();
     }
 
     private JButton getToggleDefaultScriptButton(ScriptFile loadedScript) {
