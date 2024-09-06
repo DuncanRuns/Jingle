@@ -71,6 +71,11 @@ class JingleLuaLibrary extends LuaLibrary {
         return Resizing.toggleResize(width, height);
     }
 
+    @LuaDocumentation(description = "Undoes any resizing applied by jingle.toggleResize().")
+    public void undoResize() {
+        Resizing.undoResize();
+    }
+
     @LuaDocumentation(description = "Returns true if the instance is active, otherwise false.")
     public boolean isInstanceActive() {
         return Jingle.isInstanceActive();
