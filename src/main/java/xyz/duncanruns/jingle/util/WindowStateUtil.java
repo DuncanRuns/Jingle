@@ -1,7 +1,6 @@
 package xyz.duncanruns.jingle.util;
 
 import com.sun.jna.platform.win32.WinDef.HWND;
-import com.sun.jna.platform.win32.WinDef.LONG;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser;
 import xyz.duncanruns.jingle.win32.User32;
