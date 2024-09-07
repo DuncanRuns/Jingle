@@ -72,8 +72,8 @@ function set_position_with_bounds(scene_item, x, y, width, height, center_align)
     if center_align then
         obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_NONE)
         local scale = obs.vec2()
-        scale.x = center_align_scale_x
-        scale.y = center_align_scale_y
+        scale.x = 1
+        scale.y = 1
         obs.obs_sceneitem_set_scale(scene_item, scale)
     else
         obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_STRETCH)

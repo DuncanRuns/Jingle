@@ -1,6 +1,6 @@
 --[[
 
-    Jingle OBS Link v1.2.1
+    Jingle OBS Link v1.3.0
     
     The purpose of the OBS Link Script is to generate and control various Jingle related scenes and sources to assist in Speedrunning Minecraft.
 
@@ -156,8 +156,8 @@ function set_position_with_bounds(scene_item, x, y, width, height, center_align)
     if center_align then
         obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_NONE)
         local scale = obs.vec2()
-        scale.x = center_align_scale_x
-        scale.y = center_align_scale_y
+        scale.x = 1
+        scale.y = 1
         obs.obs_sceneitem_set_scale(scene_item, scale)
     else
         obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_STRETCH)
@@ -239,11 +239,15 @@ function script_properties()
     obs.obs_properties_add_button(
         props, "generate_scenes_button", "Regenerate", regenerate)
 
+    obs.obs_properties_add_button(
+        props, "fix_julti_button", "Fix Julti Game Cap", fix_julti)
+
     return props
 end
 
 function script_load()
     update_scene_size()
+    last_state = get_state_file_string()
 end
 
 function script_update(settings)
@@ -267,20 +271,25 @@ end
 
 function regenerate()
     local game_cap = get_or_create_game_capture()
+    local audio_cap = get_or_create_audio_capture()
     local game_cap_pos = obs.vec2()
     game_cap_pos.x = total_width / 2
     game_cap_pos.y = total_height / 2
 
     if (ensure_scene_exists("Walling")) then
-        local item = obs.obs_scene_add(get_scene("Walling"), game_cap)
+        local scene = get_scene("Walling")
+        local item = obs.obs_scene_add(scene, game_cap)
         obs.obs_sceneitem_set_alignment(item, 0)
         obs.obs_sceneitem_set_pos(item, game_cap_pos)
+        obs.obs_scene_add(scene, audio_cap)
     end
 
     if (ensure_scene_exists("Playing")) then
-        local item = obs.obs_scene_add(get_scene("Playing"), game_cap)
+        local scene = get_scene("Playing")
+        local item = obs.obs_scene_add(scene, game_cap)
         obs.obs_sceneitem_set_alignment(item, 0)
         obs.obs_sceneitem_set_pos(item, game_cap_pos)
+        obs.obs_scene_add(scene, audio_cap)
     end
 
     if (ensure_scene_exists("Jingle Mag")) then
@@ -314,6 +323,7 @@ function regenerate()
     end
 
     release_source(game_cap)
+    release_source(audio_cap)
 end
 
 --- Make sure to use release_source() on it afterwards
@@ -350,6 +360,23 @@ function get_or_create_game_capture()
     return source
 end
 
+--- Make sure to use release_source() on it afterwards
+function get_or_create_audio_capture()
+    local source = get_source("Minecraft Audio 1")
+    if (source ~= nil) then
+        return source
+    end
+
+    local settings = obs.obs_data_create_from_json(
+        '{"priority": 1,"window": "Minecraft* - Instance 1:GLFW30:javaw.exe"}')
+
+    source = obs.obs_source_create("wasapi_process_output_capture", "Minecraft Audio 1", settings, nil)
+    obs.obs_data_release(settings)
+
+    return source
+end
+
+--- Make sure to use release_source() on it afterwards
 function get_or_create_cover()
     local source = get_source("Jingle Mag Cover")
     if source ~= nil then
@@ -411,5 +438,28 @@ function loop()
     if item ~= nil then
         obs.obs_sceneitem_set_visible(item, cover_reqest == 'Y')
     end
+end
+
+function fix_julti()
+    if get_scene("Julti") == nil then
+        return
+    end
+    local group = get_group_as_scene("Instance 1")
+    if group == nil then
+        return
+    end
+    local items = obs.obs_scene_enum_items(group)
+
+    for _, item in ipairs(items) do
+        local itemname = get_sceneitem_name(item)
+        if itemname == 'Minecraft Capture 1' then
+            obs.obs_sceneitem_set_visible(item, true)
+            set_position_with_bounds(item, 0, 0, total_width, total_height, true)
+        else
+            obs.obs_sceneitem_set_visible(item, false)
+        end
+    end
+
+    obs.sceneitem_list_release(items)
 end
 
