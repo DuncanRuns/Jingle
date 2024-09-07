@@ -145,12 +145,12 @@ public final class OBSProjector {
         return Pattern.compile(regex).matcher(title.toLowerCase()).matches();
     }
 
-    public static void closeAnyMeasuringProjectors() {
+    public static synchronized void closeAnyMeasuringProjectors() {
         projectorHwnd = null;
         closeExtraProjectors();
     }
 
-    private static void closeExtraProjectors() {
+    private static synchronized void closeExtraProjectors() {
         User32.INSTANCE.EnumWindows((hWnd, data) -> {
             if ((projectorHwnd != null && Objects.equals(hWnd, projectorHwnd)) || !isProjectorMagnifier(hWnd))
                 return true;

@@ -317,6 +317,9 @@ public class JingleGUI extends JFrame {
             Jingle.options.projectorEnabled = b;
             this.refreshPPFields(ppFields);
             this.projWindowPatternField.setEnabled(b);
+            if (!b) {
+                OBSProjector.closeAnyMeasuringProjectors();
+            }
         });
         setCheckBoxBoolean(this.autoProjectorPosBox, Jingle.options.projectorPosition == null, b -> {
             if (b) {
