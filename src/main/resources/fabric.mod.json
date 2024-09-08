@@ -1,14 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "fabric-crasher",
+  "id": "jingle",
   "version": "0.0.0",
-  "name": "This will crash your game!!!",
-  "description": "Crashes the game to let people know that this isn't a mod.",
+  "name": "Jingle (not a fabric mod)",
+  "description": "You are not supposed to run this as a mod!",
   "license": "MIT",
   "environment": "*",
-  "entrypoints": {
-    "main": [
-      "xyz.duncanruns.jingle.util.FabricCrashUtil::onInitialize"
-    ]
+  "depends": {
+    "not trying to run Jingle as a mod": "*"
   }
 }
