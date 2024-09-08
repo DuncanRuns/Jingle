@@ -7,6 +7,6 @@
   "license": "MIT",
   "environment": "*",
   "depends": {
-    "not trying to run Jingle as a mod": "*"
+    "!!! Do not put Jingle in the mods folder !!!": "*"
   }
 }
