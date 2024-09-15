@@ -1,6 +1,6 @@
 --[[
 
-    Jingle OBS Link v1.3.0
+    Jingle OBS Link v1.4.0
     
     The purpose of the OBS Link Script is to generate and control various Jingle related scenes and sources to assist in Speedrunning Minecraft.
 
