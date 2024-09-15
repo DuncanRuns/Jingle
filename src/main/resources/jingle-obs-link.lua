@@ -239,9 +239,6 @@ function script_properties()
     obs.obs_properties_add_button(
         props, "generate_scenes_button", "Regenerate", regenerate)
 
-    obs.obs_properties_add_button(
-        props, "fix_julti_button", "Fix Julti Game Cap", fix_julti)
-
     return props
 end
 
@@ -270,31 +267,18 @@ function update_scene_size()
 end
 
 function regenerate()
-    local game_cap = get_or_create_game_capture()
+    local mc_cap = get_or_create_mc_capture()
     local audio_cap = get_or_create_audio_capture()
-    local game_cap_pos = obs.vec2()
-    game_cap_pos.x = total_width / 2
-    game_cap_pos.y = total_height / 2
+    local mc_cap_pos = obs.vec2()
+    mc_cap_pos.x = total_width / 2
+    mc_cap_pos.y = total_height / 2
 
-    if (ensure_scene_exists("Walling")) then
-        local scene = get_scene("Walling")
-        local item = obs.obs_scene_add(scene, game_cap)
-        obs.obs_sceneitem_set_alignment(item, 0)
-        obs.obs_sceneitem_set_pos(item, game_cap_pos)
-        obs.obs_scene_add(scene, audio_cap)
-    end
-
-    if (ensure_scene_exists("Playing")) then
-        local scene = get_scene("Playing")
-        local item = obs.obs_scene_add(scene, game_cap)
-        obs.obs_sceneitem_set_alignment(item, 0)
-        obs.obs_sceneitem_set_pos(item, game_cap_pos)
-        obs.obs_scene_add(scene, audio_cap)
-    end
+    setup_recording_scene("Walling", mc_cap, audio_cap, mc_cap_pos)
+    setup_recording_scene("Playing", mc_cap, audio_cap, mc_cap_pos)
 
     if (ensure_scene_exists("Jingle Mag")) then
         local scene = get_scene("Jingle Mag")
-        local cap_item = obs.obs_scene_add(scene, game_cap)
+        local cap_item = obs.obs_scene_add(scene, mc_cap)
         obs.obs_sceneitem_set_bounds_type(cap_item, obs.OBS_BOUNDS_NONE)
         set_position(cap_item, total_width / 2, total_height / 2)
         obs.obs_sceneitem_set_alignment(cap_item, 0) -- align to center
@@ -322,8 +306,18 @@ function regenerate()
         release_source(cover_source)
     end
 
-    release_source(game_cap)
+    release_source(mc_cap)
     release_source(audio_cap)
+end
+
+function setup_recording_scene(scene_name, mc_cap, audio_cap, mc_pos)
+    if (ensure_scene_exists(scene_name)) then
+        local scene = get_scene(scene_name)
+        local item = obs.obs_scene_add(scene, mc_cap)
+        obs.obs_sceneitem_set_alignment(item, 0)
+        obs.obs_sceneitem_set_pos(item, mc_pos)
+        obs.obs_scene_add(scene, audio_cap)
+    end
 end
 
 --- Make sure to use release_source() on it afterwards
@@ -338,15 +332,15 @@ end
 --     group_source = obs.obs_source_create("group", "Instance 1", nil, nil)
 --     local group = get_group_as_scene(group_source) -- no need to release
 
---     local game_cap = get_or_create_game_capture()
+--     local game_cap = get_or_create_mc_capture()
 --     obs.obs_scene_add(group, game_cap)
 --     release_source(game_cap)
 --     return group_source
 -- end
 
 --- Make sure to use release_source() on it afterwards
-function get_or_create_game_capture()
-    local source = get_source("Minecraft Capture 1")
+function get_or_create_mc_capture()
+    local source = get_source("Jingle MC Capture")
     if (source ~= nil) then
         return source
     end
@@ -354,7 +348,7 @@ function get_or_create_game_capture()
     local settings = obs.obs_data_create_from_json(
         '{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance 1:GLFW30:javaw.exe"}')
 
-    source = obs.obs_source_create("game_capture", "Minecraft Capture 1", settings, nil)
+    source = obs.obs_source_create("game_capture", "Jingle MC Capture", settings, nil)
     obs.obs_data_release(settings)
 
     return source
@@ -438,28 +432,5 @@ function loop()
     if item ~= nil then
         obs.obs_sceneitem_set_visible(item, cover_reqest == 'Y')
     end
-end
-
-function fix_julti()
-    if get_scene("Julti") == nil then
-        return
-    end
-    local group = get_group_as_scene("Instance 1")
-    if group == nil then
-        return
-    end
-    local items = obs.obs_scene_enum_items(group)
-
-    for _, item in ipairs(items) do
-        local itemname = get_sceneitem_name(item)
-        if itemname == 'Minecraft Capture 1' then
-            obs.obs_sceneitem_set_visible(item, true)
-            set_position_with_bounds(item, 0, 0, total_width, total_height, true)
-        else
-            obs.obs_sceneitem_set_visible(item, false)
-        end
-    end
-
-    obs.sceneitem_list_release(items)
 end
 
