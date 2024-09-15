@@ -6,6 +6,11 @@ plugins {
 group 'xyz.duncanruns.jingle'
 version '0.3.0'
 
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 8
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
