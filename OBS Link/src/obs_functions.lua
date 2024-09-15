@@ -110,10 +110,14 @@ function bring_to_top(item)
     if item ~= nil then
         obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_TOP)
     end
+    return item
 end
 
 function bring_to_bottom(item)
-    obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_BOTTOM)
+    if item ~= nil then
+        obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_BOTTOM)
+    end
+    return item
 end
 
 function delete_source(name)
@@ -138,4 +142,16 @@ function get_active_scene_name()
     local current_scene_name = obs.obs_source_get_name(current_scene_source)
     release_source(current_scene_source)
     return current_scene_name
+end
+
+function set_item_visible(scene_name, item_name, visible)
+    local scene = get_scene(scene_name)
+    if (scene == nil) then
+        return
+    end
+    local item = obs.obs_scene_find_source_recursive(scene, item_name)
+    if (item == nil) then
+        return
+    end
+    obs.obs_sceneitem_set_visible(item, visible)
 end
