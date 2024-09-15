@@ -104,6 +104,7 @@ function regenerate()
     set_item_visible("Jingle Mag", "Minecraft Capture 1", false)
     set_item_visible("Playing", "Julti", false)
     set_item_visible("Walling", "Julti", false)
+    set_item_visible("Sound", "Minecraft Audio 1", false)
 end
 
 function setup_jingle_mag_mc_cap(mc_cap)
