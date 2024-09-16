@@ -106,6 +106,7 @@ end
 function on_exit_world()
     if currently_resized and undo_resize_on_reset then
         jingle.undoResize()
+        currently_resized = false
     end
     check_undo_dirties()
 end
