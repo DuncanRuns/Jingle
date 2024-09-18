@@ -28,7 +28,6 @@ public final class OBSLink {
             last = output;
             try {
                 FileUtil.writeString(OUT, output);
-                Jingle.log(Level.DEBUG, "New OBS Link state: " + output);
             } catch (IOException e) {
                 Jingle.logError("Failed to write obs-link-state:", e);
             }
