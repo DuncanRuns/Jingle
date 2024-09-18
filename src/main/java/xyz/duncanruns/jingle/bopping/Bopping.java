@@ -40,7 +40,6 @@ public final class Bopping {
                         .filter(Files::isDirectory)
                         .map(path -> new Thread(() -> {
                             try {
-                                Jingle.log(Level.INFO, "Clearing worlds for \"" + path + "\"...");
                                 clearWorlds(path);
                             } catch (IOException e) {
                                 Jingle.logError("Failed to clear worlds:", e);
@@ -81,6 +80,10 @@ public final class Bopping {
         // Actually delete stuff
         int i = 0;
         int total = worldsToRemove.size();
+        if (worldsToRemove.isEmpty()) {
+            Jingle.log(Level.INFO, "No worlds to clear for \"" + instancePath + "\"");
+            return;
+        }
         for (Path path : worldsToRemove) {
             if (++i % 50 == 0) {
                 Jingle.log(Level.INFO, "Clearing \"" + instancePath + "\": " + i + "/" + total);
@@ -90,6 +93,7 @@ public final class Bopping {
                     .map(Path::toFile)
                     .forEach(File::delete);
         }
+        Jingle.log(Level.INFO, "Cleared worlds for \"" + instancePath + "\"");
     }
 
     private static boolean shouldDelete(Path path) {
