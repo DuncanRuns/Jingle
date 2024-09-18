@@ -76,8 +76,8 @@ public final class Bopping {
                 .filter(Bopping::shouldDelete) // Filter for only ones that should be deleted
                 .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
                 .collect(Collectors.toList());
-        // Remove the first 6 (or less) worlds
-        worldsToRemove.subList(0, Math.min(6, worldsToRemove.size())).clear();
+        // Remove the first 36 (or less) worlds
+        worldsToRemove.subList(0, Math.min(36, worldsToRemove.size())).clear();
         // Actually delete stuff
         int i = 0;
         int total = worldsToRemove.size();
