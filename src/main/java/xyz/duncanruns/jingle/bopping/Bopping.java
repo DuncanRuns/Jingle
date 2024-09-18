@@ -30,9 +30,7 @@ public final class Bopping {
                     paths = Jingle.options.seenPaths.keySet().stream()
                             .map(Paths::get);
                 } else {
-                    Optional<OpenedInstance> mainInstance = Jingle.getMainInstance();
-                    assert mainInstance.isPresent();
-                    paths = Stream.of(mainInstance.get().instancePath);
+                    paths = Jingle.getMainInstance().map(instance -> Stream.of(instance.instancePath)).orElseGet(Stream::empty);
                 }
                 List<Thread> clearWorldThreads = paths
                         .map(Path::toAbsolutePath)
