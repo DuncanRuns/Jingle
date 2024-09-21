@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'xyz.duncanruns.jingle'
-version '0.4.0+pre1'
+version '1.0.0'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
