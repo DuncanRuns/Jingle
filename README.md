@@ -135,6 +135,13 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 
 - Should be a pretty self-explanatory tab. Thanks to everyone who has supported Julti and Jingle!
 
+## Julti Launcher
+
+A small executable program that will run any Jingle jar it finds in the same folder. This allows running as admin and
+pinning to the start menu.
+
+[Download](https://github.com/DuncanRuns/Jingle/raw/refs/heads/main/Launcher/zig-out/bin/Jingle%20Launcher.exe) | [Source Code](https://github.com/DuncanRuns/Jingle/tree/main/Launcher)
+
 ## Developing
 
 Jingle GUIs are made with the IntelliJ IDEA form designer, if you intend on changing GUI portions of the code, IntelliJ
