@@ -1,3 +1,9 @@
+Changes in v1.1.0:
+
+- Add "Minimize Projector When Inactive" option
+- Added customizable borderless position (right-click the "Go Borderless" button)
+- Some GUI tweaks/fixes
+
 Changes in v1.0.0:
 
 - Fix default cursor speed checkbox in Resizing customization script
