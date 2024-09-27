@@ -99,7 +99,7 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 
 - The only thing this tab does is provide a space for plugins to add their own tabs for customization or buttons (or
   anything else that can be added to a GUI).
-- There are 2 default plugins as of Julti v1.0.0:
+- There are 2 default plugins as of Jingle v1.0.0:
     - `PaceMan Tracker` tracks RSG Any% speedruns for [PaceMan.gg](https://paceman.gg/). Setup and further information
       can be found through the website.
     - `Standard Switcher` allows changing out the standard settings file for the
@@ -135,7 +135,7 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 
 - Should be a pretty self-explanatory tab. Thanks to everyone who has supported Julti and Jingle!
 
-## Julti Launcher
+## Jingle Launcher
 
 A small executable program that will run any Jingle jar it finds in the same folder. This allows running as admin and
 pinning to the start menu.
