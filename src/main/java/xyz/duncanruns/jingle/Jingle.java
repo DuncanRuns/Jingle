@@ -285,9 +285,14 @@ public final class Jingle {
         getMainInstance().ifPresent(mainInstance -> {
             WindowStateUtil.ensureNotMinimized(mainInstance.hwnd);
             WindowStateUtil.setHwndBorderless(mainInstance.hwnd);
-            Rectangle pBounds = MonitorUtil.getPrimaryMonitor().getPBounds();
-            WindowStateUtil.setHwndRectangle(mainInstance.hwnd, new Rectangle(pBounds.x, pBounds.y, pBounds.width, pBounds.height - 1));
-            WindowStateUtil.setHwndRectangle(mainInstance.hwnd, pBounds);
+            int[] bp = Jingle.options.borderlessPosition;
+            if (bp == null) {
+                Rectangle pBounds = MonitorUtil.getPrimaryMonitor().getPBounds();
+                WindowStateUtil.setHwndRectangle(mainInstance.hwnd, new Rectangle(pBounds.x, pBounds.y, pBounds.width, pBounds.height - 1));
+                WindowStateUtil.setHwndRectangle(mainInstance.hwnd, pBounds);
+            } else {
+                WindowStateUtil.setHwndRectangle(mainInstance.hwnd, new Rectangle(bp[0], bp[1], bp[2], bp[3]));
+            }
         });
     }
 

@@ -33,6 +33,8 @@ public class JingleOptions {
     public String projectorWindowPattern = "*- Jingle Mag";
     public boolean minimizeProjector;
 
+    @Nullable public int[] borderlessPosition = null;
+
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {
             try {

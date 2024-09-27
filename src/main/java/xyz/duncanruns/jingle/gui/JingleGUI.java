@@ -22,10 +22,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
@@ -36,7 +33,10 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -205,6 +205,30 @@ public class JingleGUI extends JFrame {
         this.clearWorldsButton.addActionListener(a -> Bopping.bop(false));
         this.clearWorldsFromAllButton.addActionListener(a -> Bopping.bop(true));
         this.goBorderlessButton.addActionListener(a -> Jingle.goBorderless());
+        this.goBorderlessButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == 3) {
+                    int ans = JOptionPane.showOptionDialog(JingleGUI.this, "Customize Borderless Behaviour. Choose \"Automatic\" to snap to main monitor, or \"Custom\" to set an exact position.", "Jingle: Customize Borderless", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Automatic", "Custom"}, "Automatic");
+                    if (ans == 0) { // Automatic
+                        Jingle.options.borderlessPosition = null;
+                    } else if (ans == 1) { // Custom
+                        int[] bp = Jingle.options.borderlessPosition;
+                        Function<String, Object> askFunc = s -> JOptionPane.showInputDialog(JingleGUI.this, s + "Input the x, y, width, and height separated with commas (e.g. \"0,0,1920,1080\").", "Jingle: Customize Borderless", JOptionPane.QUESTION_MESSAGE, null, null, bp == null ? "" : String.format("%d,%d,%d,%d", bp[0], bp[1], bp[2], bp[3]));
+                        Pattern pattern = Pattern.compile("^ *(-?\\d+) *, *(-?\\d+) *, *(-?\\d+) *, *(-?\\d+) *$");
+                        Object sizeAnsObj = askFunc.apply("");
+                        while (sizeAnsObj != null && !pattern.matcher(sizeAnsObj.toString()).matches()) {
+                            sizeAnsObj = askFunc.apply("Invalid input!\n");
+                        }
+                        if (sizeAnsObj == null) return;
+                        Matcher matcher;
+                        if (!(matcher = pattern.matcher(sizeAnsObj.toString())).matches())
+                            throw new RuntimeException("This should never be reached; a pattern that should have matched did not match!");
+                        Jingle.options.borderlessPosition = IntStream.range(1, 5).mapToObj(matcher::group).map(Integer::parseInt).mapToInt(i -> i).toArray();
+                    }
+                }
+            }
+        });
         this.openMinecraftFolderButton.addActionListener(a -> Jingle.openInstanceFolder());
 
         ((DefaultCaret) this.logTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
