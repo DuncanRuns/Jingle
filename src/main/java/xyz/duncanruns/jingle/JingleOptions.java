@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 public class JingleOptions {
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
+    public static final JingleOptions DEFAULTS = new JingleOptions();
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
