@@ -392,7 +392,7 @@
             <properties/>
             <border type="empty"/>
             <children>
-              <grid id="4fd38" layout-manager="GridLayoutManager" row-count="13" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="4fd38" layout-manager="GridLayoutManager" row-count="14" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="5" left="5" bottom="5" right="5"/>
                 <constraints/>
                 <properties/>
@@ -400,7 +400,7 @@
                 <children>
                   <vspacer id="2e755">
                     <constraints>
-                      <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
                   <component id="c0206" class="javax.swing.JLabel">
@@ -595,6 +595,14 @@
                       </component>
                     </children>
                   </grid>
+                  <component id="cb4ab" class="javax.swing.JCheckBox" binding="minimizeProjectorBox">
+                    <constraints>
+                      <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Minimize Projector"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
             </children>

@@ -85,6 +85,7 @@ public class JingleGUI extends JFrame {
     private JPanel scriptsJPanel;
     private JTextField projWindowPatternField;
     private JPanel pluginsTab;
+    private JCheckBox minimizeProjectorBox;
     public boolean jingleUpdating = false;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
@@ -317,6 +318,7 @@ public class JingleGUI extends JFrame {
             Jingle.options.projectorEnabled = b;
             this.refreshPPFields(ppFields);
             this.projWindowPatternField.setEnabled(b);
+            this.minimizeProjectorBox.setEnabled(b);
             if (!b) {
                 OBSProjector.closeAnyMeasuringProjectors();
             }
@@ -342,6 +344,11 @@ public class JingleGUI extends JFrame {
             }
             OBSProjector.applyProjectorPosition();
         });
+        setCheckBoxBoolean(this.minimizeProjectorBox, Jingle.options.minimizeProjector, b -> {
+            Jingle.options.minimizeProjector = b;
+            if (b) OBSProjector.minimizeProjector();
+            else OBSProjector.unminimizeProjector();
+        });
         this.projPosApplyButton.addActionListener(a -> {
             int[] newPos = new int[4];
             for (int i = 0; i < 4; i++) {
@@ -361,6 +368,7 @@ public class JingleGUI extends JFrame {
         });
         setTextFieldFunction(this.projWindowPatternField, Jingle.options.projectorWindowPattern, s -> Jingle.options.projectorWindowPattern = s);
         this.projWindowPatternField.setEnabled(Jingle.options.projectorEnabled);
+        this.minimizeProjectorBox.setEnabled(Jingle.options.projectorEnabled);
     }
 
     private void refreshPPFields(JTextField[] ppFields) {
@@ -523,10 +531,10 @@ public class JingleGUI extends JFrame {
         mainTabbedPane.addTab("OBS", scrollPane6);
         scrollPane6.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel5 = new JPanel();
-        panel5.setLayout(new GridLayoutManager(13, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel5.setLayout(new GridLayoutManager(14, 1, new Insets(5, 5, 5, 5), -1, -1));
         scrollPane6.setViewportView(panel5);
         final Spacer spacer5 = new Spacer();
-        panel5.add(spacer5, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel5.add(spacer5, new GridConstraints(13, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label3 = new JLabel();
         label3.setText("OBS Link Script Installation:");
         panel5.add(label3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -592,6 +600,9 @@ public class JingleGUI extends JFrame {
         final JLabel label12 = new JLabel();
         label12.setText("Projector Name Pattern:");
         panel7.add(label12, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        minimizeProjectorBox = new JCheckBox();
+        minimizeProjectorBox.setText("Minimize Projector");
+        panel5.add(minimizeProjectorBox, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane7 = new JScrollPane();
         mainTabbedPane.addTab("Donate", scrollPane7);
         scrollPane7.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));

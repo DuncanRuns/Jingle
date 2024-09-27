@@ -82,10 +82,7 @@ public final class OBSProjector {
                 User32.INSTANCE.EnumWindows((hWnd, data) -> {
                     if (isProjectorMagnifier(hWnd)) {
                         projectorHwnd = hWnd;
-                        applyProjectorPosition();
-                        setProjectorZOrder(1);
-                        requestProjector = -1L;
-                        requestSlowerifier = 0;
+                        onProjectorFound();
                         return false;
                     }
                     return true;
@@ -104,6 +101,14 @@ public final class OBSProjector {
         }
     }
 
+    private static void onProjectorFound() {
+        applyProjectorPosition();
+        setProjectorZOrder(1);
+        requestProjector = -1L;
+        requestSlowerifier = 0;
+        if (Jingle.options.minimizeProjector) minimizeProjector();
+    }
+
     private static boolean isPowerOfTwo(int x) {
         return (x & (x - 1)) == 0;
     }
@@ -115,10 +120,15 @@ public final class OBSProjector {
 
     public static synchronized void bringOBSProjectorToTop() {
         if (projectorHwnd != null) {
+            unminimizeProjector();
             coverJultiMag = false;
             setProjectorZOrder(0);
             setProjectorZOrder(-1);
         }
+    }
+
+    public static void unminimizeProjector() {
+        WindowStateUtil.ensureNotMinimized(projectorHwnd);
     }
 
     private static void setProjectorZOrder(int hwndInsertAfter) {
@@ -131,9 +141,16 @@ public final class OBSProjector {
 
     public static synchronized void dumpOBSProjector() {
         if (projectorHwnd != null) {
+            if (Jingle.options.minimizeProjector) {
+                minimizeProjector();
+            }
             setProjectorZOrder(1);
         }
         coverJultiMag = true;
+    }
+
+    public static void minimizeProjector() {
+        if (projectorHwnd != null) User32.INSTANCE.ShowWindow(projectorHwnd, User32.SW_MINIMIZE);
     }
 
     private static boolean isProjectorMagnifier(WinDef.HWND hwnd) {
