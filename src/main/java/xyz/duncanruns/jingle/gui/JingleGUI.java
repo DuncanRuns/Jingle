@@ -4,6 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import xyz.duncanruns.jingle.Jingle;
+import xyz.duncanruns.jingle.JingleOptions;
 import xyz.duncanruns.jingle.JingleUpdater;
 import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
@@ -86,6 +87,7 @@ public class JingleGUI extends JFrame {
     private JTextField projWindowPatternField;
     private JPanel pluginsTab;
     private JCheckBox minimizeProjectorBox;
+    private JButton resetProjNameButton;
     public boolean jingleUpdating = false;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
@@ -319,6 +321,7 @@ public class JingleGUI extends JFrame {
             this.refreshPPFields(ppFields);
             this.projWindowPatternField.setEnabled(b);
             this.minimizeProjectorBox.setEnabled(b);
+            this.resetProjNameButton.setEnabled(b);
             if (!b) {
                 OBSProjector.closeAnyMeasuringProjectors();
             }
@@ -367,8 +370,10 @@ public class JingleGUI extends JFrame {
             OBSProjector.setProjectorPosition(newPos[0], newPos[1], newPos[2], newPos[3]);
         });
         setTextFieldFunction(this.projWindowPatternField, Jingle.options.projectorWindowPattern, s -> Jingle.options.projectorWindowPattern = s);
+        this.resetProjNameButton.addActionListener(e -> this.projWindowPatternField.setText(Jingle.options.projectorWindowPattern = JingleOptions.DEFAULTS.projectorWindowPattern));
         this.projWindowPatternField.setEnabled(Jingle.options.projectorEnabled);
         this.minimizeProjectorBox.setEnabled(Jingle.options.projectorEnabled);
+        this.resetProjNameButton.setEnabled(Jingle.options.projectorEnabled);
     }
 
     private void refreshPPFields(JTextField[] ppFields) {
@@ -592,14 +597,17 @@ public class JingleGUI extends JFrame {
         label11.setText("6. Press the \"Regenerate\" button in the jingle-obs-link.lua script.");
         panel5.add(label11, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel7 = new JPanel();
-        panel7.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel5.add(panel7, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel7.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel5.add(panel7, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         projWindowPatternField = new JTextField();
         projWindowPatternField.setText("");
         panel7.add(projWindowPatternField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label12 = new JLabel();
         label12.setText("Projector Name Pattern:");
         panel7.add(label12, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        resetProjNameButton = new JButton();
+        resetProjNameButton.setText("Reset");
+        panel7.add(resetProjNameButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         minimizeProjectorBox = new JCheckBox();
         minimizeProjectorBox.setText("Minimize Projector");
         panel5.add(minimizeProjectorBox, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
