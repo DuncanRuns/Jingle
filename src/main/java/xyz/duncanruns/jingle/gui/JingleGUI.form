@@ -590,7 +590,7 @@
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text value="Projector Name Pattern:"/>
+                          <text value="OBS Projector Name Pattern:"/>
                         </properties>
                       </component>
                       <component id="98873" class="javax.swing.JButton" binding="resetProjNameButton">
@@ -608,7 +608,7 @@
                       <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text value="Minimize Projector"/>
+                      <text value="Minimize Projector When Inactive"/>
                     </properties>
                   </component>
                 </children>
