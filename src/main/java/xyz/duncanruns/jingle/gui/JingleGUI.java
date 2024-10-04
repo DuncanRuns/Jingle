@@ -588,10 +588,10 @@ public class JingleGUI extends JFrame {
         final JSeparator separator5 = new JSeparator();
         panel5.add(separator5, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         projectorCheckBox = new JCheckBox();
-        projectorCheckBox.setText("Enable Eye Measuring Projector");
+        projectorCheckBox.setText("Enable OBS Eye Measuring Projector");
         panel5.add(projectorCheckBox, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         autoProjectorPosBox = new JCheckBox();
-        autoProjectorPosBox.setText("Automatically Position Eye Measuring Projector");
+        autoProjectorPosBox.setText("Automatically Position OBS Eye Measuring Projector");
         panel5.add(autoProjectorPosBox, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         projectorPositionPanel = new JPanel();
         projectorPositionPanel.setLayout(new GridLayoutManager(1, 7, new Insets(0, 0, 0, 0), -1, -1));
