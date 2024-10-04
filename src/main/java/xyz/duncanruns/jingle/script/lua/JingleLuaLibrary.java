@@ -10,7 +10,6 @@ import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.FabricModFolder;
 import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstance;
-import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.CustomizableManager;
 import xyz.duncanruns.jingle.script.ScriptFile;
@@ -81,14 +80,14 @@ class JingleLuaLibrary extends LuaLibrary {
         return Jingle.isInstanceActive();
     }
 
-    @LuaDocumentation(description = "Sets the OBS eye measuring projector to be directly behind the instance, bringing it above everything except for the game itself.")
-    public void bringOBSProjectorToTop() {
-        OBSProjector.bringOBSProjectorToTop();
+    @LuaDocumentation(description = "Sets the any available eye measuring projectors to be directly behind the instance, bringing it above everything except for the game itself.")
+    public void showMeasuringProjector() {
+        Jingle.showMeasuringProjector();
     }
 
     @LuaDocumentation(description = "Dumps the OBS eye measuring projector to the bottom of the window Z order.")
-    public void dumpOBSProjector() {
-        OBSProjector.dumpOBSProjector();
+    public void dumpMeasuringProjector() {
+        Jingle.dumpMeasuringProjector();
     }
 
     @LuaDocumentation(description = "Gets the current Windows cursor speed.")

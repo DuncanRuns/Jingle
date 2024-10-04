@@ -89,7 +89,7 @@ function run_eye_measuring()
         return
     end
     if jingle.toggleResize(eye_measuring_width, eye_measuring_height) then
-        jingle.bringOBSProjectorToTop()
+        jingle.showMeasuringProjector()
         projector_dirty = true
         normal_cursor_speed = jingle.getCursorSpeed()
         if change_cursor_speed then
@@ -113,7 +113,7 @@ end
 
 function check_undo_dirties()
     if projector_dirty then
-        jingle.dumpOBSProjector()
+        jingle.dumpMeasuringProjector()
         projector_dirty = false
     end
     if cursor_dirty then

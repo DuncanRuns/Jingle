@@ -371,4 +371,14 @@ public final class Jingle {
             throw new RuntimeException(e);
         }
     }
+
+    public static void showMeasuringProjector() {
+        OBSProjector.bringOBSProjectorToTop();
+        PluginEvents.SHOW_PROJECTOR.runAll();
+    }
+
+    public static void dumpMeasuringProjector() {
+        OBSProjector.dumpOBSProjector();
+        PluginEvents.DUMP_PROJECTOR.runAll();
+    }
 }

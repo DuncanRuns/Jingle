@@ -17,6 +17,9 @@ public final class PluginEvents {
     public static RunnableEventType EXIT_WORLD = new RunnableEventType();
     // Runs when a world is entered
     public static RunnableEventType ENTER_WORLD = new RunnableEventType();
+    // Runs when a measuring projector is supposed to be shown/dumped
+    public static RunnableEventType SHOW_PROJECTOR = new RunnableEventType();
+    public static RunnableEventType DUMP_PROJECTOR = new RunnableEventType();
 
     private PluginEvents() {
     }
