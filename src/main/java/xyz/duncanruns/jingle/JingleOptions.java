@@ -71,6 +71,11 @@ public class JingleOptions {
 
     private void fix() {
         if (this.optionsVersion == null) this.optionsVersion = 1;
+        if (this.optionsVersion < 2) {
+            // "Misc" hotkeys -> "Extra Keys" hotkeys
+            this.setSavedHotkeys(this.copySavedHotkeys().stream().map(sh -> sh.action.startsWith("Misc:") ? new SavedHotkey(sh.type, "Extra Keys" + sh.action.substring(sh.action.indexOf(":")), sh.keys, sh.ignoreModifiers) : sh).collect(Collectors.toList()));
+        }
+
         this.optionsVersion = DEFAULTS.optionsVersion;
     }
 
