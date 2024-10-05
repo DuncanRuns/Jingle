@@ -13,10 +13,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class JingleOptions {
+    private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
+    private static final int CURRENT_OPTIONS_VERSION = 2;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
-    public static final JingleOptions DEFAULTS = new JingleOptions();
+    public static final JingleOptions DEFAULTS = createNew();
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+
+    public Integer optionsVersion = DEFAULT_LOADED_OPTIONS_VERSION;
 
     public int[] lastPosition = new int[]{50, 50};
     public Map<String, Long> seenPaths = new HashMap<>();
@@ -35,15 +40,26 @@ public class JingleOptions {
 
     @Nullable public int[] borderlessPosition = null;
 
+    private JingleOptions() {
+    }
+
+    private static JingleOptions createNew() {
+        JingleOptions options = new JingleOptions();
+        options.optionsVersion = CURRENT_OPTIONS_VERSION;
+        return options;
+    }
+
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {
             try {
-                return FileUtil.readJson(OPTIONS_PATH, JingleOptions.class);
+                JingleOptions options = FileUtil.readJson(OPTIONS_PATH, JingleOptions.class);
+                options.fix();
+                return options;
             } catch (Exception e) {
                 Jingle.logError("Failed to load options.json", e);
             }
         }
-        return new JingleOptions();
+        return createNew();
     }
 
     public static void ensureFolderExists() {
@@ -51,6 +67,11 @@ public class JingleOptions {
             Jingle.FOLDER.toFile().mkdirs();
         }
         assert Files.isDirectory(Jingle.FOLDER);
+    }
+
+    private void fix() {
+        if (this.optionsVersion == null) this.optionsVersion = 1;
+        this.optionsVersion = DEFAULTS.optionsVersion;
     }
 
     public void save() {
