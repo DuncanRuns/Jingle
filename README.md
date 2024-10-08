@@ -32,20 +32,22 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 - "A log is a file or record containing information about activities in a computer system" -lenovo.com
 - Each log line can come from Jingle itself, a plugin, or a script.
 - Select `Show Debug Logs` to see even more spam. Unlike Julti, this will show debug logs from the past as well!
-- Hotkeys
-    - An "action" or "hotkey action" is something that a set hotkey can do. Hotkey actions can be added by scripts,
-      plugins, or Jingle itself. As of v1.0.0, the only hotkeys available are from scripts.
-        - Hotkey actions from scripts are listed per script in the scripts section.
-    - `Add` will let you add a new hotkey. You can select the desired hotkey action, set a keybind by pressing
-      `Set Hotkey Here...`, and choose how modifier keys affect this key.
-    - When hotkeys are added, the Hotkeys tab will then show the list of hotkeys with some related information and
-      buttons.
-        - `Action` is the hotkey action for that key.
-        - `Hotkey` is the set key to run the action. A `*` symbol indicates that this key will ignore if Ctrl, Alt, or
-          Shift is being pressed.
-        - `Edit` will bring back the menu that was shown when originally adding the key, allowing you to change the key,
-          action, or modifier behaviour.
-        - `Remove` will immediately remove the key.
+
+### Hotkeys
+
+- An "action" or "hotkey action" is something that a set hotkey can do. Hotkey actions can be added by scripts,
+  plugins, or Jingle itself. As of v1.0.0, the only hotkeys available are from scripts.
+    - Hotkey actions from scripts are listed per script in the scripts section.
+- `Add` will let you add a new hotkey. You can select the desired hotkey action, set a keybind by pressing
+  `Set Hotkey Here...`, and choose how modifier keys affect this key.
+- When hotkeys are added, the Hotkeys tab will then show the list of hotkeys with some related information and
+  buttons.
+    - `Action` is the hotkey action for that key.
+    - `Hotkey` is the set key to run the action. A `*` symbol indicates that this key will ignore if Ctrl, Alt, or
+      Shift is being pressed.
+    - `Edit` will bring back the menu that was shown when originally adding the key, allowing you to change the key,
+      action, or modifier behaviour.
+    - `Remove` will immediately remove the key.
 
 ### Scripts
 
