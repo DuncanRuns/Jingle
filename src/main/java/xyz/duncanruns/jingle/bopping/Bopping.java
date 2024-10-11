@@ -1,5 +1,6 @@
 package xyz.duncanruns.jingle.bopping;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.gui.JingleGUI;
@@ -9,10 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +34,6 @@ public final class Bopping {
                 }
                 paths.map(Path::toAbsolutePath)
                         .distinct()
-                        .parallel()
                         .filter(Files::isDirectory)
                         .forEach(path -> {
                             try {
@@ -66,10 +64,21 @@ public final class Bopping {
                 .parallel()
                 .map(savesPath::resolve) // Map to world paths
                 .filter(Bopping::shouldDelete) // Filter for only ones that should be deleted
-                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
+                /* Sorting notes:
+                   - Sorting directly with lastModified takes quite a long time, probably due to either it being run
+                     multiple times per world and/or because doing it during sorting ruins parallelism
+                   - Sorting based on the world numbers is practically instant, but presents issues with duplicate
+                     world names, and mixing set/random/benchmark/demo seeds
+                   - Mapping the path into a pair of the path and its modification timestamp seems to be much quicker
+                     than directly sorting on timestamps, but still way slower than world numbers because it has to
+                     ask the OS/FS for the timestamps. It's an acceptable amount of time (~2 seconds per 50k worlds),
+                     so this is this solution that will be used. */
+                .map(path -> Pair.of(path, path.toFile().lastModified()))
+                .sorted(Comparator.comparingLong(p -> -p.getRight())) // Sort by most recent first
+                .map(Pair::getLeft) // map back to the path of the pair
+                .skip(36) // Remove the first 36 (or less) worlds
                 .collect(Collectors.toList());
-        // Remove the first 36 (or less) worlds
-        worldsToRemove.subList(0, Math.min(36, worldsToRemove.size())).clear();
+
         // Actually delete stuff
         int total = worldsToRemove.size();
         if (worldsToRemove.isEmpty()) {
@@ -86,9 +95,9 @@ public final class Bopping {
             } catch (IOException e) {
                 Jingle.logError("Failed to delete world \"" + path + "\".", e);
             }
-            int i = cleared.incrementAndGet();
-            if (i % 50 == 0) {
-                Jingle.log(Level.INFO, "Clearing \"" + instancePath + "\": " + i + "/" + total);
+            if (cleared.incrementAndGet() % 500 == 0) {
+                Thread.currentThread().setName("world-bopper");
+                Jingle.log(Level.INFO, String.format("Cleared %d/%d", cleared.get(), total));
             }
         });
         Jingle.log(Level.INFO, "Cleared worlds for \"" + instancePath + "\"");
