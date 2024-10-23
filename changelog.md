@@ -4,6 +4,8 @@ Changes in v1.1.0:
   - Find it in Plugins -> EyeSee
   - In simpler terms, this adds the commonly requested zoom window with a ruler that was present in Julti, without needing OBS
   - As with Julti, it may not work with certain hardware configurations, a warning is included in the plugin tab
+- Major world bopping improvements, worlds should clear significantly faster
+  - Do note that it will only log every 500 worlds cleared instead of every 50 now
 - Add "Minimize Projector When Inactive" option for the OBS Projector
 - Added customizable borderless position (right-click the "Go Borderless" button)
 - Some GUI tweaks/fixes
