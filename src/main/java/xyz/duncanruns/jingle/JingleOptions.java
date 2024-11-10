@@ -28,7 +28,7 @@ public class JingleOptions {
     public List<JsonObject> hotkeys = new ArrayList<>();
     public Set<String> disabledDefaultScripts = new HashSet<>(Collections.singletonList("Coop Mode"));
     public boolean checkForUpdates = true;
-    public boolean usePreReleases = false;
+    public boolean usePreReleases = Jingle.VERSION.contains("+pre");
     public String lastCheckedVersion = "";
     public boolean minimizeToTray = false;
 
