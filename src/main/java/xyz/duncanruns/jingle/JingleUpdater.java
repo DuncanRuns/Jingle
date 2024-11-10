@@ -8,6 +8,7 @@ import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.GrabUtil;
 import xyz.duncanruns.jingle.util.PowerShellUtil;
+import xyz.duncanruns.jingle.util.VersionUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -68,6 +69,7 @@ public final class JingleUpdater {
                 meta = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Jingle/main/meta.json");
             } catch (Exception e) {
                 Jingle.logError("Failed to grab Jingle update meta:", e);
+                return;
             }
         }
 
@@ -85,20 +87,45 @@ public final class JingleUpdater {
             latestDownloadKey = "latest_dev_download";
         }
 
-        if (!(meta.has(latestVersionKey) && meta.has(latestDownloadKey))) return;
+        if (!(meta.has(latestVersionKey) && meta.has(latestDownloadKey))) {
+            Jingle.log(Level.ERROR, "Update meta has invalid json!");
+            return;
+        }
 
         String foundLatestVersion = meta.get(latestVersionKey).getAsString();
         String downloadLink = meta.get(latestDownloadKey).getAsString();
 
-        if (Objects.equals(currentVersion, foundLatestVersion)) return;
-        if (Objects.equals(lastCheckedVersion, foundLatestVersion)) return;
+        checkForUpdates(currentVersion, foundLatestVersion, lastCheckedVersion, downloadLink);
+    }
+
+    private static void checkForUpdates(String currentVersion, String foundLatestVersion, String lastCheckedVersion, String downloadLink) {
+        // Cancel if the latest found is the exact same as the current one
+        if (Objects.equals(currentVersion, foundLatestVersion)) {
+            Jingle.log(Level.INFO, "No new updates found: on latest version.");
+            return;
+        }
+        // Cancel if the current > latest found
+        if (VersionUtil.tryCompare(
+                VersionUtil.extractVersion(currentVersion),
+                VersionUtil.extractVersion(foundLatestVersion),
+                -1
+        ) > 0) {
+            Jingle.log(Level.INFO, "No new updates found: on a later version than the latest found.");
+            return;
+        }
+        // Cancel if
+        if (Objects.equals(lastCheckedVersion, foundLatestVersion)) {
+            Jingle.log(Level.INFO, "No new updates found: already skipped this version.");
+            return;
+        }
 
         synchronized (Jingle.class) {
+            Jingle.options = JingleOptions.load();
             Jingle.options.lastCheckedVersion = foundLatestVersion;
         }
 
         // Update available!!!
-        int ans = JOptionPane.showConfirmDialog(JingleGUI.get(), String.format("A new version of Jingle is available! Current version: %s, new version: %s.", currentVersion, foundLatestVersion), "Jingle: Update available", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+        int ans = JOptionPane.showConfirmDialog(JingleGUI.get(), String.format("A new version of Jingle is available! Current version: %s, newest version: %s.", currentVersion, foundLatestVersion), "Jingle: Update available", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (ans != 0) return;
 
@@ -106,7 +133,7 @@ public final class JingleUpdater {
             update(downloadLink);
         } catch (Exception e) {
             Jingle.logError("Failed to update (wtf)!", e);
-            JOptionPane.showMessageDialog(null, "Failed to update Jingle!!!! (BAD)" + ExceptionUtil.toDetailedString(e));
+            JOptionPane.showMessageDialog(null, "Failed to update Jingle!!!! (BAD)\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 
