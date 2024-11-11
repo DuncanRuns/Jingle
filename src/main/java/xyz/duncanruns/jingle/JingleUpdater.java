@@ -95,29 +95,7 @@ public final class JingleUpdater {
         String foundLatestVersion = meta.get(latestVersionKey).getAsString();
         String downloadLink = meta.get(latestDownloadKey).getAsString();
 
-        checkForUpdates(currentVersion, foundLatestVersion, lastCheckedVersion, downloadLink);
-    }
-
-    private static void checkForUpdates(String currentVersion, String foundLatestVersion, String lastCheckedVersion, String downloadLink) {
-        // Cancel if the latest found is the exact same as the current one
-        if (Objects.equals(currentVersion, foundLatestVersion)) {
-            Jingle.log(Level.INFO, "No new updates found: on latest version.");
-            return;
-        }
-        // Cancel if the current > latest found
-        if (VersionUtil.tryCompare(
-                VersionUtil.extractVersion(currentVersion),
-                VersionUtil.extractVersion(foundLatestVersion),
-                -1
-        ) > 0) {
-            Jingle.log(Level.INFO, "No new updates found: on a later version than the latest found.");
-            return;
-        }
-        // Cancel if
-        if (Objects.equals(lastCheckedVersion, foundLatestVersion)) {
-            Jingle.log(Level.INFO, "No new updates found: already skipped this version.");
-            return;
-        }
+        if (!shouldUpdate(currentVersion, foundLatestVersion, lastCheckedVersion)) return;
 
         synchronized (Jingle.class) {
             Jingle.options = JingleOptions.load();
@@ -135,6 +113,38 @@ public final class JingleUpdater {
             Jingle.logError("Failed to update (wtf)!", e);
             JOptionPane.showMessageDialog(null, "Failed to update Jingle!!!! (BAD)\n" + ExceptionUtil.toDetailedString(e));
         }
+    }
+
+    private static boolean shouldUpdate(String currentVersion, String foundLatestVersion, String lastCheckedVersion) {
+        // Cancel if the latest found is the exact same as the current one
+        if (Objects.equals(currentVersion, foundLatestVersion)) {
+            Jingle.log(Level.INFO, "No new updates found: on latest version.");
+            return false;
+        }
+
+        // Cancel if the current > latest found
+        int comp = VersionUtil.tryCompare(
+                VersionUtil.extractVersion(currentVersion),
+                VersionUtil.extractVersion(foundLatestVersion),
+                -1
+        );
+        if (comp > 0) {
+            Jingle.log(Level.INFO, "No new updates found: on a later version than the latest found.");
+            return false;
+        }
+
+        // Cancel if latest is a pre-release of the current version (never downgrade to pre release)
+        if (comp == 0 && foundLatestVersion.contains("+pre")) {
+            Jingle.log(Level.INFO, "No new updates found: latest found version is a pre release of the currently used version.");
+            return false;
+        }
+
+        // Cancel if already checked latest version
+        if (Objects.equals(lastCheckedVersion, foundLatestVersion)) {
+            Jingle.log(Level.INFO, "No new updates found: already skipped this version.");
+            return false;
+        }
+        return true;
     }
 
     private static void update(String download) throws IOException, PowerShellExecutionException {
@@ -168,6 +178,22 @@ public final class JingleUpdater {
         JProgressBar bar = new DownloadProgressFrame(location).getBar();
         bar.setMaximum((int) GrabUtil.getFileSize(download));
         GrabUtil.download(download, newJarPath, bar::setValue, 128);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("E = expected, logs for false reason should be above the test print.\n");
+        System.out.println("1 (E: true): " + assertEqualsAndReturn(true, shouldUpdate("1.0.0", "1.1.0", "1.0.0")));
+        System.out.println("1 (E: true): " + assertEqualsAndReturn(true, shouldUpdate("1.0.0", "1.1.0+pre1234", "1.0.0")));
+        System.out.println("2 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "0.9", "1.0.0")));
+        System.out.println("3 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "1.0.0+pre1", "1.0.0")));
+        System.out.println("4 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "1.1.0", "1.1.0")));
+        System.out.println("Tests Completed!");
+        System.exit(0);
+    }
+
+    private static Object assertEqualsAndReturn(Object expected, Object value) {
+        if (!Objects.equals(expected, value)) throw new AssertionError("Expected: " + expected + ", Value: " + value);
+        return value;
     }
 
     private static class DownloadProgressFrame extends JFrame {
