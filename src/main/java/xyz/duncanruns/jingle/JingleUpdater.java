@@ -183,10 +183,12 @@ public final class JingleUpdater {
     public static void main(String[] args) {
         System.out.println("E = expected, logs for false reason should be above the test print.\n");
         System.out.println("1 (E: true): " + assertEqualsAndReturn(true, shouldUpdate("1.0.0", "1.1.0", "1.0.0")));
-        System.out.println("1 (E: true): " + assertEqualsAndReturn(true, shouldUpdate("1.0.0", "1.1.0+pre1234", "1.0.0")));
-        System.out.println("2 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "0.9", "1.0.0")));
-        System.out.println("3 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "1.0.0+pre1", "1.0.0")));
-        System.out.println("4 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "1.1.0", "1.1.0")));
+        System.out.println("2 (E: true): " + assertEqualsAndReturn(true, shouldUpdate("1.0.0", "1.1.0+pre1234", "1.0.0")));
+        System.out.println("3 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "0.9", "1.0.0")));
+        System.out.println("4 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "1.0.0+pre1", "1.0.0")));
+        System.out.println("5 (E: false): " + assertEqualsAndReturn(false, shouldUpdate("1.0.0", "1.1.0", "1.1.0")));
+        System.out.println("6 (E: true): " + assertEqualsAndReturn(true, shouldUpdate("1.1.0+pre1", "1.1.0", "1.0.0")));
+        System.out.println("7 (E: true): " + assertEqualsAndReturn(true, shouldUpdate("1.1.0+pre1", "1.1.0+pre2", "1.0.0")));
         System.out.println("Tests Completed!");
         System.exit(0);
     }
