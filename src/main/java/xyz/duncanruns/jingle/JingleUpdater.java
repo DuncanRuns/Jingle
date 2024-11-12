@@ -134,7 +134,7 @@ public final class JingleUpdater {
         }
 
         // Cancel if latest is a pre-release of the current version (never downgrade to pre release)
-        if (comp == 0 && foundLatestVersion.contains("+pre")) {
+        if (comp == 0 && foundLatestVersion.contains("+pre") && !currentVersion.contains("+pre")) {
             Jingle.log(Level.INFO, "No new updates found: latest found version is a pre release of the currently used version.");
             return false;
         }
