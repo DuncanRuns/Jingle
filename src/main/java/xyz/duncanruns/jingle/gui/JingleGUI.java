@@ -99,7 +99,7 @@ public class JingleGUI extends JFrame {
         this.finalizeComponents();
         this.setTitle("Jingle v" + Jingle.VERSION);
         this.setContentPane(this.mainPanel);
-        this.setPreferredSize(new Dimension(600, 400));
+        this.setPreferredSize(new Dimension(Jingle.options.lastSize[0], Jingle.options.lastSize[1]));
         this.setLocation(Jingle.options.lastPosition[0], Jingle.options.lastPosition[1]);
         this.setIconImage(getLogo());
         this.setInstance(null);
@@ -107,7 +107,9 @@ public class JingleGUI extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 Point location = JingleGUI.this.getLocation();
+                Dimension size = JingleGUI.this.getSize();
                 Jingle.options.lastPosition = new int[]{location.x, location.y};
+                Jingle.options.lastSize = new int[]{size.width, size.height};
                 if (!JingleGUI.this.jingleUpdating) Jingle.stop(true);
             }
         });

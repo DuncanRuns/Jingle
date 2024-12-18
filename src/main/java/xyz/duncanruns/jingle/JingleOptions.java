@@ -24,6 +24,7 @@ public class JingleOptions {
     public Integer optionsVersion = DEFAULT_LOADED_OPTIONS_VERSION;
 
     public int[] lastPosition = new int[]{50, 50};
+    public int[] lastSize = new int[]{600, 400};
     public Map<String, Long> seenPaths = new HashMap<>();
     public List<JsonObject> hotkeys = new ArrayList<>();
     public Set<String> disabledDefaultScripts = new HashSet<>(Collections.singletonList("Coop Mode"));
