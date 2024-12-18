@@ -180,6 +180,7 @@ public class JingleGUI extends JFrame {
         });
     }
 
+    @SuppressWarnings("unused")
     public void registerQuickActionButton(int priority, Supplier<JButton> buttonSupplier) {
         this.quickActionButtonSuppliers.add(Pair.of(priority, buttonSupplier));
     }

@@ -21,6 +21,7 @@ public final class LuaLibraries {
     private LuaLibraries() {
     }
 
+    @SuppressWarnings("unused")
     public static void registerLuaLibrary(BiFunction<ScriptFile, Globals, LuaLibrary> libraryProvider) {
         LIBRARY_PROVIDERS.add(libraryProvider);
     }
