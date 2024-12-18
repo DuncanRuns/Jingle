@@ -40,6 +40,7 @@ public class JingleOptions {
     public boolean minimizeProjector;
 
     @Nullable public int[] borderlessPosition = null;
+    public boolean autoBorderless = false;
 
     private JingleOptions() {
     }

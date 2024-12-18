@@ -89,6 +89,7 @@ public class JingleGUI extends JFrame {
     private JCheckBox minimizeProjectorBox;
     private JButton resetProjNameButton;
     private JButton customizeBorderlessButton;
+    private JCheckBox autoBorderlessCheckBox;
     public boolean jingleUpdating = false;
 
     public RollingDocument logDocumentWithDebug = new RollingDocument();
@@ -307,6 +308,10 @@ public class JingleGUI extends JFrame {
         this.hotkeyListPanel.reload();
 
         this.customizeBorderlessButton.addActionListener(e -> customizeBorderless());
+        setCheckBoxBoolean(this.autoBorderlessCheckBox, Jingle.options.autoBorderless, b -> {
+            Jingle.options.autoBorderless = b;
+            if (b) Jingle.goBorderless();
+        });
     }
 
     private void customizeBorderless() {
@@ -482,10 +487,10 @@ public class JingleGUI extends JFrame {
         mainTabbedPane.addTab("Options", scrollPane2);
         scrollPane2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(6, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel2.setLayout(new GridLayoutManager(7, 1, new Insets(5, 5, 5, 5), -1, -1));
         scrollPane2.setViewportView(panel2);
         final Spacer spacer2 = new Spacer();
-        panel2.add(spacer2, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel2.add(spacer2, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         checkForUpdatesCheckBox = new JCheckBox();
         checkForUpdatesCheckBox.setText("Check for Updates");
         panel2.add(checkForUpdatesCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -500,6 +505,9 @@ public class JingleGUI extends JFrame {
         customizeBorderlessButton = new JButton();
         customizeBorderlessButton.setText("Customize Borderless");
         panel2.add(customizeBorderlessButton, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        autoBorderlessCheckBox = new JCheckBox();
+        autoBorderlessCheckBox.setText("Auto Borderless");
+        panel2.add(autoBorderlessCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         logJPanel = new JPanel();
         logJPanel.setLayout(new GridLayoutManager(2, 2, new Insets(5, 5, 5, 5), -1, -1));
         mainTabbedPane.addTab("Log", logJPanel);

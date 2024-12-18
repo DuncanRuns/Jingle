@@ -224,6 +224,7 @@ public final class Jingle {
         resetStates();
         JingleGUI.get().setInstance(instance);
         if (instance != null) seeInstancePath(instance.instancePath);
+        if (options.autoBorderless) goBorderless();
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
         ScriptStuff.MAIN_INSTANCE_CHANGED.runAll();
