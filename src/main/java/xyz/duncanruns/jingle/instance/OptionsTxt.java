@@ -39,7 +39,7 @@ public class OptionsTxt {
         if (newMTime == this.mTime) return;
         this.mTime = newMTime;
 
-        this.options.clear();
+        // this.options.clear(); // We don't clear in case we are reading a file which is currently being written, instead we can just override options.
         for (String line : FileUtil.readString(this.path).split("\\n")) {
             line = line.trim();
             int i = line.indexOf(":");
