@@ -26,22 +26,26 @@ public final class Bopping {
                 JingleGUI.get().clearWorldsButton.setEnabled(false);
                 JingleGUI.get().clearWorldsFromAllButton.setEnabled(false);
                 Stream<Path> paths;
+                int totalInstances = allSeen ? Jingle.options.seenPaths.size() : 1;
                 if (allSeen) {
                     paths = Jingle.options.seenPaths.keySet().stream()
                             .map(Paths::get);
+                    totalInstances = Jingle.options.seenPaths.size();
                 } else {
                     paths = Jingle.getMainInstance().map(instance -> Stream.of(instance.instancePath)).orElseGet(Stream::empty);
                 }
-                paths.map(Path::toAbsolutePath)
+                int cleared = paths.map(Path::toAbsolutePath)
                         .distinct()
                         .filter(Files::isDirectory)
-                        .forEach(path -> {
+                        .mapToInt(path -> {
                             try {
-                                clearWorlds(path);
+                                return clearWorlds(path);
                             } catch (IOException e) {
                                 Jingle.logError("Failed to clear worlds:", e);
                             }
-                        });
+                            return 0;
+                        }).sum();
+                Jingle.log(Level.INFO, "Cleared " + cleared + " world" + (cleared == 1 ? "" : "s") + " from " + totalInstances + " instance" + (totalInstances == 1 ? "" : "s") + ".");
                 synchronized (Jingle.class) {
                     JingleGUI.get().clearWorldsButton.setEnabled(Jingle.getMainInstance().isPresent());
                     JingleGUI.get().clearWorldsFromAllButton.setEnabled(true);
@@ -51,13 +55,12 @@ public final class Bopping {
     }
 
 
-    private static void clearWorlds(Path instancePath) throws IOException {
+    private static int clearWorlds(Path instancePath) throws IOException {
         Path savesPath = instancePath.resolve("saves");
         // Check if saves folder exists first
         if (!Files.isDirectory(savesPath)) {
-            return;
+            return 0;
         }
-        Jingle.log(Level.INFO, "Finding worlds to delete for \"" + instancePath + "\"...");
         // Get all worlds that are allowed to be deleted
 
         List<Path> worldsToRemove = Files.list(savesPath) // Get all world paths
@@ -82,8 +85,7 @@ public final class Bopping {
         // Actually delete stuff
         int total = worldsToRemove.size();
         if (worldsToRemove.isEmpty()) {
-            Jingle.log(Level.INFO, "No worlds to clear for \"" + instancePath + "\"");
-            return;
+            return 0;
         }
         AtomicInteger cleared = new AtomicInteger();
         worldsToRemove.parallelStream().forEach(path -> {
@@ -100,7 +102,7 @@ public final class Bopping {
                 Jingle.log(Level.INFO, String.format("Cleared %d/%d", cleared.get(), total));
             }
         });
-        Jingle.log(Level.INFO, "Cleared worlds for \"" + instancePath + "\"");
+        return cleared.get();
     }
 
     private static boolean shouldDelete(Path path) {
