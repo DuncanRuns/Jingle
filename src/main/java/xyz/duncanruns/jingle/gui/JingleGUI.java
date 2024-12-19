@@ -99,7 +99,6 @@ public class JingleGUI extends JFrame {
     public JingleGUI() {
         this.$$$setupUI$$$();
         this.finalizeComponents();
-        this.refreshQuickActions();
         this.setTitle("Jingle v" + Jingle.VERSION);
         this.setContentPane(this.mainPanel);
         this.setPreferredSize(new Dimension(Jingle.options.lastSize[0], Jingle.options.lastSize[1]));

@@ -73,6 +73,7 @@ public final class Jingle {
 
         ScriptStuff.reloadScripts();
         JingleGUI.get().scriptListPanel.reload();
+        JingleGUI.get().refreshQuickActions();
         HotkeyManager.reload();
         HotkeyManager.start();
 
