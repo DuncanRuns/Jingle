@@ -6,7 +6,7 @@ import xyz.duncanruns.jingle.win32.User32;
 import java.util.regex.Pattern;
 
 public final class WindowTitleUtil {
-    private static final Pattern MC_PATTERN = Pattern.compile("^Minecraft\\*? .+$");
+    private static final Pattern MC_PATTERN = Pattern.compile("^Minecraft\\*? ?.+$");
 
     private WindowTitleUtil() {
     }

@@ -218,6 +218,7 @@ public final class Jingle {
     }
 
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
+        undoWindowTitle(mainInstance);
         if (mainInstance == instance) return;
         mainInstance = instance == null ? null : new OpenedInstance(instance, Jingle::onInstanceStateChange);
         legalModCheckNeeded = instance != null;
@@ -228,6 +229,13 @@ public final class Jingle {
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
         ScriptStuff.MAIN_INSTANCE_CHANGED.runAll();
+    }
+
+    private static void undoWindowTitle(OpenedInstance instance) {
+        if (instance == null) return;
+        if (User32.INSTANCE.IsWindow(instance.hwnd)) {
+            User32.INSTANCE.SetWindowTextA(instance.hwnd, "Minecraft*");
+        }
     }
 
     private static void resetStates() {
@@ -273,6 +281,7 @@ public final class Jingle {
                 OBSProjector.closeAnyMeasuringProjectors();
             } catch (Throwable ignored) { // We really don't care if this fails lol
             }
+            getMainInstance().ifPresent(Jingle::undoWindowTitle);
             options.save();
             log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {
