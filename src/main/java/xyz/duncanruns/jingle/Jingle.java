@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,8 +73,11 @@ public final class Jingle {
         running = true;
 
         ScriptStuff.reloadScripts();
-        JingleGUI.get().scriptListPanel.reload();
-        JingleGUI.get().refreshQuickActions();
+        SwingUtilities.invokeLater(() ->{
+            JingleGUI.get().scriptListPanel.reload();
+            JingleGUI.get().refreshQuickActions();
+            JingleGUI.get().refreshHack();
+        } );
         HotkeyManager.reload();
         HotkeyManager.start();
 

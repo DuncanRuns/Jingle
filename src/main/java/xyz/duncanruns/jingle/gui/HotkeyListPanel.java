@@ -106,7 +106,7 @@ public class HotkeyListPanel extends JPanel {
                 this.reload();
                 HotkeyManager.reload();
             }
-            this.fixGhostBug();
+            JingleGUI.get().refreshHack();
         });
         return removeButton;
     }
@@ -124,15 +124,9 @@ public class HotkeyListPanel extends JPanel {
                 HotkeyManager.reload();
             }
             this.reload();
-            this.fixGhostBug();
+            JingleGUI.get().refreshHack();
         });
         return editButton;
     }
 
-    private void fixGhostBug() {
-        JTabbedPane mainTabbedPane = JingleGUI.get().mainTabbedPane;
-        int i = mainTabbedPane.getSelectedIndex();
-        mainTabbedPane.setSelectedIndex(0);
-        mainTabbedPane.setSelectedIndex(i);
-    }
 }
