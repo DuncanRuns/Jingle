@@ -29,6 +29,11 @@ public final class JingleAppLaunch {
     }
 
     public static void main(String[] args) {
+        if (!System.getProperty("os.name").startsWith("Windows")) {
+            JOptionPane.showMessageDialog(null,"Jingle is only compatible with Windows. Jingle will now exit to prevent any issues from trying to launch on an invalid operating system.");
+            return;
+        }
+
         JingleAppLaunch.args = args;
         System.out.println("Launched with args: " + Arrays.toString(args));
 
