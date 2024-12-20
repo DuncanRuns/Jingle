@@ -181,6 +181,21 @@ public class JingleGUI extends JFrame {
     }
 
     @SuppressWarnings("unused")
+    public static JButton makeButton(String text, @Nullable Runnable onClick, @Nullable Runnable onRightClick, @Nullable String toolTipText, @Nullable Boolean enabled) {
+        JButton button = new JButton(text);
+        if (onClick != null) button.addActionListener(a -> onClick.run());
+        if (onRightClick != null) button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == 3) onRightClick.run();
+            }
+        });
+        if (toolTipText != null) button.setToolTipText(toolTipText);
+        if (enabled != null) button.setEnabled(enabled);
+        return button;
+    }
+
+    @SuppressWarnings("unused")
     public void registerQuickActionButton(int priority, Supplier<JButton> buttonSupplier) {
         this.quickActionButtonSuppliers.add(Pair.of(-priority, buttonSupplier));
     }
