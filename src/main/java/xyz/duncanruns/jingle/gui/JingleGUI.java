@@ -19,6 +19,7 @@ import xyz.duncanruns.jingle.util.KeyboardUtil;
 import xyz.duncanruns.jingle.util.OpenUtil;
 import xyz.duncanruns.jingle.util.ResourceUtil;
 
+import javax.annotation.Nullable;
 import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -54,6 +55,10 @@ public class JingleGUI extends JFrame {
     public JTabbedPane mainTabbedPane;
     public JButton clearWorldsFromAllButton;
     public JButton addHotkeyButton;
+    public ScriptListPanel scriptListPanel;
+    public boolean jingleUpdating = false;
+    public RollingDocument logDocumentWithDebug = new RollingDocument();
+    public RollingDocument logDocument = new RollingDocument();
     private JPanel instancePanel;
     private JTabbedPane pluginsTabbedPane;
     private JPanel noPluginsLoadedTab;
@@ -61,7 +66,6 @@ public class JingleGUI extends JFrame {
     private HotkeyListPanel hotkeyListPanel;
     private JPanel extraButtonsPanel;
     private JButton openJingleFolderButton;
-    public ScriptListPanel scriptListPanel;
     private JButton reloadScriptsButton;
     private JButton openScriptsFolderButton;
     private JButton copyScriptPathButton;
@@ -92,9 +96,6 @@ public class JingleGUI extends JFrame {
     private JButton customizeBorderlessButton;
     private JCheckBox autoBorderlessCheckBox;
     private JPanel quickActionsPanel;
-    public boolean jingleUpdating = false;
-    public RollingDocument logDocumentWithDebug = new RollingDocument();
-    public RollingDocument logDocument = new RollingDocument();
 
     public JingleGUI() {
         this.$$$setupUI$$$();
