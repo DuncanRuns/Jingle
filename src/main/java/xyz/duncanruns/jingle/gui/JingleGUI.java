@@ -760,4 +760,15 @@ public class JingleGUI extends JFrame {
         mainTabbedPane.setSelectedIndex((selectedIndex + 1) % mainTabbedPane.getTabCount());
         mainTabbedPane.setSelectedIndex(selectedIndex);
     }
+
+    public void openTab(Component tab) {
+        if (pluginsTabbedPane.indexOfComponent(tab) != -1) {
+            mainTabbedPane.setSelectedComponent(pluginsTab);
+            pluginsTabbedPane.setSelectedComponent(tab);
+        } else if (mainTabbedPane.indexOfComponent(tab) != -1) {
+            mainTabbedPane.setSelectedComponent(tab);
+        } else {
+            throw new IllegalArgumentException("Tab does not exist!");
+        }
+    }
 }
