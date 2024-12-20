@@ -751,6 +751,7 @@ public class JingleGUI extends JFrame {
                 .sorted(Comparator.comparingInt(Pair::getLeft))
                 .map(Pair::getRight)
                 .map(Supplier::get)
+                .filter(Objects::nonNull)
                 .forEach(quickActionsPanel::add);
         if (quickActionButtonSuppliers.isEmpty()) quickActionsPanel.add(new JLabel("No Quick Actions Available"));
     }
