@@ -746,8 +746,7 @@ public class JingleGUI extends JFrame {
 
     public void refreshQuickActions() {
         quickActionsPanel.removeAll();
-        WrapLayout mgr = new WrapLayout();
-        quickActionsPanel.setLayout(mgr);
+        quickActionsPanel.setLayout(new WrapLayout());
         quickActionButtonSuppliers.stream()
                 .sorted(Comparator.comparingInt(Pair::getLeft))
                 .map(Pair::getRight)
