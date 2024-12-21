@@ -237,6 +237,7 @@ public class JingleGUI extends JFrame {
                 if (e.getButton() == 3) customizeBorderless();
             }
         });
+        this.goBorderlessButton.setToolTipText("Right Click to Configure");
         this.openMinecraftFolderButton.addActionListener(a -> Jingle.openInstanceFolder());
 
         ((DefaultCaret) this.logTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
