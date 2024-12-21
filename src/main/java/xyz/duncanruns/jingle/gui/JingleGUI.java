@@ -763,13 +763,14 @@ public class JingleGUI extends JFrame {
     public void refreshQuickActions() {
         quickActionsPanel.removeAll();
         quickActionsPanel.setLayout(new WrapLayout());
-        quickActionButtonSuppliers.stream()
+        List<JButton> buttons = quickActionButtonSuppliers.stream()
                 .sorted(Comparator.comparingInt(Pair::getLeft))
                 .map(Pair::getRight)
                 .map(Supplier::get)
                 .filter(Objects::nonNull)
-                .forEach(quickActionsPanel::add);
-        if (quickActionButtonSuppliers.isEmpty()) quickActionsPanel.add(new JLabel("No Quick Actions Available"));
+                .collect(Collectors.toList());
+        if (buttons.isEmpty()) quickActionsPanel.add(new JLabel("No Quick Actions Available"));
+        else buttons.forEach(quickActionsPanel::add);
     }
 
     public void refreshHack() {
