@@ -9,9 +9,18 @@ Changes in v1.1.0:
 - Added Program Launcher Plugin (@joe-ldp)
 - Major world bopping improvements, worlds should clear significantly faster
     - Do note that it will only log every 500 worlds cleared instead of every 50 now
-- Add "Minimize Projector When Inactive" option for the OBS Projector
-- Added customizable borderless position (right-click the "Go Borderless" button)
+- Added "Minimize Projector When Inactive" option for the OBS Projector
+- Added customizable borderless position (right-click the "Go Borderless" button or go to options tab)
+- Added Auto Borderless
+- Added a "Quick Actions" section to the main Jingle tab
+    - This area is for buttons that a user may need to use often enough such that it's annoying to sift through the tabs in Jingle
+    - The new Program Launcher plugin adds a button here for launching the configured programs and/or Minecraft
+    - The PaceMan Tracker plugin adds a button here for disabling/enabling the tracker (same with the AA tracker); the button will only appear if you have an access token entered
+    - Buttons can be right-clicked to go to relevant configuration screens, as long as the plugin that added the button configures a right-click action
 - Fixed update suggestion when downloading pre-release from GitHub
+- Window titles (`Minecraft* - Instance 1`) will now revert after they are no longer the main instance on Jingle or if Jingle closes. This helps OBS capture the correct instance
+- Moved "Basic Options" to a new options tab
+- The size of the Jingle window will now be remembered when closing
 - Some GUI tweaks/fixes
 
 Changes in v1.0.0:
