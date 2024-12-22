@@ -21,6 +21,7 @@ Changes in v1.1.0:
 - Window titles (`Minecraft* - Instance 1`) will now revert after they are no longer the main instance on Jingle or if Jingle closes. This helps OBS capture the correct instance
 - Moved "Basic Options" to a new options tab
 - The size of the Jingle window will now be remembered when closing
+- Fixed function to ask Windows for key names (@me-nx)
 - Some GUI tweaks/fixes
 
 Changes in v1.0.0:
