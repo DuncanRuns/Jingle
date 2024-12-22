@@ -1,12 +1,15 @@
 package xyz.duncanruns.jingle.util;
 
+import com.sun.jna.Memory;
 import com.sun.jna.platform.win32.BaseTSD;
+import com.sun.jna.platform.win32.WTypes;
 import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinUser;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+
 import xyz.duncanruns.jingle.win32.User32;
 
 import java.awt.*;
@@ -71,31 +74,27 @@ public final class KeyboardUtil {
                 );
     }
 
-    // This code may cause a system exit. Removed for safety.
-    //private static String findKeyName(int vKey) {
-    //    WTypes.LPSTR lpstr = new WTypes.LPSTR("");
-    //    User32.INSTANCE.GetKeyNameTextA(new WinDef.LONG(createLParamKeyDown(vKey).longValue()), lpstr, 128);
-    //    String out = lpstr.getValue();
-    //    if (out.isEmpty()) {
-    //        return "Unknown Key";
-    //    }
-    //    return out;
-    //}
+    private static String findKeyName(int vKey) {
+        final int BUFFER_SIZE = 128;
+
+        WTypes.LPSTR lpstr = new WTypes.LPSTR(new Memory(BUFFER_SIZE));
+        User32.INSTANCE.GetKeyNameTextA(new WinDef.LONG(createLParamKeyDown(vKey).longValue()), lpstr, BUFFER_SIZE);
+        String out = lpstr.getValue();
+        if (out.isEmpty()) {
+            return "Unknown Key";
+        }
+        return out;
+    }
 
     private static String[] getKeyNamesArray() {
-
-        // For some reason actually calling findKeyName will randomly cause a system exit.
-        //String[] names = new String[0xFE + 1];
-        //for (int vKey = 0; vKey <= 0xFE; vKey++) {
-        //    names[vKey] = findKeyName(vKey);
-        //}
-        //for (int vKey : new int[]{User32.VK_LCONTROL, User32.VK_LSHIFT, User32.VK_LMENU}) {
-        //    names[vKey] = "Left " + names[vKey];
-        //}
-        //return names;
-
-        // Original Strings generated from code above
-        return new String[]{"Unknown Key", "Left Click", "Right Click", "Scroll Lock", "Middle Click", "X1", "X2", "Unknown Key", "Backspace", "Tab", "Unknown Key", "Unknown Key", "Num 5", "Enter", "Unknown Key", "Unknown Key", "Shift", "Ctrl", "Alt", "Unknown Key", "Caps Lock", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Esc", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Space", "Page Up", "Page Down", "End", "Home", "Left", "Up", "Right", "Down", "Unknown Key", "Unknown Key", "Unknown Key", "Sys Req", "Insert", "Delete", "Unknown Key", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Num 0", "Num 1", "Num 2", "Num 3", "Num 4", "Num 5", "Num 6", "Num 7", "Num 8", "Num 9", "Num *", "Num +", "Unknown Key", "Num -", "Num Del", "Num /", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Num Lock", "Scroll Lock", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Left Shift", "Right Shift", "Left Ctrl", "Right Ctrl", "Left Alt", "Right Alt", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "M", "D", "C", "B", "P", "Q", "J", "G", "Unknown Key", "Unknown Key", "Unknown Key", "F", "Unknown Key", "Unknown Key", ";", "=", ",", "-", ".", "/", "`", "Unknown Key", "F15", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "[", "\\", "]", "'", "Unknown Key", "Unknown Key", "Unknown Key", "\\", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key", "Unknown Key"};
+        String[] names = new String[0xFE + 1];
+        for (int vKey = 0; vKey <= 0xFE; vKey++) {
+            names[vKey] = findKeyName(vKey);
+        }
+        for (int vKey : new int[]{User32.VK_LCONTROL, User32.VK_LSHIFT, User32.VK_LMENU}) {
+            names[vKey] = "Left " + names[vKey];
+        }
+        return names;
     }
 
     public static List<Integer> getPressedNonModKeys() {

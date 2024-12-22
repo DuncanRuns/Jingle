@@ -2,6 +2,7 @@ package xyz.duncanruns.jingle.win32;
 
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
+import com.sun.jna.platform.win32.WTypes.LPSTR;
 import com.sun.jna.ptr.IntByReference;
 
 /**
@@ -57,8 +58,7 @@ public interface User32 extends com.sun.jna.platform.win32.User32 {
 
     boolean SystemParametersInfoA(int uiAction, int uiParam, int pvParam, int fWinIni);
 
-    // This may somehow cause a system exit, removed for safety.
-    // int GetKeyNameTextA(LONG lParam, LPSTR lpString, int cchSize);
+    int GetKeyNameTextA(LONG lParam, LPSTR lpString, int cchSize);
 
     @Structure.FieldOrder({"cbSize", "flags", "hCursor", "ptScreenPos"})
     class CURSORINFO extends Structure {
