@@ -82,7 +82,7 @@ function run_start_coping()
 end
 
 function customize()
-    jingle.addCustomizationMenuText("Allowed states for 'Safe Resets' and 'Reset Before 20s':")
+    jingle.addCustomizationMenuText("Allowed states for 'Safe Reset' and 'Reset Before 20s':")
     jingle.addCustomizationMenuCheckBox("iwu", true, "In World, Unpaused")
     jingle.addCustomizationMenuCheckBox("iwp", true, "In World, Paused")
     jingle.addCustomizationMenuCheckBox("iwgso", false, "In World, Inventory/Chat Open")
