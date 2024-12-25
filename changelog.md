@@ -17,7 +17,7 @@ Changes in v1.1.0:
     - The new Program Launcher plugin adds a button here for launching the configured programs and/or Minecraft
     - The PaceMan Tracker plugin adds a button here for disabling/enabling the tracker (same with the AA tracker); the button will only appear if you have an access token entered
     - Buttons can be right-clicked to go to relevant configuration screens, as long as the plugin that added the button configures a right-click action
-- Changed default Thin BT size to 250x1000
+- Changed default Thin BT size to 280x1000
 - Fixed update suggestion when downloading pre-release from GitHub
 - Window titles (`Minecraft* - Instance 1`) will now revert after they are no longer the main instance on Jingle or if Jingle closes. This helps OBS capture the correct instance
 - Moved "Basic Options" to a new options tab
