@@ -42,7 +42,7 @@ permanent_normal_cursor_speed = nil
 
 function reload()
     eye_measuring_width, eye_measuring_height = get_size_customization("eye_measuring", 384, 16384)
-    thin_bt_width, thin_bt_height = get_size_customization("thin_bt", 250, 750)
+    thin_bt_width, thin_bt_height = get_size_customization("thin_bt", 250, 1000)
     planar_abuse_width, planar_abuse_height = get_size_customization("planar_abuse", 1920, 300)
     change_cursor_speed = jingle.getCustomizable("change_cursor_speed", tostring(false)) == "true"
     permanent_normal_cursor_speed = to_number_or_else(jingle.getCustomizable("permanent_normal_cursor_speed"), nil)
