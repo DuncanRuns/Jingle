@@ -95,6 +95,7 @@ public final class JingleUpdater {
         String foundLatestVersion = meta.get(latestVersionKey).getAsString();
         String downloadLink = meta.get(latestDownloadKey).getAsString();
 
+        Jingle.log(Level.DEBUG, String.format("Checking if Jingle should update (current=%s, found=%s, lastChecked=%s)", currentVersion, foundLatestVersion, lastCheckedVersion));
         if (!shouldUpdate(currentVersion, foundLatestVersion, lastCheckedVersion)) return;
 
         synchronized (Jingle.class) {
