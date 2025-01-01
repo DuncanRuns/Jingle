@@ -1,5 +1,9 @@
 Changes in v1.1.0:
 
+- Updated PaceMan Tracker to v0.7.0
+
+Changes in v1.1.0:
+
 - Ported the EyeSee projector from @draconix6's Julti plugin to a new Jingle plugin, and added as a default plugin
     - Find it in Plugins -> EyeSee
     - In simpler terms, this adds the commonly requested zoom window with a ruler that was present in Julti, without
