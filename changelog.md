@@ -1,4 +1,4 @@
-Changes in v1.1.0:
+Changes in v1.1.1:
 
 - Updated PaceMan Tracker to v0.7.0
 
