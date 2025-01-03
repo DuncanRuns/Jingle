@@ -158,7 +158,7 @@
             <properties/>
             <border type="empty"/>
             <children>
-              <grid id="5abfc" layout-manager="GridLayoutManager" row-count="7" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="5abfc" layout-manager="GridLayoutManager" row-count="9" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="5" left="5" bottom="5" right="5"/>
                 <constraints/>
                 <properties/>
@@ -166,7 +166,7 @@
                 <children>
                   <vspacer id="fe43d">
                     <constraints>
-                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
                   <component id="1964d" class="javax.swing.JCheckBox" binding="checkForUpdatesCheckBox" default-binding="true">
@@ -213,6 +213,20 @@
                     </constraints>
                     <properties>
                       <text value="Auto Borderless"/>
+                    </properties>
+                  </component>
+                  <component id="c40fc" class="javax.swing.JSeparator">
+                    <constraints>
+                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="2" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                  </component>
+                  <component id="5dd04" class="javax.swing.JCheckBox" binding="disableHotkeysWithF3CheckBox" default-binding="true">
+                    <constraints>
+                      <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Disable Hotkeys while holding F3"/>
                     </properties>
                   </component>
                 </children>

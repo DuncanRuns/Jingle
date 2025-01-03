@@ -96,6 +96,7 @@ public class JingleGUI extends JFrame {
     private JButton customizeBorderlessButton;
     private JCheckBox autoBorderlessCheckBox;
     private JPanel quickActionsPanel;
+    private JCheckBox disableHotkeysWithF3CheckBox;
 
     public JingleGUI() {
         this.$$$setupUI$$$();
@@ -335,6 +336,7 @@ public class JingleGUI extends JFrame {
             Jingle.options.autoBorderless = b;
             if (b) Jingle.goBorderless();
         });
+        setCheckBoxBoolean(this.disableHotkeysWithF3CheckBox, Jingle.options.disableHotkeysWithF3, b -> Jingle.options.disableHotkeysWithF3 = b);
     }
 
     private void customizeBorderless() {
@@ -515,10 +517,10 @@ public class JingleGUI extends JFrame {
         mainTabbedPane.addTab("Options", scrollPane2);
         scrollPane2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(7, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel2.setLayout(new GridLayoutManager(9, 1, new Insets(5, 5, 5, 5), -1, -1));
         scrollPane2.setViewportView(panel2);
         final Spacer spacer1 = new Spacer();
-        panel2.add(spacer1, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel2.add(spacer1, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         checkForUpdatesCheckBox = new JCheckBox();
         checkForUpdatesCheckBox.setText("Check for Updates");
         panel2.add(checkForUpdatesCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -536,6 +538,11 @@ public class JingleGUI extends JFrame {
         autoBorderlessCheckBox = new JCheckBox();
         autoBorderlessCheckBox.setText("Auto Borderless");
         panel2.add(autoBorderlessCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JSeparator separator4 = new JSeparator();
+        panel2.add(separator4, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        disableHotkeysWithF3CheckBox = new JCheckBox();
+        disableHotkeysWithF3CheckBox.setText("Disable Hotkeys while holding F3");
+        panel2.add(disableHotkeysWithF3CheckBox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         logJPanel = new JPanel();
         logJPanel.setLayout(new GridLayoutManager(2, 2, new Insets(5, 5, 5, 5), -1, -1));
         mainTabbedPane.addTab("Log", logJPanel);
@@ -561,8 +568,8 @@ public class JingleGUI extends JFrame {
         scrollPane4.setViewportView(hotkeyListPanel);
         final Spacer spacer3 = new Spacer();
         hotkeysJPanel.add(spacer3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final JSeparator separator4 = new JSeparator();
-        hotkeysJPanel.add(separator4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JSeparator separator5 = new JSeparator();
+        hotkeysJPanel.add(separator5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         hotkeysJPanel.add(panel3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -590,8 +597,8 @@ public class JingleGUI extends JFrame {
         reloadScriptsButton = new JButton();
         reloadScriptsButton.setText("Reload Scripts");
         panel4.add(reloadScriptsButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JSeparator separator5 = new JSeparator();
-        scriptsJPanel.add(separator5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JSeparator separator6 = new JSeparator();
+        scriptsJPanel.add(separator6, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         pluginsTab = new JPanel();
         pluginsTab.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Plugins", pluginsTab);
@@ -638,8 +645,8 @@ public class JingleGUI extends JFrame {
         final JLabel label7 = new JLabel();
         label7.setText("5. Press the bottom bar and press Ctrl+V to paste the script path, then press Open to add the script.");
         panel6.add(label7, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JSeparator separator6 = new JSeparator();
-        panel6.add(separator6, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JSeparator separator7 = new JSeparator();
+        panel6.add(separator7, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         projectorCheckBox = new JCheckBox();
         projectorCheckBox.setText("Enable OBS Eye Measuring Projector");
         panel6.add(projectorCheckBox, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

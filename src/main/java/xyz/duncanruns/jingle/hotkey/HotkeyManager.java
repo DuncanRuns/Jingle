@@ -1,10 +1,12 @@
 package xyz.duncanruns.jingle.hotkey;
 
 import com.google.gson.JsonObject;
+import com.sun.jna.platform.win32.Win32VK;
 import org.apache.commons.lang3.tuple.Pair;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.plugin.PluginHotkeys;
 import xyz.duncanruns.jingle.script.ScriptStuff;
+import xyz.duncanruns.jingle.util.KeyboardUtil;
 
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -65,8 +67,10 @@ public final class HotkeyManager {
     private static void run() {
         while (Jingle.isRunning()) {
             sleep(1);
+            boolean disableWithF3 = Jingle.options.disableHotkeysWithF3 && KeyboardUtil.isPressed(Win32VK.VK_F3.code);
             for (Pair<Hotkey, Runnable> hotkeyAction : HOTKEYS) {
                 if (hotkeyAction.getLeft().wasPressed()) {
+                    if (disableWithF3) continue;
                     try {
                         hotkeyAction.getRight().run();
                     } catch (Throwable t) {

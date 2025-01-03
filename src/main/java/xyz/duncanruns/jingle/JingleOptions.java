@@ -31,6 +31,7 @@ public class JingleOptions {
 
     // Hotkey
     public List<JsonObject> hotkeys = new ArrayList<>();
+    public boolean disableHotkeysWithF3 = true;
 
     // Script
     public Set<String> disabledDefaultScripts = new HashSet<>(Collections.singletonList("Coop Mode"));
