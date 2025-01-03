@@ -1,15 +1,10 @@
 package xyz.duncanruns.jingle.util;
 
 import com.sun.jna.Memory;
-import com.sun.jna.platform.win32.BaseTSD;
-import com.sun.jna.platform.win32.WTypes;
-import com.sun.jna.platform.win32.Win32VK;
-import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.WinDef.HWND;
-import com.sun.jna.platform.win32.WinUser;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-
 import xyz.duncanruns.jingle.win32.User32;
 
 import java.awt.*;

@@ -184,7 +184,8 @@ class CustomizationMenu extends JDialog {
     static class TextFieldElement implements Element {
         private final String key;
         private final String defaultVal;
-        @Nullable private final LuaFunction validator;
+        @Nullable
+        private final LuaFunction validator;
 
         TextFieldElement(String key, String defaultVal, @Nullable LuaFunction validator) {
             this.key = key;

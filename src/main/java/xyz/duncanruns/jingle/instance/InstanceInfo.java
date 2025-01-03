@@ -44,7 +44,6 @@ public class InstanceInfo {
      * Uses powershell to get the command line of a Minecraft instance and retrieve relevant information about it
      *
      * @param hwnd the window pointer object of the Minecraft instance
-     *
      * @return the extracted instance info of the Minecraft instance
      */
     public static InstanceInfo getInstanceInfoFromHwnd(WinDef.HWND hwnd) {

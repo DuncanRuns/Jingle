@@ -1,6 +1,5 @@
 package xyz.duncanruns.jingle.obs;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.instance.InstanceState;
 import xyz.duncanruns.jingle.util.FileUtil;

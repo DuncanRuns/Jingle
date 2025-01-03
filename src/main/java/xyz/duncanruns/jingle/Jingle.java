@@ -40,9 +40,11 @@ public final class Jingle {
 
     public static JingleOptions options = null;
 
-    @Nullable private static OpenedInstance mainInstance = null;
+    @Nullable
+    private static OpenedInstance mainInstance = null;
 
-    @Nullable public static WinDef.HWND activeHwnd = null;
+    @Nullable
+    public static WinDef.HWND activeHwnd = null;
 
     private static boolean openedToLan = false;
 
