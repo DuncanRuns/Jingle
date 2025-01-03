@@ -23,24 +23,33 @@ public class JingleOptions {
 
     public Integer optionsVersion = DEFAULT_LOADED_OPTIONS_VERSION;
 
-    public int[] lastPosition = new int[]{50, 50};
-    public int[] lastSize = new int[]{600, 400};
+    // Minecraft Instance
     public Map<String, Long> seenPaths = new HashMap<>();
+    @Nullable
+    public int[] borderlessPosition = null;
+    public boolean autoBorderless = false;
+
+    // Hotkey
     public List<JsonObject> hotkeys = new ArrayList<>();
+
+    // Script
     public Set<String> disabledDefaultScripts = new HashSet<>(Collections.singletonList("Coop Mode"));
+
+    // Application
     public boolean checkForUpdates = true;
     public boolean usePreReleases = Jingle.VERSION.contains("+pre");
     public String lastCheckedVersion = "";
     public boolean minimizeToTray = false;
+    public int[] lastPosition = new int[]{50, 50};
+    public int[] lastSize = new int[]{600, 400};
 
+    // OBS Projector
     public boolean projectorEnabled;
     // null for auto, [x,y,w,h] for custom
-    @Nullable public int[] projectorPosition = null;
+    @Nullable
+    public int[] projectorPosition = null;
     public String projectorWindowPattern = "*- Jingle Mag";
     public boolean minimizeProjector;
-
-    @Nullable public int[] borderlessPosition = null;
-    public boolean autoBorderless = false;
 
     private JingleOptions() {
     }
