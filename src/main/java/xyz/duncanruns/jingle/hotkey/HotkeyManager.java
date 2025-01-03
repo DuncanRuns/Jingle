@@ -8,13 +8,22 @@ import xyz.duncanruns.jingle.plugin.PluginHotkeys;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.KeyboardUtil;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static xyz.duncanruns.jingle.util.SleepUtil.sleep;
 
 public final class HotkeyManager {
     public static final CopyOnWriteArrayList<Pair<Hotkey, Runnable>> HOTKEYS = new CopyOnWriteArrayList<>(); // This lets us run the hotkey checker without ever having to stop it
+    private static final Set<Integer> F3_INCOMPATIBLES = new HashSet<>(Arrays.asList(
+            Win32VK.VK_F4.code, // F4
+            65, 66, 67, 68, 70, 71, 72, 73, 76, 78, 80, 81, 83, 84, // A, B, C, D, F, G, H, I, L, N, P, Q, S, T
+            49, 50, 51 // 1, 2, 3
+    ));
+
 
     private HotkeyManager() {
     }
@@ -67,10 +76,10 @@ public final class HotkeyManager {
     private static void run() {
         while (Jingle.isRunning()) {
             sleep(1);
-            boolean disableWithF3 = Jingle.options.disableHotkeysWithF3 && KeyboardUtil.isPressed(Win32VK.VK_F3.code);
+            boolean f3IsPressed = KeyboardUtil.isPressed(Win32VK.VK_F3.code);
             for (Pair<Hotkey, Runnable> hotkeyAction : HOTKEYS) {
                 if (hotkeyAction.getLeft().wasPressed()) {
-                    if (disableWithF3) continue;
+                    if (f3IsPressed && F3_INCOMPATIBLES.contains(hotkeyAction.getLeft().getMainKey())) continue;
                     try {
                         hotkeyAction.getRight().run();
                     } catch (Throwable t) {

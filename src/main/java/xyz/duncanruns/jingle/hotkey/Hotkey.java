@@ -204,6 +204,15 @@ public class Hotkey {
         return this.keys.isEmpty();
     }
 
+    public int getMainKey() {
+        for (int vKey : this.keys) {
+            if (!KeyboardUtil.ALL_MODIFIERS.contains(vKey)) {
+                return vKey;
+            }
+        }
+        return -1;
+    }
+
     /**
      * Like the regular Hotkey class, except ignores extra pressed modifier keys.
      */
