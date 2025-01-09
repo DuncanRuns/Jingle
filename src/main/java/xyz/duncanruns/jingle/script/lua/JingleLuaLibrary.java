@@ -348,4 +348,10 @@ class JingleLuaLibrary extends LuaLibrary {
         customizationMenu.values.forEach((key, val) -> CustomizableManager.set(this.getScriptName(), key, val));
         return true;
     }
+
+    @LuaDocumentation(description = "Gets the instance path, useful for checking what instance is being used for conditional hotkeys.")
+    @Nullable
+    public String getInstancePath() {
+        return Jingle.getMainInstance().map(openedInstance -> openedInstance.instancePath.toString()).orElse(null);
+    }
 }
