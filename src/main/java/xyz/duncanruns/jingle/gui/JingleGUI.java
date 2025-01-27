@@ -28,6 +28,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class JingleGUI extends JFrame {
-    private static final JingleGUI instance = new JingleGUI();
+    private static JingleGUI instance = null;
     private static BufferedImage logo = null;
     private final List<Pair<Integer, Supplier<JButton>>> quickActionButtonSuppliers = new ArrayList<>();
     public JPanel mainPanel;
@@ -97,7 +98,7 @@ public class JingleGUI extends JFrame {
     private JCheckBox autoBorderlessCheckBox;
     private JPanel quickActionsPanel;
 
-    public JingleGUI() {
+    private JingleGUI() {
         this.$$$setupUI$$$();
         this.finalizeComponents();
         this.setTitle("Jingle v" + Jingle.VERSION);
@@ -122,7 +123,14 @@ public class JingleGUI extends JFrame {
         this.setVisible(true);
     }
 
-    public static JingleGUI get() {
+    public static synchronized JingleGUI get() {
+        if (instance == null) {
+            try {
+                SwingUtilities.invokeAndWait(() -> instance = new JingleGUI());
+            } catch (InterruptedException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return instance;
     }
 
