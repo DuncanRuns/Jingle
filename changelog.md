@@ -1,3 +1,11 @@
+Changes in v1.1.2:
+
+- Fixed some unknown key names
+- Added a new script library: `srigtevent`
+- Fixed hotkeys conflicting with F3 ([#5](https://github.com/DuncanRuns/Jingle/issues/5))
+    - If you bind a Jingle hotkey to `A`, then press `F3`+`A`, the Jingle hotkey is cancelled.
+- Other small tweaks/fixes
+
 Changes in v1.1.1:
 
 - Updated PaceMan Tracker to v0.7.0
