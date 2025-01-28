@@ -11,21 +11,28 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
   MultiMC (and forks such as prism), or ColorMC (chinese launcher).
     - `Clear Worlds` will clear all but the last 36 worlds, this is to ensure it doesn't clear anything important for
       file submission. most of those 36 worlds should be near empty and won't take up much space.
-    - `Go Borderless` will set your game as a borderless window and fill the primary monitor.
+    - `Go Borderless` will set your game as a borderless window and fill the primary monitor. This button can be
+      right-clicked for customization of the behaviour.
     - `Package Submission Files` will automatically package worlds and logs needed for speedrun verification. This
       feature works best when used with SpeedRunIGT 14.0 or later!
     - `Open Minecraft Folder` will open the `.minecraft` directory of the instance.
 - Only a s**ingle** instance can be J**ingle**'s focus at any time, it will automatically switch to whatever instance
   you activate.
-- Basic Options
-    - `Check for Updates` will enable checking for updates when launching Jingle, `Enable Pre-Release Updates` will make
-      change it to include development versions.
-    - `Minimize to Tray` will make it so hiding the Jingle window will also hide it on the task bar, putting it in the "
-      tray" (the up arrow at the bottom left of the screen).
+- "Quick Actions" is a section for buttons added by plugins to do actions that are frequent enough to be featured on the
+  main tab in Jingle but not frequent enough to need a hotkey.
 - `Clear Worlds from All Instances` will do the action of `Clear Worlds` but for all instances that Jingle has ever
   seen.
 - `Open Jingle Folder` will open the folder containing configurations, save data, scripts, plugins, and more files for
   Jingle.
+
+## Options
+
+- `Check for Updates` will enable checking for updates when launching Jingle, `Enable Pre-Release Updates` will make
+  change it to include development versions.
+- `Minimize to Tray` will make it so hiding the Jingle window will also hide it on the task bar, putting it in the "
+  tray" (the up arrow at the bottom left of the screen).
+- `Customize Borderless` will let you customize borderless behaviour.
+- `Auto Borderless` will automatically put detected instances into borderless when detected.
 
 ### Log
 
@@ -36,7 +43,7 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 ### Hotkeys
 
 - An "action" or "hotkey action" is something that a set hotkey can do. Hotkey actions can be added by scripts,
-  plugins, or Jingle itself. As of v1.0.0, the only hotkeys available are from scripts.
+  plugins, or Jingle itself. As of v1.1.1, the only hotkeys available are from scripts.
     - Hotkey actions from scripts are listed per script in the scripts section.
 - `Add` will let you add a new hotkey. You can select the desired hotkey action, set a keybind by pressing
   `Set Hotkey Here...`, and choose how modifier keys affect this key.
@@ -57,17 +64,17 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
     - `Customize` will show customization defined by a function in the script. It can be showing a whole menu of
       options, or asking a single question. Scripts are also able to not define any customization function, and the
       button will be greyed out.
-    - `More...` will show a menu of extra buttons defined by the script. As of v1.0.0, the default scripts do not have
+    - `More...` will show a menu of extra buttons defined by the script. As of v1.1.1, the default scripts do not have
       any extra buttons.
     - `Enable`/`Disable` is for default scripts packaged with Jingle, since you can't remove them from the folder, you
       can disable them from running by pressing `Disable`, or bring back their functionality by pressing `Enable`.
 - `Open Scripts Folder` will open the folder where .lua files will be placed. The folder also contains a `libs` folder
   containing all the functions a script can use.
 - `Reload Scripts` will reload all scripts and load new ones added to the scripts folder.
-- As of v1.0.0 there are 3 default scripts packaged with Jingle.
+- As of v1.1.1 there are 3 default scripts packaged with Jingle.
     - **Coop Mode**: This script will automatically open to lan when joining a world. It will always do this if the
       script is enabled. Press `Customize` to decide if you want cheats enabled (for /difficulty and /time set 0).
-    - **Misc**: This script adds 4 hotkeys actions, and some customization for 2 of them.
+    - **Extra Keys**: This script adds 4 hotkeys actions, and some customization for 2 of them.
         - The customization for this script tweaks when the reset keys for this script are allowed to activate.
         - `Safe Reset` is a hotkey action that will reset the world for you, but only if you are in a location selected
           in the customization. **This will only work if you have a "Create New World" hotkey set in game, and it must
@@ -101,10 +108,12 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 
 - The only thing this tab does is provide a space for plugins to add their own tabs for customization or buttons (or
   anything else that can be added to a GUI).
-- There are 2 default plugins as of Jingle v1.0.0:
-    - `PaceMan Tracker` tracks RSG Any% speedruns for [PaceMan.gg](https://paceman.gg/). Setup and further information
+- There are 4 default plugins as of Jingle v1.1.1:
+    - [`PaceMan Tracker`](https://github.com/PaceMan-MCSR/PaceMan-Tracker/) tracks RSG Any% speedruns
+      for [PaceMan.gg](https://paceman.gg/). Setup and further information
       can be found through the website.
-    - `Standard Switcher` allows changing out the standard settings file for the
+    - [`Standard Switcher`](https://github.com/DuncanRuns/Jingle-Standard-Switcher) allows changing out the standard
+      settings file for the
       game. [Standard Settings](https://github.com/KingContaria/StandardSettings/) is a mod that will reset your
       settings every time a new world is created. As of the release of SpeedrunAPI, all options can be customized in
       game, so no options will be shown within Jingle itself (Unlike Standard manager in Julti, which came before in
@@ -115,6 +124,13 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
           It will then set the instance to use this file.
         - `Switch to Another File` will allow switching the instance's current standard settings to any created file in
           the Standard Switcher folder.
+    - [`EyeSee`](https://github.com/DuncanRuns/Jingle-EyeSee-Plugin) provides an eye measuring projector without needing
+      to set up OBS. It features similar settings to the OBS eye measuring projector as well as an FPS Limit setting to
+      prevent unnecessary lag.
+    - [`Program Launching`](https://github.com/joe-ldp/Jingle-Launch-Programs) allows adding a list of programs/files
+      that are opened when pressing the launch button on the plugin tab or when using the quick action on the main
+      Jingle tab. It also allows launching a Minecraft instance with Prism Launcher or MultiMC and automatically
+      launching when Jingle launches.
 
 ### OBS
 
