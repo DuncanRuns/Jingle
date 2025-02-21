@@ -1,3 +1,7 @@
+Changes in v1.1.3:
+
+- Allow many more key combinations (multiple main keys, or only modifier keys) ([#7](https://github.com/DuncanRuns/Jingle/issues/7), [#8](https://github.com/DuncanRuns/Jingle/issues/8))
+
 Changes in v1.1.2:
 
 - Fixed some unknown key names
