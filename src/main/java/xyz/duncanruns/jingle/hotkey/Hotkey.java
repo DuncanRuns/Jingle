@@ -134,7 +134,7 @@ public class Hotkey {
      * Re-pressing modifier keys will not cause the method to return true.
      * The method will need to be called often to ensure intended results.
      *
-     * @return true if called consistenly and follows the descriptions
+     * @return true if called consistently and follows the descriptions
      */
     public boolean wasPressed() {
         if (this.isPressed()) {
