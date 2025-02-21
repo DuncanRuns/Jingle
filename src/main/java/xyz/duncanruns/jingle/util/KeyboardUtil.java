@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static xyz.duncanruns.jingle.util.SleepUtil.sleep;
 
@@ -170,7 +171,15 @@ public final class KeyboardUtil {
         }
         // No non-modifier keys pressed.
         return Collections.emptyList();
+    }
 
+    /**
+     * Returns all currently pressed keys except for the ones excluded in the parameter.
+     *
+     * @return A list of integers representing virtual keys.
+     */
+    public static List<Integer> getPressedKeys(List<Integer> excludeKeys) {
+        return getPressedKeys().stream().filter(vk -> !excludeKeys.contains(vk)).collect(Collectors.toList());
     }
 
     // LPARAM STUFF -> https://stackoverflow.com/questions/54638741/how-is-the-lparam-of-postmessage-constructe

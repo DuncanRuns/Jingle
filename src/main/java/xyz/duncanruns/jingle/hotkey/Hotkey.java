@@ -73,6 +73,7 @@ public class Hotkey {
         List<Integer> preHeldKeys = KeyboardUtil.getPressedKeys();
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         AtomicBoolean done = new AtomicBoolean(false);
+        List<Integer> lastHeldKeys = new ArrayList<>();
         executor.scheduleWithFixedDelay(() -> {
             if (done.get()) {
                 return;
@@ -83,12 +84,23 @@ public class Hotkey {
                 return;
             }
             preHeldKeys.removeIf(key -> !KeyboardUtil.getPressedKeys().contains(key));
-            List<Integer> keyList = KeyboardUtil.getPressedKeyWithMods(preHeldKeys);
-            if (!keyList.isEmpty()) {
-                Hotkey hotkey = new Hotkey(keyList);
-                hotkeyConsumer.accept(hotkey);
-                executor.shutdown();
+            List<Integer> pressedKeys = KeyboardUtil.getPressedKeys(preHeldKeys);
+
+            if (pressedKeys.equals(lastHeldKeys)) return;
+
+            // If keys have been let go
+            if (pressedKeys.size() < lastHeldKeys.size()) {
+                ArrayList<Integer> keysReleased = new ArrayList<>(lastHeldKeys);
+                keysReleased.removeAll(pressedKeys);
+                // If the keys let go are not modifiers or all the last held keys are modifiers
+                if (KeyboardUtil.ALL_MODIFIERS.containsAll(lastHeldKeys) || keysReleased.stream().noneMatch(KeyboardUtil.ALL_MODIFIERS::contains)) {
+                    hotkeyConsumer.accept(new Hotkey(lastHeldKeys));
+                    executor.shutdown();
+                    return;
+                }
             }
+            lastHeldKeys.clear();
+            lastHeldKeys.addAll(pressedKeys);
         }, 25, 25, TimeUnit.MILLISECONDS);
 
     }
