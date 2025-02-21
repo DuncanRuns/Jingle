@@ -27,12 +27,14 @@ public class Hotkey {
     private static final Hotkey EMPTY = Hotkey.of(Collections.emptyList());
     protected final List<Integer> keys;
     private boolean hasBeenPressed;
+    private final boolean isOnlyModifiers;
 
     private Hotkey(List<Integer> keys) {
         // Copy the list by wrapping in the ArrayList constructor, and use unmodifiableList to give an unmodifiable view of it.
         // This is the best way to prevent the hotkey from being tampered with, which also keeps it thread-safe.
         this.keys = new ArrayList<>(keys);
         this.hasBeenPressed = false;
+        this.isOnlyModifiers = KeyboardUtil.ALL_MODIFIERS.containsAll(this.keys);
     }
 
     public static List<Integer> keysFromJson(JsonArray jsonArray) {
@@ -143,7 +145,7 @@ public class Hotkey {
                 return true;
             }
         } else {
-            this.hasBeenPressed = this.isMainKeyPressed();
+            this.hasBeenPressed = this.areNonModKeysPressed();
         }
         return false;
     }
@@ -172,18 +174,11 @@ public class Hotkey {
     }
 
     /**
-     * Returns true if any non-modifier key is pressed. Hotkeys should be constructed with only one non-modifier
-     * key for intended behaviour, so this should only be checking a single key.
-     *
-     * @return true if any non-modifier key is pressed
+     * @return true if there are non-modifier keys and all of them are pressed, otherwise false
      */
-    public boolean isMainKeyPressed() {
-        for (int vKey : this.keys) {
-            if (!KeyboardUtil.ALL_MODIFIERS.contains(vKey) && KeyboardUtil.isPressed(vKey)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean areNonModKeysPressed() {
+        if (isOnlyModifiers) return false;
+        return this.keys.stream().filter(vKey -> !KeyboardUtil.ALL_MODIFIERS.contains(vKey)).allMatch(KeyboardUtil::isPressed);
     }
 
     @Override
