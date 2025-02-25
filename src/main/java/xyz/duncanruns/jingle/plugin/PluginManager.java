@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
+import xyz.duncanruns.jingle.util.JavaVersionUtil;
 import xyz.duncanruns.jingle.util.ResourceUtil;
 import xyz.duncanruns.jingle.util.VersionUtil;
 
@@ -201,9 +202,16 @@ public final class PluginManager {
             }
         }
 
+        int majorJavaVersion = JavaVersionUtil.getMajorJavaVersion();
+
         for (Map.Entry<String, Pair<Path, JinglePluginData>> entry : bestPluginVersions.entrySet()) {
+            JinglePluginData data = entry.getValue().getRight();
+            if (data.minimumJava > majorJavaVersion) {
+                Jingle.log(Level.WARN, String.format("%s v%s will not load because Jingle is not running with the minimum required Java version (Java %d).", data.name, data.version, data.minimumJava));
+                continue;
+            }
             try {
-                loadPluginJar(entry.getValue().getLeft(), entry.getValue().getRight());
+                loadPluginJar(entry.getValue().getLeft(), data);
             } catch (Exception e) {
                 Jingle.log(Level.ERROR, "Failed to load plugin from " + entry.getValue().getLeft() + ": " + ExceptionUtil.toDetailedString(e));
             }
@@ -242,6 +250,7 @@ public final class PluginManager {
         public String id = null;
         public String version = null;
         public String initializer = null;
+        public int minimumJava = 8;
 
         public static JinglePluginData fromString(String string) {
             return GSON.fromJson(string, JinglePluginData.class);
