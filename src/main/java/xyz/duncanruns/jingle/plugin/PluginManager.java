@@ -203,6 +203,10 @@ public final class PluginManager {
         }
 
         int majorJavaVersion = JavaVersionUtil.getMajorJavaVersion();
+        if (majorJavaVersion == -1) {
+            Jingle.log(Level.WARN, "Couldn't find java version! Assuming plugins are all compatible with the used Java...");
+            majorJavaVersion = Integer.MAX_VALUE;
+        }
 
         for (Map.Entry<String, Pair<Path, JinglePluginData>> entry : bestPluginVersions.entrySet()) {
             JinglePluginData data = entry.getValue().getRight();
