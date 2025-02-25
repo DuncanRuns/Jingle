@@ -1,6 +1,7 @@
 Changes in v1.1.3:
 
 - Allow many more key combinations (multiple main keys, or only modifier keys) ([#7](https://github.com/DuncanRuns/Jingle/issues/7), [#8](https://github.com/DuncanRuns/Jingle/issues/8))
+- Allow plugins to specify a minimum Java version
 
 Changes in v1.1.2:
 
