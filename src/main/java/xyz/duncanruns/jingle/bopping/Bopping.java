@@ -113,7 +113,7 @@ public final class Bopping {
 
         if (!Files.isRegularFile(path.resolve("level.dat"))) return false;
         if (name.startsWith("_")) return false;
-
-        return name.startsWith("New World") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
+        
+        return name.startsWith("New World") || name.contains("Ny verden") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
     }
 }
