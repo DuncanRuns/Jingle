@@ -24,10 +24,12 @@ public class JingleTrayIcon extends TrayIcon {
         }
 
         jingleGUI.addWindowStateListener(e -> {
+            boolean minimizeToTray;
             synchronized (Jingle.class) {
-                if (e.getNewState() == ICONIFIED) {
-                    jingleGUI.setVisible(!Jingle.options.minimizeToTray);
-                }
+                minimizeToTray = Jingle.options.minimizeToTray;
+            }
+            if (e.getNewState() == ICONIFIED && minimizeToTray) {
+                jingleGUI.setVisible(false);
             }
             if (e.getNewState() == MAXIMIZED_BOTH || e.getNewState() == NORMAL) {
                 jingleGUI.setVisible(true);
