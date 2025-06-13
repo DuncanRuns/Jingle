@@ -18,8 +18,8 @@ import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.*;
 
 import javax.annotation.Nullable;
-import javax.swing.Timer;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
@@ -31,8 +31,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class JingleGUI extends JFrame {
+    private static final int MAX_INSTANCE_PATH_DISPLAY_LENGTH = 50;
     private static JingleGUI instance = null;
     private static BufferedImage logo = null;
     private final List<Pair<Integer, Supplier<JButton>>> quickActionButtonSuppliers = new ArrayList<>();
@@ -216,7 +217,11 @@ public class JingleGUI extends JFrame {
         this.openMinecraftFolderButton.setEnabled(instanceExists);
         this.packageSubmissionFilesButton.setEnabled(instanceExists);
         if (instanceExists) {
-            this.instanceLabel.setText("Instance: " + instance.instancePath);
+            String instancePathString = instance.instancePath.toString();
+            if (instancePathString.length() > MAX_INSTANCE_PATH_DISPLAY_LENGTH) {
+                instancePathString = "..." + instancePathString.substring(instancePathString.length() - MAX_INSTANCE_PATH_DISPLAY_LENGTH + 3);
+            }
+            this.instanceLabel.setText("Instance: " + instancePathString);
         } else {
             this.instanceLabel.setText("Instance: No instances opened!");
         }
