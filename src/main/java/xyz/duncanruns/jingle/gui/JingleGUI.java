@@ -1,5 +1,6 @@
 package xyz.duncanruns.jingle.gui;
 
+import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -14,10 +15,7 @@ import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
 import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.packaging.Packaging;
 import xyz.duncanruns.jingle.script.ScriptStuff;
-import xyz.duncanruns.jingle.util.ExceptionUtil;
-import xyz.duncanruns.jingle.util.KeyboardUtil;
-import xyz.duncanruns.jingle.util.OpenUtil;
-import xyz.duncanruns.jingle.util.ResourceUtil;
+import xyz.duncanruns.jingle.util.*;
 
 import javax.annotation.Nullable;
 import javax.swing.Timer;
@@ -25,6 +23,8 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -63,6 +63,7 @@ public class JingleGUI extends JFrame {
     private JPanel instancePanel;
     private JTabbedPane pluginsTabbedPane;
     private JPanel noPluginsLoadedTab;
+    private JButton uploadLogButton;
     private JCheckBox showDebugLogsCheckBox;
     private HotkeyListPanel hotkeyListPanel;
     private JPanel extraButtonsPanel;
@@ -255,6 +256,47 @@ public class JingleGUI extends JFrame {
             boolean enabled = this.showDebugLogsCheckBox.isSelected();
             this.logTextArea.setDocument(enabled ? this.logDocumentWithDebug : this.logDocument);
             this.jumpToEndOfLog();
+        });
+
+        this.uploadLogButton.addActionListener(a -> {
+            this.uploadLogButton.setEnabled(false);
+
+            new Thread(() -> {
+                try {
+                    JsonObject response = UploadUtil.uploadLog(Jingle.FOLDER.resolve("logs").resolve("latest.log"));
+                    if (response.get("success").getAsBoolean()) {
+                        String url = response.get("url").getAsString();
+                        Object[] options = new Object[]{"Copy URL", "Close"};
+                        JEditorPane pane = new UploadedLogPane(url);
+
+                        int button = JOptionPane.showOptionDialog(
+                                this,
+                                pane,
+                                "Jingle: Uploaded Log",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.INFORMATION_MESSAGE,
+                                null,
+                                options,
+                                null
+                        );
+
+                        if (button == 0) {
+                            // copy to clipboard
+                            StringSelection sel = new StringSelection(url);
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            clipboard.setContents(sel, null);
+                        }
+                    } else {
+                        String error = response.get("error").getAsString();
+                        JOptionPane.showMessageDialog(this, String.format("Error while uploading log:\n%s", error), "Jingle: Upload Log Failed", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    Jingle.logError("Failed to upload log:", ex);
+                    JOptionPane.showMessageDialog(this, "Error while uploading log.", "Jingle: Upload Log Failed", JOptionPane.ERROR_MESSAGE);
+                }
+
+                this.uploadLogButton.setEnabled(true);
+            }, "log-uploader").start();
         });
 
         this.mainTabbedPane.addChangeListener(e -> {
@@ -545,11 +587,11 @@ public class JingleGUI extends JFrame {
         autoBorderlessCheckBox.setText("Auto Borderless");
         panel2.add(autoBorderlessCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         logJPanel = new JPanel();
-        logJPanel.setLayout(new GridLayoutManager(2, 2, new Insets(5, 5, 5, 5), -1, -1));
+        logJPanel.setLayout(new GridLayoutManager(2, 3, new Insets(5, 5, 5, 5), -1, -1));
         mainTabbedPane.addTab("Log", logJPanel);
         final JScrollPane scrollPane3 = new JScrollPane();
         scrollPane3.setHorizontalScrollBarPolicy(31);
-        logJPanel.add(scrollPane3, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        logJPanel.add(scrollPane3, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         logTextArea = new JTextArea();
         logTextArea.setEditable(false);
         logTextArea.setLineWrap(true);
@@ -557,9 +599,12 @@ public class JingleGUI extends JFrame {
         scrollPane3.setViewportView(logTextArea);
         showDebugLogsCheckBox = new JCheckBox();
         showDebugLogsCheckBox.setText("Show Debug Logs");
-        logJPanel.add(showDebugLogsCheckBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        logJPanel.add(showDebugLogsCheckBox, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        uploadLogButton = new JButton();
+        uploadLogButton.setText("Upload Log");
+        logJPanel.add(uploadLogButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        logJPanel.add(spacer2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        logJPanel.add(spacer2, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         hotkeysJPanel = new JPanel();
         hotkeysJPanel.setLayout(new GridLayoutManager(4, 1, new Insets(5, 5, 5, 5), -1, -1));
         mainTabbedPane.addTab("Hotkeys", hotkeysJPanel);
