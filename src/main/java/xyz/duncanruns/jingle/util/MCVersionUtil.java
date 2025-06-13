@@ -16,6 +16,9 @@ public final class MCVersionUtil {
     private static final Map<int[], String> SNAP_MAP = getSnapMap();
     private static final Pattern SNAPSHOT_VERSION_PATTERN = Pattern.compile("^(\\d\\d)w0?(\\d+).+"); // Does not exactly match, but is useful for matching groups
 
+    private static final String DEFAULT_OLD_SNAPSHOT_VERSION = "1.14.99";
+    private static final String DEFAULT_NEW_SNAPSHOT_VERSION = "1.21.6";
+
     private MCVersionUtil() {
     }
 
@@ -69,6 +72,9 @@ public final class MCVersionUtil {
                     return Version.of(entry.getValue());
                 }
             }
+
+            if(year < 22) return Version.of(DEFAULT_OLD_SNAPSHOT_VERSION);
+            return Version.of(DEFAULT_NEW_SNAPSHOT_VERSION);
         }
         return null;
     }
