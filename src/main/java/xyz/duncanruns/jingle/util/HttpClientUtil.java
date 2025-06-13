@@ -43,7 +43,7 @@ public final class HttpClientUtil {
             // Normal functionality!
             return HttpClientBuilder.create().build();
         } catch (Exception e) {
-            System.out.println("Outdated Java, GrabUtil is using an insecure HttpClient!");
+            System.out.println("Outdated Java, HttpClientUtil has an insecure HttpClient!");
         }
 
         HttpClientBuilder b = HttpClientBuilder.create();
