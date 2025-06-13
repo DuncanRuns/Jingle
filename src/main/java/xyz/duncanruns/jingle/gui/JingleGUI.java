@@ -263,7 +263,7 @@ public class JingleGUI extends JFrame {
 
             new Thread(() -> {
                 try {
-                    JsonObject response = UploadUtil.uploadLog(Jingle.FOLDER.resolve("logs").resolve("latest.log"));
+                    JsonObject response = MCLogsUtil.uploadLog(Jingle.FOLDER.resolve("logs").resolve("latest.log"));
                     if (response.get("success").getAsBoolean()) {
                         String url = response.get("url").getAsString();
                         Object[] options = new Object[]{"Copy URL", "Close"};

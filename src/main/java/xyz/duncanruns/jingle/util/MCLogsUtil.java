@@ -34,49 +34,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 
-public class UploadUtil {
+public class MCLogsUtil {
 
     private static final Gson GSON = new Gson();
-    private static final HttpClient httpClient;
 
-    static {
-        try {
-            httpClient = getHttpClient();
-        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private UploadUtil() {}
-
-    private static HttpClient getHttpClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        //https://stackoverflow.com/a/28847175
-
-        try {
-            // Test a Let's Encrypt valid page
-            IOUtils.toString(new URL("https://valid-isrgrootx1.letsencrypt.org/").openStream(), Charset.defaultCharset());
-            // Normal functionality!
-            return HttpClientBuilder.create().build();
-        } catch (Exception e) {
-            System.out.println("Outdated Java, GrabUtil is using an insecure HttpClient!");
-        }
-
-        HttpClientBuilder b = HttpClientBuilder.create();
-
-
-        SSLContext sslContext = SSLContextBuilder.create().loadTrustMaterial((chain, authType) -> true).build();
-        b.setSSLContext(sslContext);
-
-        SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", sslSocketFactory)
-                .build();
-
-        PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        b.setConnectionManager(connMgr);
-        return b.build();
-    }
+    private MCLogsUtil() {}
 
     /*
          https://api.mclo.gs/
@@ -95,7 +57,7 @@ public class UploadUtil {
         );
         request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
 
-        HttpResponse response = httpClient.execute(request);
+        HttpResponse response = HttpClientUtil.getHttpClient().execute(request);
         HttpEntity entity = response.getEntity();
 
         return GSON.fromJson(new InputStreamReader(entity.getContent(), StandardCharsets.UTF_8), JsonObject.class);
