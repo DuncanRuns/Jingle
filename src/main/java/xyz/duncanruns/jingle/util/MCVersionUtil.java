@@ -34,12 +34,23 @@ public final class MCVersionUtil {
         map.put(new int[]{22, 42, 46}, "1.19.3"); // 1.19.3 snapshots
         map.put(new int[]{23, 3, 7}, "1.19.4"); // 1.19.4 snapshots
         map.put(new int[]{23, 12, 52}, "1.19.99"); // 1.20 snapshots, including voting april fools
+        map.put(new int[]{23, 51, 51}, "1.20.5"); // 2023 1.20.5 snapshots
+        map.put(new int[]{24, 3, 14}, "1.20.5"); // 2024 1.20.5 snapshots, including potato april fools
+        map.put(new int[]{24, 18, 21}, "1.20.99"); // 1.21 snapshots
+        map.put(new int[]{24, 33, 39}, "1.21.2"); // 1.21.2 snapshots
+        map.put(new int[]{24, 44, 46}, "1.21.4"); // 1.21.4 snapshots
+        map.put(new int[]{25, 2, 10}, "1.21.5"); // 1.21.5 snapshots
 
         return Collections.unmodifiableMap(map);
     }
 
     private static Version findVersion(String versionString) {
         try {
+            // hack for pre-releases & release candidates
+            int idx = versionString.indexOf('-');
+            if (idx != -1) {
+                versionString = versionString.substring(0, idx);
+            }
             return Version.of(versionString);
         } catch (IllegalArgumentException e) {
             // Check for snapshots
