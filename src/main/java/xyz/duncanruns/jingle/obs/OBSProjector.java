@@ -2,7 +2,6 @@ package xyz.duncanruns.jingle.obs;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinUser;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.MonitorUtil;
 import xyz.duncanruns.jingle.util.PidUtil;
@@ -129,17 +128,7 @@ public final class OBSProjector {
     }
 
     public static void unminimizeProjector() {
-        if (projectorHwnd == null) return;
-
-        WinUser.WINDOWPLACEMENT windowplacement = new WinUser.WINDOWPLACEMENT();
-        windowplacement.length = windowplacement.size();
-
-        if (User32.INSTANCE.GetWindowPlacement(projectorHwnd, windowplacement).booleanValue()) {
-            if (windowplacement.showCmd == WinUser.SW_SHOWMINIMIZED) {
-                windowplacement.showCmd = WinUser.SW_SHOWNOACTIVATE;
-                User32.INSTANCE.SetWindowPlacement(projectorHwnd, windowplacement);
-            }
-        }
+        WindowStateUtil.ensureNotMinimized(projectorHwnd);
     }
 
     private static void setProjectorZOrder(int hwndInsertAfter) {
