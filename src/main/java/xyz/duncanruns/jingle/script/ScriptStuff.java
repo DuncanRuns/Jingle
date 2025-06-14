@@ -92,7 +92,9 @@ public final class ScriptStuff {
             Files.list(scriptsFolder).filter(path -> path.getFileName().toString().endsWith(".lua")).forEach(path -> {
                 try {
                     ScriptFile script = ScriptFile.loadFile(path);
-                    LuaRunner.runLuaScript(script);
+                    if (!Jingle.options.disabledScripts.contains(script.name)) {
+                        LuaRunner.runLuaScript(script);
+                    }
                     LOADED_SCRIPTS.add(script);
                 } catch (Exception e) {
                     Jingle.logError("Failed to load script \"" + path.getFileName() + "\":", e);
@@ -105,7 +107,7 @@ public final class ScriptStuff {
             for (String s : ResourceUtil.getResourcesFromFolder("defaultscripts")) {
                 try {
                     ScriptFile script = ScriptFile.loadResource("/defaultscripts/" + s);
-                    if (!Jingle.options.disabledDefaultScripts.contains(s.substring(0, s.length() - 4))) {
+                    if (!Jingle.options.disabledScripts.contains(script.name)) {
                         LuaRunner.runLuaScript(script);
                     }
                     LOADED_SCRIPTS.add(script);
@@ -116,6 +118,8 @@ public final class ScriptStuff {
         } catch (Exception e) {
             Jingle.logError("Failed to load default scripts:", e);
         }
+
+        Jingle.options.disabledScripts.removeIf(s -> LOADED_SCRIPTS.stream().map(ScriptFile::getName).noneMatch(s::equals));
     }
 
     public static void addExtraFunction(ScriptFile script, String functionName, Runnable runnable) {

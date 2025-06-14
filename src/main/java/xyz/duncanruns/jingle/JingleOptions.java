@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
-    private static final int CURRENT_OPTIONS_VERSION = 2;
+    private static final int CURRENT_OPTIONS_VERSION = 3;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
     public static final JingleOptions DEFAULTS = createNew();
 
@@ -33,7 +33,7 @@ public class JingleOptions {
     public List<JsonObject> hotkeys = new ArrayList<>();
 
     // Script
-    public Set<String> disabledDefaultScripts = new HashSet<>(Collections.singletonList("Coop Mode"));
+    public Set<String> disabledScripts = new HashSet<>(Collections.singletonList("Coop Mode"));
 
     // Application
     public boolean checkForUpdates = true;
@@ -50,6 +50,11 @@ public class JingleOptions {
     public int[] projectorPosition = null;
     public String projectorWindowPattern = "*- Jingle Mag";
     public boolean minimizeProjector;
+
+
+    @Deprecated
+    @Nullable
+    public Set<String> disabledDefaultScripts = null;
 
     private JingleOptions() {
     }
@@ -85,6 +90,9 @@ public class JingleOptions {
         if (this.optionsVersion < 2) {
             // "Misc" hotkeys -> "Extra Keys" hotkeys
             this.setSavedHotkeys(this.copySavedHotkeys().stream().map(sh -> sh.action.startsWith("Misc:") ? new SavedHotkey(sh.type, "Extra Keys" + sh.action.substring(sh.action.indexOf(":")), sh.keys, sh.ignoreModifiers) : sh).collect(Collectors.toList()));
+        }
+        if (this.optionsVersion < 3 && this.disabledDefaultScripts != null) {
+            this.disabledScripts.addAll(this.disabledDefaultScripts);
         }
 
         this.optionsVersion = DEFAULTS.optionsVersion;

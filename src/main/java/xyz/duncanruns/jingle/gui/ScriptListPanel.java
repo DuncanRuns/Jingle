@@ -64,7 +64,7 @@ public class ScriptListPanel extends JPanel {
 
         List<ScriptFile> loadedScripts = ScriptStuff.getLoadedScripts();
         loadedScripts = Stream.concat(loadedScripts.stream().filter(s -> !s.fromFolder), loadedScripts.stream().filter(s -> s.fromFolder)).collect(Collectors.toList());
-        Set<String> disabledDefaultScripts = Jingle.options.disabledDefaultScripts;
+        Set<String> disabledDefaultScripts = Jingle.options.disabledScripts;
         for (ScriptFile loadedScript : loadedScripts) {
             JLabel nameLabel = new JLabel(loadedScript.name);
             this.add(nameLabel, constraints.clone());
@@ -74,26 +74,25 @@ public class ScriptListPanel extends JPanel {
             this.add(getCustomizeButton(loadedScript), constraints.clone());
             this.add(getMoreButton(loadedScript), constraints.clone());
 
-            if (!loadedScript.fromFolder) {
-                this.add(this.getToggleDefaultScriptButton(loadedScript), constraints.clone());
-            }
+            this.add(this.getToggleScriptButton(loadedScript), constraints.clone());
+
             constraints.gridy++;
         }
         this.revalidate();
     }
 
-    private JButton getToggleDefaultScriptButton(ScriptFile loadedScript) {
+    private JButton getToggleScriptButton(ScriptFile loadedScript) {
         boolean isDisabled;
         synchronized (Jingle.class) {
-            isDisabled = Jingle.options.disabledDefaultScripts.contains(loadedScript.name);
+            isDisabled = Jingle.options.disabledScripts.contains(loadedScript.name);
         }
         JButton toggleButton = new JButton(isDisabled ? "Enable" : "Disable");
         toggleButton.addActionListener(a -> {
             synchronized (Jingle.class) {
                 if (isDisabled) {
-                    Jingle.options.disabledDefaultScripts.remove(loadedScript.name);
+                    Jingle.options.disabledScripts.remove(loadedScript.name);
                 } else {
-                    Jingle.options.disabledDefaultScripts.add(loadedScript.name);
+                    Jingle.options.disabledScripts.add(loadedScript.name);
                 }
                 ScriptStuff.reloadScripts();
                 HotkeyManager.reload();

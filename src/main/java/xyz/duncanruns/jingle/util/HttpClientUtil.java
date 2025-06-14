@@ -22,9 +22,6 @@ import java.security.NoSuchAlgorithmException;
 public final class HttpClientUtil {
     private static final HttpClient httpClient;
 
-    private HttpClientUtil() {
-    }
-
     static {
         try {
             httpClient = initHttpClient();
@@ -33,6 +30,8 @@ public final class HttpClientUtil {
         }
     }
 
+    private HttpClientUtil() {
+    }
 
     private static HttpClient initHttpClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         //https://stackoverflow.com/a/28847175

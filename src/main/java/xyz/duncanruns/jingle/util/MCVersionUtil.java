@@ -73,7 +73,7 @@ public final class MCVersionUtil {
                 }
             }
 
-            if(year < 22) return Version.of(DEFAULT_OLD_SNAPSHOT_VERSION);
+            if (year < 22) return Version.of(DEFAULT_OLD_SNAPSHOT_VERSION);
             return Version.of(DEFAULT_NEW_SNAPSHOT_VERSION);
         }
         return null;
