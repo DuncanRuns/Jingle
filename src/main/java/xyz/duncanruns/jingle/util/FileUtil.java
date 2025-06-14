@@ -1,6 +1,7 @@
 package xyz.duncanruns.jingle.util;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
@@ -29,7 +30,11 @@ public final class FileUtil {
         return readJson(path, JsonObject.class);
     }
 
-    public static <T> T readJson(Path path, Class<T> clazz) throws IOException, JsonSyntaxException {
-        return GSON.fromJson(readString(path), clazz);
+    public static <T> T readJson(Path path, Class<T> clazz, Gson gson) throws IOException {
+        return gson.fromJson(readString(path), clazz);
+    }
+
+    public static <T> T readJson(Path path, Class<T> clazz) throws IOException {
+        return readJson(path, clazz, GSON);
     }
 }

@@ -1,25 +1,46 @@
 package xyz.duncanruns.jingle;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 import xyz.duncanruns.jingle.util.FileUtil;
 
 import javax.annotation.Nullable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class JingleOptions {
+    /**
+     * Marks a field to be loaded from JSON but not saved back to JSON.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface LoadOnly {
+    }
+
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
     private static final int CURRENT_OPTIONS_VERSION = 3;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
     public static final JingleOptions DEFAULTS = createNew();
 
+    private static final Gson LOAD_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+    private static final Gson SAVE_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls()
+            .setExclusionStrategies(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes field) {
+                    return field.getAnnotation(LoadOnly.class) != null;
+                }
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return false;
+                }
+            }).create();
 
     public Integer optionsVersion = DEFAULT_LOADED_OPTIONS_VERSION;
 
@@ -51,8 +72,8 @@ public class JingleOptions {
     public String projectorWindowPattern = "*- Jingle Mag";
     public boolean minimizeProjector;
 
-
     @Deprecated
+    @LoadOnly
     @Nullable
     public Set<String> disabledDefaultScripts = null;
 
@@ -68,7 +89,7 @@ public class JingleOptions {
     public static JingleOptions load() {
         if (Files.exists(OPTIONS_PATH)) {
             try {
-                JingleOptions options = FileUtil.readJson(OPTIONS_PATH, JingleOptions.class);
+                JingleOptions options = FileUtil.readJson(OPTIONS_PATH, JingleOptions.class, LOAD_GSON);
                 options.fix();
                 return options;
             } catch (Exception e) {
@@ -91,7 +112,7 @@ public class JingleOptions {
             // "Misc" hotkeys -> "Extra Keys" hotkeys
             this.setSavedHotkeys(this.copySavedHotkeys().stream().map(sh -> sh.action.startsWith("Misc:") ? new SavedHotkey(sh.type, "Extra Keys" + sh.action.substring(sh.action.indexOf(":")), sh.keys, sh.ignoreModifiers) : sh).collect(Collectors.toList()));
         }
-        if (this.optionsVersion < 3 && this.disabledDefaultScripts != null) {
+        if (this.disabledDefaultScripts != null) {
             this.disabledScripts.addAll(this.disabledDefaultScripts);
         }
 
@@ -100,7 +121,7 @@ public class JingleOptions {
 
     public void save() {
         try {
-            FileUtil.writeString(OPTIONS_PATH, GSON.toJson(this));
+            FileUtil.writeString(OPTIONS_PATH, SAVE_GSON.toJson(this));
         } catch (Exception e) {
             Jingle.logError("Failed to save options.json:", e);
         }
