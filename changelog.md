@@ -1,3 +1,11 @@
+Changes in v1.2.0:
+
+- Support MC pre-releases and release candidates, add more snapshots (@tildejustin)
+  - All official MC releases, pre-releases, and release candidates will work indefinitely with Jingle 
+- Support all future snapshots lazily by defaulting them to 1.14-like if old or 1.21-like if new (subject to change depending on what snapshots are manually entered)
+- Add an "Upload Log" button (#20 @marin774)
+- Extended the ability to disable default scripts to custom scripts too
+
 Changes in v1.1.4:
 
 - Fix Jingle umminimizing itself
