@@ -16,8 +16,8 @@ public final class MCVersionUtil {
     private static final Map<int[], String> SNAP_MAP = getSnapMap();
     private static final Pattern SNAPSHOT_VERSION_PATTERN = Pattern.compile("^(\\d\\d)w0?(\\d+).+"); // Does not exactly match, but is useful for matching groups
 
-    private static final String DEFAULT_OLD_SNAPSHOT_VERSION = "1.14.99";
-    private static final String DEFAULT_NEW_SNAPSHOT_VERSION = "1.21.6";
+    private static final String DEFAULT_OLD_SNAPSHOT_VERSION = "0.99.99";
+    private static final String DEFAULT_NEW_SNAPSHOT_VERSION = "1.21.7";
 
     private MCVersionUtil() {
     }
@@ -25,7 +25,31 @@ public final class MCVersionUtil {
     private static Map<int[], String> getSnapMap() {
         Map<int[], String> map = new HashMap<>();
 
-        // TODO: older snapshots
+        map.put(new int[]{11, 47, 52}, "1.0.99"); // 2011 1.1 snapshots
+        map.put(new int[]{12, 1, 1}, "1.1.1"); // 2012 1.1 snapshots
+        map.put(new int[]{12, 3, 8}, "1.1.99"); // 1.2 snapshots
+        map.put(new int[]{12, 15, 30}, "1.2.99"); // 1.3 snapshots
+        map.put(new int[]{12, 32, 42}, "1.3.99"); // 1.4 snapshots
+        map.put(new int[]{13, 1, 10}, "1.4.99"); // 1.5 snapshots
+        map.put(new int[]{13, 11, 12}, "1.5.1"); // 1.5.1 snapshots
+        map.put(new int[]{13, 16, 26}, "1.5.99"); // 1.6 snapshots
+        map.put(new int[]{13, 36, 43}, "1.6.99"); // 1.7 snapshots
+        map.put(new int[]{13, 47, 49}, "1.6.99"); // 1.7.4 snapshots
+        map.put(new int[]{14, 2, 34}, "1.7.99"); // 1.8 snapshots
+        map.put(new int[]{15, 31, 52}, "1.8.99"); // 2015 1.9 snapshots
+        map.put(new int[]{16, 1, 7}, "1.8.99"); // 2016 1.9 snapshots
+        map.put(new int[]{16, 14, 15}, "1.9.3"); // 1.9.3 snapshots
+        map.put(new int[]{16, 20, 21}, "1.9.99"); // 1.10 snapshots
+        map.put(new int[]{16, 32, 44}, "1.10.99"); // 1.11 snapshots
+        map.put(new int[]{16, 50, 50}, "1.11.1"); // 1.11.1 snapshots
+        map.put(new int[]{17, 6, 18}, "1.11.99"); // 1.12 snapshots
+        map.put(new int[]{17, 31, 31}, "1.12.1"); // 1.12.1 snapshots
+        map.put(new int[]{17, 43, 52}, "1.12.99"); // 2017 1.13 snapshots
+        map.put(new int[]{18, 1, 22}, "1.12.99"); // 2018 1.13 snapshots
+        map.put(new int[]{18, 30, 33}, "1.13.1"); // 1.13.1 snapshots
+        map.put(new int[]{18, 43, 52}, "1.13.99"); // 2018 1.14 snapshots
+        map.put(new int[]{19, 1, 14}, "1.14.99"); // 2019 1.14 snapshots
+        map.put(new int[]{19, 34, 46}, "1.14.99"); // 1.15 snapshots
         map.put(new int[]{20, 6, 22}, "1.15.99"); // 1.16 snapshots, including infinity april fools
         map.put(new int[]{20, 27, 30}, "1.16.2"); // 1.16.2 snapshots
         map.put(new int[]{20, 45, 51}, "1.16.99"); // 1.17 snapshots
@@ -43,6 +67,7 @@ public final class MCVersionUtil {
         map.put(new int[]{24, 33, 39}, "1.21.2"); // 1.21.2 snapshots
         map.put(new int[]{24, 44, 46}, "1.21.4"); // 1.21.4 snapshots
         map.put(new int[]{25, 2, 10}, "1.21.5"); // 1.21.5 snapshots
+        map.put(new int[]{25, 15, 21}, "1.21.6"); // 1.21.6 snapshots
 
         return Collections.unmodifiableMap(map);
     }
@@ -73,7 +98,7 @@ public final class MCVersionUtil {
                 }
             }
 
-            if (year < 22) return Version.of(DEFAULT_OLD_SNAPSHOT_VERSION);
+            if (year < 12) return Version.of(DEFAULT_OLD_SNAPSHOT_VERSION);
             return Version.of(DEFAULT_NEW_SNAPSHOT_VERSION);
         }
         return null;
