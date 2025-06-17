@@ -5,7 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.gui.JingleGUI;
-import xyz.duncanruns.jingle.instance.OpenedInstance;
+import xyz.duncanruns.jingle.instance.FabricModFolder;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.FileUtil;
 import xyz.duncanruns.jingle.util.VersionUtil;
@@ -35,22 +35,26 @@ public final class Packaging {
      * @author DuncanRuns
      * @author draconix6
      */
-    public static Path prepareSubmission(OpenedInstance instance) throws IOException, SecurityException, JsonSyntaxException {
-        Path savesPath = instance.instancePath.resolve("saves");
+    public static Path prepareSubmission(Path instancePath) throws IOException, SecurityException, JsonSyntaxException {
+        // TODO: just find the latest world with a completed SpeedRunIGT, subtract 5 from world number, copy all numbers after, also take 5 previous worlds in modification time order, and every world after.
+        //  Otherwise if no SpeedRunIGT world found, copy latest world + 5 previous saves.
+        //  Also ask user if the found world is correct.
+        Path savesPath = instancePath.resolve("saves");
         if (!Files.isDirectory(savesPath)) {
             Jingle.log(Level.ERROR, "Saves path for instance not found! Please refer to the speedrun.com rules to submit files yourself.");
             return null;
         }
 
-        Path logsPath = instance.instancePath.resolve("logs");
+        Path logsPath = instancePath.resolve("logs");
         if (!Files.isDirectory(logsPath)) {
             Jingle.log(Level.ERROR, "Logs path for instance not found! Please refer to the speedrun.com rules to submit files yourself.");
             return null;
         }
 
-        boolean hasSeedQueue = instance.fabricModFolder.getInfos().stream().anyMatch(j -> Objects.equals(j.id, "seedqueue"));
+        FabricModFolder fabricModFolder = new FabricModFolder(instancePath.resolve("mods"));
+        boolean hasSeedQueue = fabricModFolder.getInfos().stream().anyMatch(j -> Objects.equals(j.id, "seedqueue"));
         if (hasSeedQueue) {
-            if (instance.fabricModFolder.getInfos().stream().noneMatch(j -> Objects.equals(j.id, "speedrunigt") && VersionUtil.tryCompare(j.version.split("\\+")[0], "14.0", -2) >= 0)) {
+            if (fabricModFolder.getInfos().stream().noneMatch(j -> Objects.equals(j.id, "speedrunigt") && VersionUtil.tryCompare(j.version.split("\\+")[0], "14.0", -2) >= 0)) {
                 Jingle.log(Level.ERROR, "SeedQueue detected without an updated SpeedRunIGT! Please refer to the speedrun.com rules to submit files yourself.");
                 return null;
             }

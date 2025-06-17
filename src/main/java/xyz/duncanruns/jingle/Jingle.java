@@ -75,6 +75,7 @@ public final class Jingle {
 
         ScriptStuff.reloadScripts();
         SwingUtilities.invokeLater(() -> {
+            JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), false);
             JingleGUI.get().scriptListPanel.reload();
             JingleGUI.get().refreshQuickActions();
             JingleGUI.get().refreshHack();
@@ -229,7 +230,7 @@ public final class Jingle {
         mainInstance = instance == null ? null : new OpenedInstance(instance, Jingle::onInstanceStateChange);
         legalModCheckNeeded = instance != null;
         resetStates();
-        JingleGUI.get().setInstance(instance);
+        JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
         if (instance != null) seeInstancePath(instance.instancePath);
         if (options.autoBorderless) goBorderless();
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath));
@@ -313,7 +314,7 @@ public final class Jingle {
     }
 
     public static void openInstanceFolder() {
-        getMainInstance().ifPresent(instance -> OpenUtil.openFile(instance.instancePath.toString()));
+        getLatestInstancePath().ifPresent(p -> OpenUtil.openFile(p.toString()));
     }
 
     public static boolean isRunning() {
@@ -396,5 +397,14 @@ public final class Jingle {
     public static void dumpMeasuringProjector() {
         OBSProjector.dumpOBSProjector();
         PluginEvents.DUMP_PROJECTOR.runAll();
+    }
+
+    public static Optional<Path> getLatestInstancePath() {
+        return Optional.ofNullable(getMainInstance().map(i -> i.instancePath).orElse(
+                Jingle.options.seenPaths.entrySet().stream()
+                        .max(Comparator.comparingLong(Map.Entry::getValue))
+                        .map(Map.Entry::getKey).map(Paths::get)
+                        .orElse(null)
+        ));
     }
 }

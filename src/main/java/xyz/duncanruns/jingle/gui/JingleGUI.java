@@ -108,7 +108,7 @@ public class JingleGUI extends JFrame {
         this.setPreferredSize(new Dimension(Jingle.options.lastSize[0], Jingle.options.lastSize[1]));
         this.setLocation(Jingle.options.lastPosition[0], Jingle.options.lastPosition[1]);
         this.setIconImage(getLogo());
-        this.setInstance(null);
+        this.noInstanceYet();
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -211,20 +211,32 @@ public class JingleGUI extends JFrame {
     }
 
     public void setInstance(OpenedInstanceInfo instance) {
-        boolean instanceExists = instance != null;
-        this.clearWorldsButton.setEnabled(instanceExists);
-        this.goBorderlessButton.setEnabled(instanceExists);
-        this.openMinecraftFolderButton.setEnabled(instanceExists);
-        this.packageSubmissionFilesButton.setEnabled(instanceExists);
-        if (instanceExists) {
-            String instancePathString = instance.instancePath.toString();
+        this.setInstance(instance == null ? null : instance.instancePath, instance != null);
+    }
+
+    public void setInstance(Path instancePath, boolean open) {
+        boolean exists = instancePath != null;
+        this.clearWorldsButton.setEnabled(exists);
+        this.goBorderlessButton.setEnabled(open);
+        this.openMinecraftFolderButton.setEnabled(exists);
+        this.packageSubmissionFilesButton.setEnabled(exists);
+        if (exists) {
+            String instancePathString = instancePath.toString();
             if (instancePathString.length() > MAX_INSTANCE_PATH_DISPLAY_LENGTH) {
                 instancePathString = "..." + instancePathString.substring(instancePathString.length() - MAX_INSTANCE_PATH_DISPLAY_LENGTH + 3);
             }
-            this.instanceLabel.setText("Instance: " + instancePathString);
+            this.instanceLabel.setText((open ? "Instance: " : "Instance (Closed): ") + instancePathString);
         } else {
-            this.instanceLabel.setText("Instance: No instances opened!");
+            this.instanceLabel.setText("No instances ever opened!");
         }
+    }
+
+    private void noInstanceYet() {
+        this.clearWorldsButton.setEnabled(false);
+        this.goBorderlessButton.setEnabled(false);
+        this.openMinecraftFolderButton.setEnabled(false);
+        this.packageSubmissionFilesButton.setEnabled(false);
+        this.instanceLabel.setText("Loading...");
     }
 
     private void addPluginTabInternal(String name, JPanel panel, Runnable onSwitchTo) {
@@ -371,7 +383,7 @@ public class JingleGUI extends JFrame {
             }
         });
 
-        this.packageSubmissionFilesButton.addActionListener(a -> Jingle.getMainInstance().ifPresent(i -> {
+        this.packageSubmissionFilesButton.addActionListener(a -> Jingle.getLatestInstancePath().ifPresent(i -> {
             try {
                 Path path = Packaging.prepareSubmission(i);
                 if (path != null) {

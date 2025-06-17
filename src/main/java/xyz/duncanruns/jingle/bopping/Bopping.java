@@ -32,7 +32,7 @@ public final class Bopping {
                             .map(Paths::get);
                     totalInstances = Jingle.options.seenPaths.size();
                 } else {
-                    paths = Jingle.getMainInstance().map(instance -> Stream.of(instance.instancePath)).orElseGet(Stream::empty);
+                    paths = Jingle.getLatestInstancePath().map(Stream::of).orElse(Stream.empty());
                 }
                 int cleared = paths.map(Path::toAbsolutePath)
                         .distinct()
@@ -47,7 +47,7 @@ public final class Bopping {
                         }).sum();
                 Jingle.log(Level.INFO, "Cleared " + cleared + " world" + (cleared == 1 ? "" : "s") + " from " + totalInstances + " instance" + (totalInstances == 1 ? "" : "s") + ".");
                 synchronized (Jingle.class) {
-                    JingleGUI.get().clearWorldsButton.setEnabled(Jingle.getMainInstance().isPresent());
+                    JingleGUI.get().clearWorldsButton.setEnabled(Jingle.getLatestInstancePath().isPresent());
                     JingleGUI.get().clearWorldsFromAllButton.setEnabled(true);
                 }
             }
