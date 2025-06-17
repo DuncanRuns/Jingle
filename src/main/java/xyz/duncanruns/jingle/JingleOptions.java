@@ -15,14 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class JingleOptions {
-    /**
-     * Marks a field to be loaded from JSON but not saved back to JSON.
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface LoadOnly {
-    }
-
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
     private static final int CURRENT_OPTIONS_VERSION = 3;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
@@ -139,5 +131,13 @@ public class JingleOptions {
      */
     public void setSavedHotkeys(List<SavedHotkey> hotkeys) {
         this.hotkeys = hotkeys.stream().distinct().map(SavedHotkey::toJson).collect(Collectors.toList());
+    }
+
+    /**
+     * Marks a field to be loaded from JSON but not saved back to JSON.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface LoadOnly {
     }
 }
