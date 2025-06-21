@@ -383,17 +383,7 @@ public class JingleGUI extends JFrame {
             }
         });
 
-        this.packageSubmissionFilesButton.addActionListener(a -> Jingle.getLatestInstancePath().ifPresent(i -> {
-            try {
-                Path path = Packaging.prepareSubmission(i);
-                if (path != null) {
-                    OpenUtil.openFile(path.toString());
-                }
-            } catch (IOException e) {
-                Jingle.logError("Preparing File Submission Failed:", e);
-                JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", JOptionPane.ERROR_MESSAGE);
-            }
-        }));
+        this.packageSubmissionFilesButton.addActionListener(a -> packageSubmissionFiles());
 
         this.hotkeyListPanel.reload();
 
@@ -401,6 +391,31 @@ public class JingleGUI extends JFrame {
         setCheckBoxBoolean(this.autoBorderlessCheckBox, Jingle.options.autoBorderless, b -> {
             Jingle.options.autoBorderless = b;
             if (b) Jingle.goBorderless();
+        });
+    }
+
+    private void packageSubmissionFiles() {
+
+        Jingle.getLatestInstancePath().ifPresent(p -> {
+            this.packageSubmissionFilesButton.setEnabled(false);
+            this.packageSubmissionFilesButton.setText("Packaging...");
+            Thread thread = new Thread(() -> {
+                try {
+                    Path path = Packaging.prepareSubmission(p);
+                    if (path != null) {
+                        OpenUtil.openFile(path.toString());
+                    }
+                } catch (IOException e) {
+                    Jingle.logError("Preparing File Submission Failed:", e);
+                    JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    SwingUtilities.invokeLater(() -> {
+                        this.packageSubmissionFilesButton.setText("Package Submission Files");
+                        this.packageSubmissionFilesButton.setEnabled(true);
+                    });
+                }
+            });
+            thread.start();
         });
     }
 
