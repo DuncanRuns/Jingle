@@ -1,10 +1,13 @@
 Changes in v1.2.0:
 
 - Support MC pre-releases and release candidates, add more snapshots (@tildejustin)
-  - All official MC releases, pre-releases, and release candidates will work indefinitely with Jingle 
-- Support all future snapshots lazily by defaulting them to 1.14-like if old or 1.21-like if new (subject to change depending on what snapshots are manually entered)
+    - All official MC releases, pre-releases, and release candidates will work indefinitely with Jingle
+- Support all future snapshots lazily by defaulting them to 1.14-like if old or 1.21-like if new (subject to change
+  depending on what snapshots are manually entered)
 - Add an "Upload Log" button (#20 @marin774)
 - Extended the ability to disable default scripts to custom scripts too
+- Jingle will now keep track of the last used Minecraft instance, allowing submission packaging and world clearing to
+  work even if the instance is not open.
 
 Changes in v1.1.4:
 
@@ -12,7 +15,8 @@ Changes in v1.1.4:
 
 Changes in v1.1.3:
 
-- Allow many more key combinations (multiple main keys, or only modifier keys) ([#7](https://github.com/DuncanRuns/Jingle/issues/7), [#8](https://github.com/DuncanRuns/Jingle/issues/8))
+- Allow many more key combinations (multiple main keys, or only modifier
+  keys) ([#7](https://github.com/DuncanRuns/Jingle/issues/7), [#8](https://github.com/DuncanRuns/Jingle/issues/8))
 - Allow plugins to specify a minimum Java version
 
 Changes in v1.1.2:
