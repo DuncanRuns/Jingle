@@ -5,6 +5,7 @@ import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.hotkey.Hotkey;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
+import xyz.duncanruns.jingle.util.I18nUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -60,6 +61,7 @@ public class HotkeyListPanel extends JPanel {
         for (final SavedHotkey hotkey : savedHotkeys) {
             constraints.gridy++;
 
+
             JLabel actionLabel = new JLabel(String.format("%s (%s)", Jingle.formatAction(hotkey.action), StringUtils.capitalize(hotkey.type)));
             this.add(actionLabel, constraints.clone());
             JLabel setHotkeyLabel = new JLabel((hotkey.ignoreModifiers ? "* " : "") + Hotkey.formatKeys(hotkey.keys));
@@ -81,25 +83,25 @@ public class HotkeyListPanel extends JPanel {
             this.add(buttonsPanel, constraints.clone());
         }
         if (constraints.gridy == 1) {
-            this.add(new JLabel("No hotkeys added!"));
+            this.add(new JLabel(I18nUtil.getString("jingle.hotkey.list.no_hotkey_added")));
         } else {
             if (hasInvalidHotkeys) {
                 constraints.gridy = 0;
                 constraints.gridwidth = 4;
-                JLabel warningLabel = new JLabel("Warning: some of your hotkeys have an invalid action");
+                JLabel warningLabel = new JLabel(I18nUtil.getString("jingle.hotkey.list.warn"));
                 warningLabel.setForeground(new Color(255, 0, 0));
                 this.add(warningLabel, constraints.clone());
                 constraints.gridwidth = 1;
             }
             constraints.gridy = 1;
-            this.add(new JLabel("Action"), constraints.clone());
-            this.add(new JLabel("Hotkey"), constraints.clone());
+            this.add(new JLabel(I18nUtil.getString("jingle.hotkey.list.action")), constraints.clone());
+            this.add(new JLabel(I18nUtil.getString("jingle.hotkey.list.hotkey")), constraints.clone());
         }
         this.revalidate();
     }
 
     private JButton getRemoveButton(SavedHotkey hotkey) {
-        JButton removeButton = new JButton("Remove");
+        JButton removeButton = new JButton(I18nUtil.getString("jingle.hotkey.list.remove"));
         removeButton.addActionListener(a -> {
             synchronized (Jingle.class) {
                 Jingle.options.setSavedHotkeys(Jingle.options.copySavedHotkeys().stream().filter(h -> !h.equals(hotkey)).collect(Collectors.toList()));
@@ -112,7 +114,7 @@ public class HotkeyListPanel extends JPanel {
     }
 
     private JButton getEditButton(SavedHotkey hotkey) {
-        JButton editButton = new JButton("Edit");
+        JButton editButton = new JButton(I18nUtil.getString("jingle.hotkey.list.edit"));
         editButton.addActionListener(a -> {
             synchronized (Jingle.class) {
                 EditHotkeyDialog dialog = new EditHotkeyDialog(this.owner, hotkey.action, hotkey.type, hotkey.keys, hotkey.ignoreModifiers);

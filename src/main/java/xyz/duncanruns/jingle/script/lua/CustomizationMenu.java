@@ -6,6 +6,7 @@ import com.intellij.uiDesigner.core.Spacer;
 import org.luaj.vm2.LuaFunction;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.script.CustomizableManager;
+import xyz.duncanruns.jingle.util.I18nUtil;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -30,7 +31,7 @@ class CustomizationMenu extends JDialog {
     public CustomizationMenu(JingleLuaLibrary library, List<Element> elements) {
         super(JingleGUI.get());
         assert library.script != null;
-        this.setTitle("Jingle Script: " + library.script.name);
+        this.setTitle(I18nUtil.getString("jingle.script.custom_title") + " " + library.script.name);
         this.setContentPane(this.contentPane);
         this.setModal(true);
         this.getRootPane().setDefaultButton(this.okButton);
@@ -169,6 +170,7 @@ class CustomizationMenu extends JDialog {
         CheckBoxElement(String key, boolean defaultVal, String checkBoxLabel) {
             this.key = key;
             this.defaultVal = defaultVal;
+            //this.checkBoxLabel = checkBoxLabel;
             this.checkBoxLabel = checkBoxLabel;
         }
     }
@@ -179,6 +181,7 @@ class CustomizationMenu extends JDialog {
         TextElement(String message) {
             this.message = message;
         }
+
     }
 
     static class TextFieldElement implements Element {

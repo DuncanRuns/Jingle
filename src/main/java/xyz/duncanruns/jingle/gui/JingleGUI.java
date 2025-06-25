@@ -5,7 +5,9 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
+import xyz.duncanruns.jingle.JingleAppLaunch;
 import xyz.duncanruns.jingle.JingleOptions;
 import xyz.duncanruns.jingle.JingleUpdater;
 import xyz.duncanruns.jingle.bopping.Bopping;
@@ -27,10 +29,16 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.JarURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,10 +46,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class JingleGUI extends JFrame {
     private static final int MAX_INSTANCE_PATH_DISPLAY_LENGTH = 50;
@@ -99,9 +110,13 @@ public class JingleGUI extends JFrame {
     private JButton customizeBorderlessButton;
     private JCheckBox autoBorderlessCheckBox;
     private JPanel quickActionsPanel;
+    private JComboBox comboBox1;
+    private Map<String, Locale> localeMap = new HashMap<>();
+    private Map<String, String> displayNameMap = new HashMap<>();
 
     private JingleGUI() {
         this.$$$setupUI$$$();
+        this.loadAvailableLocales();
         this.finalizeComponents();
         this.setTitle("Jingle v" + Jingle.VERSION);
         this.setContentPane(this.mainPanel);
@@ -130,10 +145,37 @@ public class JingleGUI extends JFrame {
             try {
                 SwingUtilities.invokeAndWait(() -> instance = new JingleGUI());
             } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
         return instance;
+    }
+
+    private void loadAvailableLocales() {
+        localeMap.clear();
+        displayNameMap.clear();
+        List<String> i18n = ResourceUtil.getResourcesFromFolder("i18n");
+        for (String i18nFile : i18n) {
+            if (!i18nFile.startsWith("Jingle_") || !i18nFile.endsWith(".properties")) continue;
+            String langCode = i18nFile.substring(7, i18nFile.length() - 11);
+
+            String[] parts = langCode.split("_");
+            Locale locale = parts.length > 1 ?
+                    new Locale(parts[0], parts[1]) :
+                    new Locale(parts[0]);
+
+            localeMap.put(langCode, locale);
+
+            String displayName = locale.getDisplayName(locale);
+            displayNameMap.put(langCode, displayName);
+        }
+        if (localeMap.isEmpty()) {
+            Locale defaultLocale = Locale.getDefault();
+            String defaultLangCode = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+            localeMap.put(defaultLangCode, defaultLocale);
+            displayNameMap.put(defaultLangCode, defaultLocale.getDisplayName(defaultLocale));
+        }
     }
 
     @SuppressWarnings("unused")
@@ -225,9 +267,9 @@ public class JingleGUI extends JFrame {
             if (instancePathString.length() > MAX_INSTANCE_PATH_DISPLAY_LENGTH) {
                 instancePathString = "..." + instancePathString.substring(instancePathString.length() - MAX_INSTANCE_PATH_DISPLAY_LENGTH + 3);
             }
-            this.instanceLabel.setText((open ? "Instance: " : "Instance (Closed): ") + instancePathString);
+            this.instanceLabel.setText((open ? I18nUtil.getString("jingle.instance.open") + " " : I18nUtil.getString("jingle.instance.closed") + " ") + instancePathString);
         } else {
-            this.instanceLabel.setText("No instances ever opened!");
+            this.instanceLabel.setText(I18nUtil.getString("jingle.instance.no_instance"));
         }
     }
 
@@ -236,7 +278,7 @@ public class JingleGUI extends JFrame {
         this.goBorderlessButton.setEnabled(false);
         this.openMinecraftFolderButton.setEnabled(false);
         this.packageSubmissionFilesButton.setEnabled(false);
-        this.instanceLabel.setText("Loading...");
+        this.instanceLabel.setText(I18nUtil.getString("jingle.instance.loading"));
     }
 
     private void addPluginTabInternal(String name, JPanel panel, Runnable onSwitchTo) {
@@ -254,6 +296,7 @@ public class JingleGUI extends JFrame {
     }
 
     private void finalizeComponents() {
+        this.setI18n();
         this.clearWorldsButton.addActionListener(a -> Bopping.bop(false));
         this.clearWorldsFromAllButton.addActionListener(a -> Bopping.bop(true));
         this.goBorderlessButton.addActionListener(a -> Jingle.goBorderless());
@@ -263,7 +306,7 @@ public class JingleGUI extends JFrame {
                 if (e.getButton() == 3) customizeBorderless();
             }
         });
-        this.goBorderlessButton.setToolTipText("Right Click to Configure");
+        this.goBorderlessButton.setToolTipText(I18nUtil.getString("jingle.borderless.right_click_configure"));
         this.openMinecraftFolderButton.addActionListener(a -> Jingle.openInstanceFolder());
 
         ((DefaultCaret) this.logTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -283,13 +326,13 @@ public class JingleGUI extends JFrame {
                     JsonObject response = MCLogsUtil.uploadLog(Jingle.FOLDER.resolve("logs").resolve("latest.log"));
                     if (response.get("success").getAsBoolean()) {
                         String url = response.get("url").getAsString();
-                        Object[] options = new Object[]{"Copy URL", "Close"};
+                        Object[] options = new Object[]{I18nUtil.getString("jingle.log.upload_log_copy_url"), I18nUtil.getString("jingle.log.upload_close")};
                         JEditorPane pane = new UploadedLogPane(url);
 
                         int button = JOptionPane.showOptionDialog(
                                 this,
                                 pane,
-                                "Jingle: Uploaded Log",
+                                I18nUtil.getString("jingle.log.upload_log_title"),
                                 JOptionPane.YES_NO_OPTION,
                                 JOptionPane.INFORMATION_MESSAGE,
                                 null,
@@ -305,11 +348,11 @@ public class JingleGUI extends JFrame {
                         }
                     } else {
                         String error = response.get("error").getAsString();
-                        JOptionPane.showMessageDialog(this, String.format("Error while uploading log:\n%s", error), "Jingle: Upload Log Failed", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this, String.format(I18nUtil.getString("jingle.log.error_while_upload") + ":\n%s", error), I18nUtil.getString("jingle.log.error_while_upload_title"), JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
                     Jingle.logError("Failed to upload log:", ex);
-                    JOptionPane.showMessageDialog(this, "Error while uploading log.", "Jingle: Upload Log Failed", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, I18nUtil.getString("jingle.log.error_while_upload") + ".", I18nUtil.getString("jingle.log.error_while_upload_title"), JOptionPane.ERROR_MESSAGE);
                 }
 
                 this.uploadLogButton.setEnabled(true);
@@ -379,7 +422,7 @@ public class JingleGUI extends JFrame {
             try {
                 Desktop.getDesktop().browse(URI.create("https://ko-fi.com/duncanruns"));
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Failed to open link. Donations can be done at https://ko-fi.com/duncanruns.", "Jingle: Failed to open link", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, I18nUtil.getString("jingle.donate.failed_open_link"), I18nUtil.getString("jingle.donate.failed_open_link_title"), JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -392,13 +435,15 @@ public class JingleGUI extends JFrame {
             Jingle.options.autoBorderless = b;
             if (b) Jingle.goBorderless();
         });
+
+        initLanguageComboBox();
     }
 
     private void packageSubmissionFiles() {
 
         Jingle.getLatestInstancePath().ifPresent(p -> {
             this.packageSubmissionFilesButton.setEnabled(false);
-            this.packageSubmissionFilesButton.setText("Packaging...");
+            this.packageSubmissionFilesButton.setText(I18nUtil.getString("jingle.package.packaging"));
             Thread thread = new Thread(() -> {
                 try {
                     Path path = Packaging.prepareSubmission(p);
@@ -407,10 +452,10 @@ public class JingleGUI extends JFrame {
                     }
                 } catch (IOException e) {
                     Jingle.logError("Preparing File Submission Failed:", e);
-                    JOptionPane.showMessageDialog(this, "Preparing File Submission Failed:\n" + ExceptionUtil.toDetailedString(e), "Jingle: Packaging failed", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, I18nUtil.getString("jingle_package.preparing_file_fail") + "\n" + ExceptionUtil.toDetailedString(e), I18nUtil.getString("jingle.package.preparing_file_fail_title"), JOptionPane.ERROR_MESSAGE);
                 } finally {
                     SwingUtilities.invokeLater(() -> {
-                        this.packageSubmissionFilesButton.setText("Package Submission Files");
+                        this.packageSubmissionFilesButton.setText(I18nUtil.getString("gui.jingle.package_submission_files"));
                         this.packageSubmissionFilesButton.setEnabled(true);
                     });
                 }
@@ -420,16 +465,16 @@ public class JingleGUI extends JFrame {
     }
 
     private void customizeBorderless() {
-        int ans = JOptionPane.showOptionDialog(JingleGUI.this, "Customize Borderless Behaviour. Choose \"Automatic\" to snap to main monitor, or \"Custom\" to set an exact position.", "Jingle: Customize Borderless", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Automatic", "Custom"}, "Automatic");
+        int ans = JOptionPane.showOptionDialog(JingleGUI.this, I18nUtil.getString("jingle.options.customize_borderless"), I18nUtil.getString("jingle.options.customize_borderless_title"), JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{I18nUtil.getString("jingle.options.auto_borderless"), I18nUtil.getString("jingle.options.custom")}, I18nUtil.getString("jingle.options.auto_borderless"));
         if (ans == 0) { // Automatic
             Jingle.options.borderlessPosition = null;
         } else if (ans == 1) { // Custom
             int[] bp = Jingle.options.borderlessPosition;
-            Function<String, Object> askFunc = s -> JOptionPane.showInputDialog(JingleGUI.this, s + "Input the x, y, width, and height separated with commas (e.g. \"0,0,1920,1080\").", "Jingle: Customize Borderless", JOptionPane.QUESTION_MESSAGE, null, null, bp == null ? "" : String.format("%d,%d,%d,%d", bp[0], bp[1], bp[2], bp[3]));
+            Function<String, Object> askFunc = s -> JOptionPane.showInputDialog(JingleGUI.this, s + I18nUtil.getString("jingle.options.customize_borderless_message"), I18nUtil.getString("jingle.options.customize_borderless_title"), JOptionPane.QUESTION_MESSAGE, null, null, bp == null ? "" : String.format("%d,%d,%d,%d", bp[0], bp[1], bp[2], bp[3]));
             Pattern pattern = Pattern.compile("^ *(-?\\d+) *, *(-?\\d+) *, *(-?\\d+) *, *(-?\\d+) *$");
             Object sizeAnsObj = askFunc.apply("");
             while (sizeAnsObj != null && !pattern.matcher(sizeAnsObj.toString()).matches()) {
-                sizeAnsObj = askFunc.apply("Invalid input!\n");
+                sizeAnsObj = askFunc.apply(I18nUtil.getString("jingle.options.custom_invalid_input") + "\n");
             }
             if (sizeAnsObj == null) return;
             Matcher matcher;
@@ -444,7 +489,7 @@ public class JingleGUI extends JFrame {
             try {
                 KeyboardUtil.copyToClipboard(Jingle.FOLDER.resolve("jingle-obs-link.lua").toString());
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Failed to copy to clipboard: " + ExceptionUtil.toDetailedString(e));
+                JOptionPane.showMessageDialog(this, I18nUtil.getString("jingle.obs.fail_copy_path") + " " + ExceptionUtil.toDetailedString(e));
             }
         });
         JTextField[] ppFields = new JTextField[]{this.projPosXField, this.projPosYField, this.projPosWField, this.projPosHField};
@@ -550,7 +595,6 @@ public class JingleGUI extends JFrame {
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(6, 1, new Insets(5, 5, 5, 5), -1, -1));
         panel1.setEnabled(true);
-        panel1.putClientProperty("html.disable", Boolean.FALSE);
         mainTabbedPane.addTab("Jingle", panel1);
         instancePanel = new JPanel();
         instancePanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
@@ -597,27 +641,32 @@ public class JingleGUI extends JFrame {
         mainTabbedPane.addTab("Options", scrollPane2);
         scrollPane2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(7, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel2.setLayout(new GridLayoutManager(8, 5, new Insets(5, 5, 5, 5), -1, -1));
         scrollPane2.setViewportView(panel2);
         final Spacer spacer1 = new Spacer();
-        panel2.add(spacer1, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel2.add(spacer1, new GridConstraints(7, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         checkForUpdatesCheckBox = new JCheckBox();
         checkForUpdatesCheckBox.setText("Check for Updates");
-        panel2.add(checkForUpdatesCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(checkForUpdatesCheckBox, new GridConstraints(0, 0, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         preReleaseCheckBox = new JCheckBox();
         preReleaseCheckBox.setText("Enable Pre-Release Updates");
-        panel2.add(preReleaseCheckBox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(preReleaseCheckBox, new GridConstraints(1, 0, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         minimizeToTrayCheckBox = new JCheckBox();
         minimizeToTrayCheckBox.setText("Minimize to Tray");
-        panel2.add(minimizeToTrayCheckBox, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(minimizeToTrayCheckBox, new GridConstraints(2, 0, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator3 = new JSeparator();
-        panel2.add(separator3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel2.add(separator3, new GridConstraints(3, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         customizeBorderlessButton = new JButton();
         customizeBorderlessButton.setText("Customize Borderless");
-        panel2.add(customizeBorderlessButton, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(customizeBorderlessButton, new GridConstraints(4, 0, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         autoBorderlessCheckBox = new JCheckBox();
         autoBorderlessCheckBox.setText("Auto Borderless");
-        panel2.add(autoBorderlessCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(autoBorderlessCheckBox, new GridConstraints(5, 0, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Language :");
+        panel2.add(label2, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        comboBox1 = new JComboBox();
+        panel2.add(comboBox1, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         logJPanel = new JPanel();
         logJPanel.setLayout(new GridLayoutManager(2, 3, new Insets(5, 5, 5, 5), -1, -1));
         mainTabbedPane.addTab("Log", logJPanel);
@@ -685,9 +734,9 @@ public class JingleGUI extends JFrame {
         noPluginsLoadedTab = new JPanel();
         noPluginsLoadedTab.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pluginsTabbedPane.addTab("No Plugins Loaded", noPluginsLoadedTab);
-        final JLabel label2 = new JLabel();
-        label2.setText("No Plugins Loaded");
-        noPluginsLoadedTab.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("No Plugins Loaded");
+        noPluginsLoadedTab.add(label3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 5, 5), -1, -1));
         pluginsTab.add(panel5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -702,27 +751,27 @@ public class JingleGUI extends JFrame {
         scrollPane7.setViewportView(panel6);
         final Spacer spacer5 = new Spacer();
         panel6.add(spacer5, new GridConstraints(13, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final JLabel label3 = new JLabel();
-        label3.setText("OBS Link Script Installation:");
-        panel6.add(label3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label4 = new JLabel();
-        label4.setText("1. Open OBS, at the top, click Tools, and then Scripts.");
-        panel6.add(label4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label4.setText("OBS Link Script Installation:");
+        panel6.add(label4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label5 = new JLabel();
-        label5.setText("2. Check if jingle-obs-link.lua is listed under \"Loaded Scripts\", in this case you are already done.");
-        panel6.add(label5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label5.setText("1. Open OBS, at the top, click Tools, and then Scripts.");
+        panel6.add(label5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label6 = new JLabel();
+        label6.setText("2. Check if jingle-obs-link.lua is listed under \"Loaded Scripts\", in this case you are already done.");
+        panel6.add(label6, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel7 = new JPanel();
         panel7.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel6.add(panel7, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JLabel label6 = new JLabel();
-        label6.setText("3. Press this button:");
-        panel7.add(label6, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label7 = new JLabel();
+        label7.setText("3. Press this button:");
+        panel7.add(label7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         copyScriptPathButton = new JButton();
         copyScriptPathButton.setText("Copy Script Path");
         panel7.add(copyScriptPathButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label7 = new JLabel();
-        label7.setText("5. Press the bottom bar and press Ctrl+V to paste the script path, then press Open to add the script.");
-        panel6.add(label7, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label8 = new JLabel();
+        label8.setText("5. Press the bottom bar and press Ctrl+V to paste the script path, then press Open to add the script.");
+        panel6.add(label8, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator6 = new JSeparator();
         panel6.add(separator6, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         projectorCheckBox = new JCheckBox();
@@ -737,12 +786,12 @@ public class JingleGUI extends JFrame {
         panel6.add(projectorPositionPanel, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         projPosXField = new JTextField();
         projectorPositionPanel.add(projPosXField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(30, -1), null, 0, false));
-        final JLabel label8 = new JLabel();
-        label8.setText("Position:");
-        projectorPositionPanel.add(label8, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label9 = new JLabel();
-        label9.setText("Size:");
-        projectorPositionPanel.add(label9, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label9.setText("Position:");
+        projectorPositionPanel.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label10 = new JLabel();
+        label10.setText("Size:");
+        projectorPositionPanel.add(label10, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         projPosYField = new JTextField();
         projectorPositionPanel.add(projPosYField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(30, -1), null, 0, false));
         projPosWField = new JTextField();
@@ -752,21 +801,21 @@ public class JingleGUI extends JFrame {
         projPosApplyButton = new JButton();
         projPosApplyButton.setText("Apply");
         projectorPositionPanel.add(projPosApplyButton, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label10 = new JLabel();
-        label10.setText("4. Click on the + icon at the bottom left of the OBS Scripts window.");
-        panel6.add(label10, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label11 = new JLabel();
-        label11.setText("6. Press the \"Regenerate\" button in the jingle-obs-link.lua script.");
-        panel6.add(label11, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label11.setText("4. Click on the + icon at the bottom left of the OBS Scripts window.");
+        panel6.add(label11, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label12 = new JLabel();
+        label12.setText("6. Press the \"Regenerate\" button in the jingle-obs-link.lua script.");
+        panel6.add(label12, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel8 = new JPanel();
         panel8.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel6.add(panel8, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         projWindowPatternField = new JTextField();
         projWindowPatternField.setText("");
         panel8.add(projWindowPatternField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final JLabel label12 = new JLabel();
-        label12.setText("OBS Projector Name Pattern:");
-        panel8.add(label12, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label13 = new JLabel();
+        label13.setText("OBS Projector Name Pattern:");
+        panel8.add(label13, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         resetProjNameButton = new JButton();
         resetProjNameButton.setText("Reset");
         panel8.add(resetProjNameButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -777,26 +826,25 @@ public class JingleGUI extends JFrame {
         mainTabbedPane.addTab("Donate", scrollPane8);
         scrollPane8.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel9 = new JPanel();
-        panel9.setLayout(new GridLayoutManager(6, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel9.setLayout(new GridLayoutManager(7, 1, new Insets(5, 5, 5, 5), -1, -1));
         scrollPane8.setViewportView(panel9);
         final JPanel panel10 = new JPanel();
         panel10.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel9.add(panel10, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JLabel label13 = new JLabel();
-        label13.setForeground(new Color(-14894848));
-        label13.setOpaque(false);
-        label13.setText("Support Jingle:");
-        label13.putClientProperty("html.disable", Boolean.FALSE);
-        panel10.add(label13, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel9.add(panel10, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label14 = new JLabel();
+        label14.setForeground(new Color(-14894848));
+        label14.setOpaque(false);
+        label14.setText("Support Jingle:");
+        panel10.add(label14, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         donateButton = new JButton();
         donateButton.setText("Donate");
         panel10.add(donateButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label14 = new JLabel();
-        label14.setText("Thank you supporters!");
-        panel9.add(label14, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label15 = new JLabel();
+        label15.setText("Thank you supporters!");
+        panel9.add(label15, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel11 = new JPanel();
         panel11.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
-        panel9.add(panel11, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel9.add(panel11, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         supporter1Label = new JLabel();
         supporter1Label.setText(" ");
         panel11.add(supporter1Label, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -807,11 +855,14 @@ public class JingleGUI extends JFrame {
         supporter3Label.setText(" ");
         panel11.add(supporter3Label, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer6 = new Spacer();
-        panel9.add(spacer6, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel9.add(spacer6, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer7 = new Spacer();
         panel9.add(spacer7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer8 = new Spacer();
-        panel9.add(spacer8, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel9.add(spacer8, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JLabel label16 = new JLabel();
+        label16.setText(I18nUtil.getString("gui.support.translator"));
+        panel9.add(label16, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
@@ -855,7 +906,7 @@ public class JingleGUI extends JFrame {
                 .map(Supplier::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        if (buttons.isEmpty()) quickActionsPanel.add(new JLabel("No Quick Actions Available"));
+        if (buttons.isEmpty()) quickActionsPanel.add(new JLabel(I18nUtil.getString("jingle.action.no_quick_action")));
         else buttons.forEach(quickActionsPanel::add);
     }
 
@@ -881,5 +932,226 @@ public class JingleGUI extends JFrame {
             tab = parent;
         }
         return tab == this;
+    }
+
+    private void initLanguageComboBox() {
+        for (Map.Entry<String, String> entry : displayNameMap.entrySet()) {
+            comboBox1.addItem(entry.getValue());
+        }
+
+        String currentLang = Jingle.options.language;
+
+        if (currentLang != null && displayNameMap.containsKey(currentLang)) {
+            comboBox1.setSelectedItem(displayNameMap.get(currentLang));
+            comboBox1.revalidate();
+            comboBox1.repaint();
+        } else {
+            Locale defaultLocale = Locale.getDefault();
+            String defaultLangCode = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+            String defaultDisplay = defaultLocale.getDisplayName(defaultLocale) + " (" + defaultLangCode + ")";
+            comboBox1.setSelectedItem(defaultDisplay);
+        }
+
+        comboBox1.addActionListener(e -> {
+            String selectedItem = (String) comboBox1.getSelectedItem();
+            String selectedLang = null;
+
+            for (Map.Entry<String, String> entry : displayNameMap.entrySet()) {
+                String display = entry.getValue();
+                if (display.equals(selectedItem)) {
+                    selectedLang = entry.getKey();
+                    break;
+                }
+            }
+
+            if (selectedLang != null && !selectedLang.equals(Jingle.options.language)) {
+
+                // 提示重启
+                int choice = JOptionPane.showConfirmDialog(
+                        this,
+                        I18nUtil.getString("jingle.options.language_change_restart"),
+                        I18nUtil.getString("jingle.options.language_change_restart_title"),
+                        JOptionPane.OK_CANCEL_OPTION
+                );
+
+                if (choice == JOptionPane.OK_OPTION) {
+                    Jingle.options.language = selectedLang;
+                    restartApplication();
+                } else {
+                    // 如果选择no，则Jingle.options.language不变
+                    comboBox1.setSelectedItem(displayNameMap.get(currentLang));
+                }
+            }
+        });
+    }
+
+    private void restartApplication() {
+        try {
+            Jingle.options.save();
+
+            String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+            String jarPath = Jingle.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+
+            List<String> command = new ArrayList<>();
+            command.add(javaBin);
+            command.add("-jar");
+            command.add(jarPath.substring(1));
+
+            if (JingleAppLaunch.args != null) {
+                command.addAll(Arrays.asList(JingleAppLaunch.args));
+            }
+            new ProcessBuilder(command).start();
+
+            System.exit(0);
+        } catch (Exception ex) {
+            Jingle.logError("Failed to restart application", ex);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to restart: " + ExceptionUtil.toDetailedString(ex),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void setI18n() {
+        // Tab titles
+        setTabTitles();
+
+        // Jingle
+        instanceLabel.setText(I18nUtil.getString("gui.jingle.no_instances_opened"));
+        clearWorldsButton.setText(I18nUtil.getString("gui.jingle.clear_worlds"));
+        goBorderlessButton.setText(I18nUtil.getString("gui.jingle.go_borderless"));
+        packageSubmissionFilesButton.setText(I18nUtil.getString("gui.jingle.package_submission_files"));
+        openMinecraftFolderButton.setText(I18nUtil.getString("gui.jingle.open_minecraft_folder"));
+        clearWorldsFromAllButton.setText(I18nUtil.getString("gui.jingle.clear_worlds_all"));
+        openJingleFolderButton.setText(I18nUtil.getString("gui.jingle.open_jingle_folder"));
+        JLabel quickActionsLabel = findLabelByText(mainPanel, "Quick Actions");
+        if (quickActionsLabel != null) {
+            quickActionsLabel.setText(I18nUtil.getString("gui.jingle.quick_actions"));
+        }
+
+        // Options
+        checkForUpdatesCheckBox.setText(I18nUtil.getString("gui.options.check_for_updates"));
+        preReleaseCheckBox.setText(I18nUtil.getString("gui.options.pre_release_updates"));
+        minimizeToTrayCheckBox.setText(I18nUtil.getString("gui.options.minimize_to_tray"));
+        customizeBorderlessButton.setText(I18nUtil.getString("gui.options.customize_borderless"));
+        autoBorderlessCheckBox.setText(I18nUtil.getString("gui.options.auto_borderless"));
+        JLabel languageLabel = findLabelByText(mainPanel, "Language :");
+        if (languageLabel != null) {
+            languageLabel.setText(I18nUtil.getString("gui.options.language"));
+        }
+
+        // Log
+        showDebugLogsCheckBox.setText(I18nUtil.getString("gui.log.show_debug_logs"));
+        uploadLogButton.setText(I18nUtil.getString("gui.log.upload_logs"));
+
+        // Hotkeys
+        addHotkeyButton.setText(I18nUtil.getString("gui.hotkeys.add"));
+
+        // Scripts
+        openScriptsFolderButton.setText(I18nUtil.getString("gui.scripts.open_scripts_folder"));
+        reloadScriptsButton.setText(I18nUtil.getString("gui.scripts.reload_scripts"));
+
+        // Plugins
+        // TODO pluginsTabbedPane : No Plugins Loaded
+        openPluginsFolderButton.setText(I18nUtil.getString("gui.plugins.open_plugins_folder"));
+
+        // OBS
+        JLabel obs_text_0 = findLabelByText(mainPanel, "OBS Link Script Installation:");
+        if (obs_text_0 != null) {
+            obs_text_0.setText(I18nUtil.getString("gui.obs.obs_text_0"));
+        }
+        JLabel obs_text_1 = findLabelByText(mainPanel, "1. Open OBS, at the top, click Tools, and then Scripts.");
+        if (obs_text_1 != null) {
+            obs_text_1.setText(I18nUtil.getString("gui.obs.obs_text_1"));
+        }
+        JLabel obs_text_2 = findLabelByText(mainPanel, "2. Check if jingle-obs-link.lua is listed under \"Loaded Scripts\", in this case you are already done.");
+        if (obs_text_2 != null) {
+            obs_text_2.setText(I18nUtil.getString("gui.obs.obs_text_2"));
+        }
+        JLabel obs_text_3 = findLabelByText(mainPanel, "3. Press this button:");
+        if (obs_text_3 != null) {
+            obs_text_3.setText(I18nUtil.getString("gui.obs.obs_text_3"));
+        }
+        JLabel obs_text_4 = findLabelByText(mainPanel, "4. Click on the + icon at the bottom left of the OBS Scripts window.");
+        if (obs_text_4 != null) {
+            obs_text_4.setText(I18nUtil.getString("gui.obs.obs_text_4"));
+        }
+        JLabel obs_text_5 = findLabelByText(mainPanel, "5. Press the bottom bar and press Ctrl+V to paste the script path, then press Open to add the script.");
+        if (obs_text_5 != null) {
+            obs_text_5.setText(I18nUtil.getString("gui.obs.obs_text_5"));
+        }
+        JLabel obs_text_6 = findLabelByText(mainPanel, "6. Press the \"Regenerate\" button in the jingle-obs-link.lua script.");
+        if (obs_text_6 != null) {
+            obs_text_6.setText(I18nUtil.getString("gui.obs.obs_text_6"));
+        }
+        JLabel position = findLabelByText(mainPanel, "Position:");
+        if (position != null) {
+            position.setText(I18nUtil.getString("gui.obs.position"));
+        }
+        JLabel size = findLabelByText(mainPanel, "Size:");
+        if (size != null) {
+            size.setText(I18nUtil.getString("gui.obs.size"));
+        }
+        JLabel obs_projector_name_pattern = findLabelByText(mainPanel, "OBS Projector Name Pattern:");
+        if (obs_projector_name_pattern != null) {
+            obs_projector_name_pattern.setText(I18nUtil.getString("gui.obs.obs_projector_name_pattern"));
+        }
+        projectorCheckBox.setText(I18nUtil.getString("gui.obs.obs_eye_projector"));
+        autoProjectorPosBox.setText(I18nUtil.getString("gui.obs.auto_position_projector"));
+        projPosApplyButton.setText(I18nUtil.getString("gui.obs.apply"));
+        resetProjNameButton.setText(I18nUtil.getString("gui.obs.reset"));
+        minimizeProjectorBox.setText(I18nUtil.getString("gui.obs.minimize_projector_when_inactive"));
+        copyScriptPathButton.setText(I18nUtil.getString("gui.obs.copy_script_path"));
+
+        // Donate
+        JLabel supportLabel = findLabelByText(mainPanel, "Support Jingle:");
+        if (supportLabel != null) {
+            supportLabel.setText(I18nUtil.getString("gui.support.support_jingle"));
+        }
+        donateButton.setText(I18nUtil.getString("gui.support.donate"));
+        JLabel thanks = findLabelByText(mainPanel, "Thank you supporters!");
+        if (thanks != null) {
+            thanks.setText(I18nUtil.getString("gui.support.thanks"));
+        }
+
+    }
+
+    private void setTabTitles() {
+        // 获取所有标签页索引
+        int tabCount = mainTabbedPane.getTabCount();
+
+        Map<String, String> tabTitleMap = new HashMap<>();
+        tabTitleMap.put("Jingle", "gui.tabs.jingle");
+        tabTitleMap.put("Options", "gui.tabs.options");
+        tabTitleMap.put("Log", "gui.tabs.log");
+        tabTitleMap.put("Hotkeys", "gui.tabs.hotkeys");
+        tabTitleMap.put("Scripts", "gui.tabs.scripts");
+        tabTitleMap.put("Plugins", "gui.tabs.plugins");
+        tabTitleMap.put("OBS", "gui.tabs.obs");
+        tabTitleMap.put("Donate", "gui.tabs.donate");
+
+        for (int i = 0; i < tabCount; i++) {
+            String originalTitle = mainTabbedPane.getTitleAt(i);
+            String i18nKey = tabTitleMap.get(originalTitle);
+
+            if (i18nKey != null) {
+                mainTabbedPane.setTitleAt(i, I18nUtil.getString(i18nKey));
+            }
+        }
+    }
+
+    private JLabel findLabelByText(Container container, String text) {
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JLabel && text.equals(((JLabel) comp).getText())) {
+                return (JLabel) comp;
+            }
+            if (comp instanceof Container) {
+                JLabel found = findLabelByText((Container) comp, text);
+                if (found != null) return found;
+            }
+        }
+        return null;
     }
 }
