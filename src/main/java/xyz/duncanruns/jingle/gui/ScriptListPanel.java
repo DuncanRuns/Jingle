@@ -4,6 +4,7 @@ import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.script.ScriptFile;
 import xyz.duncanruns.jingle.script.ScriptStuff;
+import xyz.duncanruns.jingle.util.I18nUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,14 +26,14 @@ public class ScriptListPanel extends JPanel {
 
     private static JButton getCustomizeButton(ScriptFile loadedScript) {
         Optional<Runnable> customizationFunction = ScriptStuff.getCustomizationFunction(loadedScript.name);
-        JButton customizeButton = new JButton("Customize");
+        JButton customizeButton = new JButton(I18nUtil.getString("jingle.script.customize"));
         customizeButton.setEnabled(customizationFunction.isPresent());
         customizeButton.addActionListener(e -> customizationFunction.get().run());
         return customizeButton;
     }
 
     private static JButton getMoreButton(ScriptFile loadedScript) {
-        JButton moreButton = new JButton("More...");
+        JButton moreButton = new JButton(I18nUtil.getString("jingle.script.more"));
         Optional<Map<String, Runnable>> extraFunctions;
         synchronized (Jingle.class) {
             extraFunctions = ScriptStuff.getExtraFunctions(loadedScript.getName());
@@ -66,7 +67,7 @@ public class ScriptListPanel extends JPanel {
         loadedScripts = Stream.concat(loadedScripts.stream().filter(s -> !s.fromFolder), loadedScripts.stream().filter(s -> s.fromFolder)).collect(Collectors.toList());
         Set<String> disabledDefaultScripts = Jingle.options.disabledScripts;
         for (ScriptFile loadedScript : loadedScripts) {
-            JLabel nameLabel = new JLabel(loadedScript.name);
+            JLabel nameLabel = new JLabel(I18nUtil.getString("jingle.script." + I18nUtil.format(loadedScript.name)));
             this.add(nameLabel, constraints.clone());
             if (disabledDefaultScripts.contains(loadedScript.name)) {
                 nameLabel.setForeground(new Color(128, 128, 128));
@@ -86,7 +87,7 @@ public class ScriptListPanel extends JPanel {
         synchronized (Jingle.class) {
             isDisabled = Jingle.options.disabledScripts.contains(loadedScript.name);
         }
-        JButton toggleButton = new JButton(isDisabled ? "Enable" : "Disable");
+        JButton toggleButton = new JButton(isDisabled ? I18nUtil.getString("jingle.script.enable") : I18nUtil.getString("jingle.script.disable"));
         toggleButton.addActionListener(a -> {
             synchronized (Jingle.class) {
                 if (isDisabled) {

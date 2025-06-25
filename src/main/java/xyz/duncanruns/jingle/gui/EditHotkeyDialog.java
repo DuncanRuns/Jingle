@@ -5,6 +5,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.hotkey.Hotkey;
+import xyz.duncanruns.jingle.util.I18nUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +44,8 @@ public class EditHotkeyDialog extends JDialog {
         this.setModal(true);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.getRootPane().setDefaultButton(this.buttonOK);
-        this.setTitle("Jingle: Edit Hotkey");
+        this.setTitle(I18nUtil.getString("jingle.hotkey.title"));
+        this.setI18n();
 
         this.buttonOK.addActionListener(e -> EditHotkeyDialog.this.onOK());
 
@@ -65,11 +67,17 @@ public class EditHotkeyDialog extends JDialog {
         this.setLocation(new Point(owner.getX() + (owner.getWidth() - this.getWidth()) / 2, owner.getY() + (owner.getHeight() - this.getHeight()) / 2));
     }
 
+    private void setI18n() {
+        buttonOK.setText(I18nUtil.getString("jingle.hotkey.dialog_ok"));
+        buttonCancel.setText(I18nUtil.getString("jingle.hotkey.dialog_cancel"));
+        imBox.setText(I18nUtil.getString("jingle.hotkey.ignore_extra_modifier"));
+    }
+
     private void finalizeComponents() {
         this.selectedActionBox.setModel(new DefaultComboBoxModel<>(new Vector<>(Hotkey.getHotkeyActions())));
         this.selectedActionBox.setSelectedItem(new Hotkey.HotkeyTypeAndAction(this.type, this.action));
         this.keyButton.setText(Hotkey.formatKeys(this.keys));
-        if (this.keyButton.getText().isEmpty()) this.keyButton.setText("Set Hotkey Here...");
+        if (this.keyButton.getText().isEmpty()) this.keyButton.setText(I18nUtil.getString("jingle.hotkey.set_hotkey_here"));
         this.keyButton.addActionListener(a -> {
             synchronized (this) {
                 this.keyButton.setText("...");
@@ -78,7 +86,7 @@ public class EditHotkeyDialog extends JDialog {
                     synchronized (this) {
                         this.keys = hotkey.getKeys();
                         this.keyButton.setText(Hotkey.formatKeys(this.keys));
-                        if (this.keyButton.getText().isEmpty()) this.keyButton.setText("Set Hotkey Here...");
+                        if (this.keyButton.getText().isEmpty()) this.keyButton.setText(I18nUtil.getString("jingle.hotkey.set_hotkey_here"));
                         this.keyButton.setEnabled(true);
                         this.pack();
                     }

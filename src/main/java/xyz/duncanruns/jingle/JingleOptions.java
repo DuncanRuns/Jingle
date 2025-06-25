@@ -69,6 +69,8 @@ public class JingleOptions {
     @Nullable
     public Set<String> disabledDefaultScripts = null;
 
+    public String language = "en_US";
+
     private JingleOptions() {
     }
 

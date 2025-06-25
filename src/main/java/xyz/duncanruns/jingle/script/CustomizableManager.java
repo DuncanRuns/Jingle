@@ -25,6 +25,7 @@ public final class CustomizableManager {
             String s;
             try {
                 s = FileUtil.readString(STORAGE_PATH);
+
                 json = GSON.fromJson(s, JsonObject.class);
             } catch (IOException e) {
                 Jingle.logError("Failed to load customizable storage:", e);

@@ -1,6 +1,7 @@
 package xyz.duncanruns.jingle.script;
 
 import org.apache.commons.io.IOUtils;
+import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.FileUtil;
 import xyz.duncanruns.jingle.util.ResourceUtil;
 
@@ -31,7 +32,9 @@ public class ScriptFile {
     public static ScriptFile loadResource(String resourceLocation) throws IOException {
         try (InputStream stream = ResourceUtil.getResourceAsStream(resourceLocation)) {
             // Split the resourceLocation by '/' and get the last one for name
-            List<String> parts = Arrays.stream(resourceLocation.split("/")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+            List<String> parts = Arrays.stream(resourceLocation.split("/"))
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
             String contents = parts.get(parts.size() - 1);
             return new ScriptFile(
                     // Remove .lua for resource loaded script
