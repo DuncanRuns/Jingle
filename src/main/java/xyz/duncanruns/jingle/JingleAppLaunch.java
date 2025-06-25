@@ -1,6 +1,7 @@
 package xyz.duncanruns.jingle;
 
 import com.formdev.flatlaf.*;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.Level;
@@ -12,10 +13,11 @@ import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.LockUtil;
 
 import javax.swing.*;
+import java.awt.*;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public final class JingleAppLaunch {
+public final class JingleAppLaunch{
     private static final Path LOCK_FILE = Jingle.FOLDER.resolve("LOCK");
     private static final Log log = LogFactory.getLog(JingleAppLaunch.class);
     private static LockUtil.LockStuff lockStuff = null;

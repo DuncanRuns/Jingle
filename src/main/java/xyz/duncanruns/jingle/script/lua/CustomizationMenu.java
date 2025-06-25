@@ -59,7 +59,7 @@ class CustomizationMenu extends JDialog {
         for (Element element : elements) {
             if (element instanceof TextElement) {
                 for (String s : ((TextElement) element).message.split("\n")) {
-                    this.mainPanel.add(new JLabel(s), constraints.clone());
+                    this.mainPanel.add(new JLabel(I18nUtil.getString(s)), constraints.clone());
                 }
             } else if (element instanceof CheckBoxElement) {
                 CheckBoxElement checkBoxElement = (CheckBoxElement) element;
@@ -170,8 +170,8 @@ class CustomizationMenu extends JDialog {
         CheckBoxElement(String key, boolean defaultVal, String checkBoxLabel) {
             this.key = key;
             this.defaultVal = defaultVal;
-            //this.checkBoxLabel = checkBoxLabel;
-            this.checkBoxLabel = checkBoxLabel;
+            this.checkBoxLabel = I18nUtil.getString("jingle.script." + key);
+//            this.checkBoxLabel = checkBoxLabel;
         }
     }
 
@@ -179,7 +179,7 @@ class CustomizationMenu extends JDialog {
         private final String message;
 
         TextElement(String message) {
-            this.message = message;
+            this.message = "jingle.script." + I18nUtil.format(message);
         }
 
     }

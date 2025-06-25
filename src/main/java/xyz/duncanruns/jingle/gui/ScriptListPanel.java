@@ -67,7 +67,7 @@ public class ScriptListPanel extends JPanel {
         loadedScripts = Stream.concat(loadedScripts.stream().filter(s -> !s.fromFolder), loadedScripts.stream().filter(s -> s.fromFolder)).collect(Collectors.toList());
         Set<String> disabledDefaultScripts = Jingle.options.disabledScripts;
         for (ScriptFile loadedScript : loadedScripts) {
-            JLabel nameLabel = new JLabel(loadedScript.name);
+            JLabel nameLabel = new JLabel(I18nUtil.getString("jingle.script." + I18nUtil.format(loadedScript.name)));
             this.add(nameLabel, constraints.clone());
             if (disabledDefaultScripts.contains(loadedScript.name)) {
                 nameLabel.setForeground(new Color(128, 128, 128));

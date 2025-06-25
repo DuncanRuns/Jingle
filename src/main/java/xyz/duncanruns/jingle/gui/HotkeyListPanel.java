@@ -62,7 +62,7 @@ public class HotkeyListPanel extends JPanel {
             constraints.gridy++;
 
 
-            JLabel actionLabel = new JLabel(String.format("%s (%s)", Jingle.formatAction(hotkey.action), StringUtils.capitalize(hotkey.type)));
+            JLabel actionLabel = new JLabel(String.format("%s (%s)", I18nUtil.getString("jingle.hotkey." + I18nUtil.format(Jingle.formatAction(hotkey.action))), StringUtils.capitalize(hotkey.type)));
             this.add(actionLabel, constraints.clone());
             JLabel setHotkeyLabel = new JLabel((hotkey.ignoreModifiers ? "* " : "") + Hotkey.formatKeys(hotkey.keys));
             this.add(setHotkeyLabel, constraints.clone());

@@ -17,6 +17,8 @@ public class I18nUtil {
         if (" ".equals(input)){
             return "space";
         }
-        return input.replaceAll("[^a-zA-Z0-9 ]", "").replaceAll(" ", "_").toLowerCase();
+        String s = input.replaceAll("[^a-zA-Z0-9\\s]", "");
+        String lowerCase = s.replaceAll("\\s+", "_").toLowerCase();
+        return lowerCase;
     }
 }
