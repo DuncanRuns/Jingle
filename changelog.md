@@ -6,8 +6,9 @@ Changes in v1.2.0:
   depending on what snapshots are manually entered)
 - Add an "Upload Log" button (#20 @marin774)
 - Extended the ability to disable default scripts to custom scripts too
-- Jingle will now keep track of the last used Minecraft instance, allowing submission packaging and world clearing to
-  work even if the instance is not open.
+- Jingle will now keep track of the last used Minecraft instance, allowing file submission packaging and world clearing to
+  work even if the instance is not open
+- Overhauled file submission packaging
 
 Changes in v1.1.4:
 
