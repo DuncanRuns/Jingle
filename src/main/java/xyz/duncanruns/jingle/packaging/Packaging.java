@@ -198,37 +198,4 @@ public final class Packaging {
     private static long getCreationTime(Path path) throws IOException {
         return Files.getFileAttributeView(path, BasicFileAttributeView.class).readAttributes().creationTime().toMillis();
     }
-
-    private static void copyFolderToZip(Path zipFile, Path sourceFolder) {
-        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-            Files.walkFileTree(sourceFolder, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new ZipFileVisitor(zos, sourceFolder));
-        } catch (IOException e) {
-            Jingle.log(Level.ERROR, "Error while copying zip to folder: \n" + ExceptionUtil.toDetailedString(e));
-        }
-    }
-
-    private static class ZipFileVisitor extends java.nio.file.SimpleFileVisitor<Path> {
-
-        private final ZipOutputStream zos;
-        private final Path sourceFolder;
-
-        public ZipFileVisitor(ZipOutputStream zos, Path sourceFolder) {
-            this.zos = zos;
-            this.sourceFolder = sourceFolder;
-        }
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            Path relativePath = this.sourceFolder.relativize(file);
-            this.zos.putNextEntry(new ZipEntry(relativePath.toString()));
-            Files.copy(file, this.zos);
-            this.zos.closeEntry();
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult visitFileFailed(Path file, IOException exc) {
-            return FileVisitResult.CONTINUE;
-        }
-    }
 }
