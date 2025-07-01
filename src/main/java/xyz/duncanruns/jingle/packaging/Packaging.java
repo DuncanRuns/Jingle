@@ -26,6 +26,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Packaging {
+
+    private static final String README = "The relevant worlds and logs have been packaged into the file '%FILE_NAME%', which should be uploaded to google drive or\n" +
+            "another file hosting service so that you are able to get a link for others to download the file. The link should then be\n" +
+            "sent in the file submission form (https://forms.gle/v7oPXfjfi7553jkp7) along with a link to the speedrun.com submission.\n" +
+            "The file link can be placed in \"Link to world files\", \"Link to extra world files\", and \"Link to log files\".";
+
     private Packaging() {
     }
 
@@ -46,9 +52,11 @@ public final class Packaging {
             return null;
         }
 
-        Collection<Path> worldsToCopy = getWorldsUsingLastCompletedRun(savesPath);
+        Pair<Path, Collection<Path>> worldsTargetRunPair = extractVerificationWorlds(savesPath);
+        Path targetRun = worldsTargetRunPair.getLeft();
+        Collection<Path> worldPaths = worldsTargetRunPair.getRight();
 
-        if (worldsToCopy.isEmpty()) {
+        if (worldPaths.isEmpty()) {
             Jingle.log(Level.ERROR, "No worlds found! Please refer to the speedrun.com rules to submit files yourself.");
             return null;
         }
@@ -69,7 +77,7 @@ public final class Packaging {
         Path savesDest = submissionPath.resolve("Worlds");
         savesDest.toFile().mkdirs();
         try {
-            for (Path currentPath : worldsToCopy) {
+            for (Path currentPath : worldPaths) {
                 File currentSave = currentPath.toFile();
                 Jingle.log(Level.INFO, "Copying " + currentSave.getName() + " to submission folder...");
                 FileUtils.copyDirectoryToDirectory(currentSave, savesDest.toFile());
@@ -91,6 +99,15 @@ public final class Packaging {
             FileUtils.copyFileToDirectory(currentLog, logsDest);
         }
 
+
+        Path notesJsonPath = submissionPath.resolve("notes.json");
+        JsonObject notes = new JsonObject();
+        notes.addProperty("targetRun", targetRun.getFileName().toString());
+        notes.addProperty("targetRunCreationTime", getCreationTime(targetRun));
+        notes.addProperty("targetRunModificationTime", Files.getLastModifiedTime(targetRun.resolve("level.dat")).toMillis());
+
+        FileUtil.writeString(notesJsonPath, notes.toString());
+
         Jingle.log(Level.INFO, "Zipping submission folder...");
         try (ZipFile zipFile = new ZipFile(submissionPath.resolve(submissionFolderName + ".zip").toFile())) {
             ZipParameters parameters = new ZipParameters();
@@ -101,12 +118,16 @@ public final class Packaging {
             zipFile.addFolder(savesDest.toFile(), parameters);
         }
 
-        // Remove folders
-        Jingle.log(Level.INFO, "Deleting temporary folders...");
+        // Remove stuff
+        Jingle.log(Level.INFO, "Deleting temporary files...");
         FileUtils.deleteDirectory(logsDest);
         FileUtils.deleteDirectory(savesDest.toFile());
+        Files.delete(notesJsonPath);
 
-        Jingle.log(Level.INFO, "Saved submission files for instance to /Jingle/submissionpackages.\r\nPlease submit a download link to your files through this form: https://forms.gle/v7oPXfjfi7553jkp7");
+        // Write readme
+        FileUtil.writeString(submissionPath.resolve("README.txt"), README.replace("%FILE_NAME%", submissionFolderName + ".zip"));
+
+        Jingle.log(Level.INFO, README);
 
         return submissionPath;
     }
@@ -156,13 +177,13 @@ public final class Packaging {
                 .orElseGet(() -> worlds.isEmpty() ? null : worlds.get(0)); // Method 2: Find the latest world via creation time
     }
 
-    private static Collection<Path> getWorldsUsingLastCompletedRun(final Path savesPath) {
+    private static Pair<Path, Collection<Path>> extractVerificationWorlds(final Path savesPath) {
         // Get worlds and find target run
         final List<Pair<Path, Long>> allWorlds = getWorldsByCreationTime(savesPath);
         final Pair<Path, Long> targetRunWithTime = findTargetRun(allWorlds);
         if (targetRunWithTime == null) {
             Jingle.log(Level.ERROR, "Failed to find target run!");
-            return Collections.emptyList();
+            return Pair.of(null, Collections.emptyList());
         }
         final Path targetRun = targetRunWithTime.getLeft();
         Jingle.log(Level.INFO, "Target run: " + targetRun.getFileName().toString());
@@ -187,10 +208,11 @@ public final class Packaging {
         int targetRunIndex = allWorlds.indexOf(targetRunWithTime);
         allWorlds.stream()
                 .limit(targetRunIndex + 8)
-                .filter(pair -> pair.getRight() <= targetRunModificationTime)
+                .filter(pair -> pair.getRight() <= targetRunModificationTime) // Filter for worlds created before the last save time of the target run
+                .filter(pair -> Math.abs(targetRunWithTime.getRight() - pair.getRight()) < 1000L * 60 * 60 * 24) // Filter for worlds created within 24 hours of the target run (helps exclude bloated practice maps)
                 .forEach(pair -> outWorlds.add(pair.getLeft()));
 
-        return outWorlds;
+        return Pair.of(targetRun, outWorlds);
     }
 
     private static long getCreationTime(Path path) throws IOException {
