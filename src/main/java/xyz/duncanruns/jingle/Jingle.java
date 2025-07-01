@@ -55,6 +55,7 @@ public final class Jingle {
     public static void log(Level level, String message) {
         new Thread(() -> {
             String messageWithTime = String.format("[%s/%s] %s", new SimpleDateFormat("HH:mm:ss").format(new Date()), level, message);
+            if (!JingleGUI.instanceExists()) return;
             JingleGUI.get().logDocumentWithDebug.addLineWithRolling(messageWithTime);
             if (level.equals(Level.DEBUG)) return;
             JingleGUI.get().logDocument.addLineWithRolling(messageWithTime);

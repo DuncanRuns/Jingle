@@ -125,6 +125,10 @@ public class JingleGUI extends JFrame {
         this.setVisible(true);
     }
 
+    public static boolean instanceExists() {
+        return instance != null;
+    }
+
     public static synchronized JingleGUI get() {
         if (instance == null) {
             try {
