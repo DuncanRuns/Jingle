@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.util.FileUtil;
+import xyz.duncanruns.jingle.util.MCWorldUtils;
 
 import javax.swing.*;
 import java.io.File;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributeView;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -103,7 +103,7 @@ public final class Packaging {
         Path notesJsonPath = submissionPath.resolve("notes.json");
         JsonObject notes = new JsonObject();
         notes.addProperty("targetRun", targetRun.getFileName().toString());
-        notes.addProperty("targetRunCreationTime", getCreationTime(targetRun));
+        notes.addProperty("targetRunCreationTime", MCWorldUtils.getCreationTime(targetRun));
         notes.addProperty("targetRunModificationTime", Files.getLastModifiedTime(targetRun.resolve("level.dat")).toMillis());
 
         FileUtil.writeString(notesJsonPath, notes.toString());
@@ -139,22 +139,6 @@ public final class Packaging {
                 .collect(Collectors.toList());
     }
 
-    public static List<Pair<Path, Long>> getWorldsByCreationTime(Path savesPath) {
-        return Arrays.stream(Objects.requireNonNull(savesPath.toFile().list()))
-                .parallel()
-                .map(savesPath::resolve)
-                .filter(path -> Files.isRegularFile(path.resolve("level.dat")))
-                .map(path -> {
-                    try {
-                        return Pair.of(path, getCreationTime(path));
-                    } catch (IOException e) {
-                        return null;
-                    }
-                }).filter(Objects::nonNull)
-                .sorted(Comparator.comparing(Pair::getRight, Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-    }
-
     public static Pair<Path, Long> findTargetRun(List<Pair<Path, Long>> worlds) {
         long currentTime = System.currentTimeMillis();
         return worlds.stream()
@@ -179,7 +163,7 @@ public final class Packaging {
 
     private static Pair<Path, Collection<Path>> extractVerificationWorlds(final Path savesPath) {
         // Get worlds and find target run
-        final List<Pair<Path, Long>> allWorlds = getWorldsByCreationTime(savesPath);
+        final List<Pair<Path, Long>> allWorlds = MCWorldUtils.getWorldsByCreationTime(savesPath);
         final Pair<Path, Long> targetRunWithTime = findTargetRun(allWorlds);
         if (targetRunWithTime == null) {
             Jingle.log(Level.ERROR, "Failed to find target run!");
@@ -215,7 +199,4 @@ public final class Packaging {
         return Pair.of(targetRun, outWorlds);
     }
 
-    private static long getCreationTime(Path path) throws IOException {
-        return Files.getFileAttributeView(path, BasicFileAttributeView.class).readAttributes().creationTime().toMillis();
-    }
 }
