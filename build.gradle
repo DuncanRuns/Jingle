@@ -44,6 +44,8 @@ dependencies {
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
 
     implementation 'org.luaj:luaj-jse:3.0.1'
+
+    implementation 'net.lingala.zip4j:zip4j:2.11.5'
 }
 
 jar {

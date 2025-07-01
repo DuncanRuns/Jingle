@@ -403,6 +403,9 @@ public class JingleGUI extends JFrame {
         Jingle.getLatestInstancePath().ifPresent(p -> {
             this.packageSubmissionFilesButton.setEnabled(false);
             this.packageSubmissionFilesButton.setText("Packaging...");
+            // Switch to log tab and lock tabbed pane
+            this.mainTabbedPane.setSelectedComponent(this.logJPanel);
+            this.mainTabbedPane.setEnabled(false);
             Thread thread = new Thread(() -> {
                 try {
                     Path path = Packaging.prepareSubmission(p);
@@ -416,6 +419,7 @@ public class JingleGUI extends JFrame {
                     SwingUtilities.invokeLater(() -> {
                         this.packageSubmissionFilesButton.setText("Package Submission Files");
                         this.packageSubmissionFilesButton.setEnabled(true);
+                        this.mainTabbedPane.setEnabled(true);
                     });
                 }
             });
