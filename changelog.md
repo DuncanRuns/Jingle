@@ -9,6 +9,7 @@ Changes in v1.2.0:
 - Jingle will now keep track of the last used Minecraft instance, allowing file submission packaging and world clearing to
   work even if the instance is not open
 - Overhauled file submission packaging
+- Fix for new OBS projector title
 
 Changes in v1.1.4:
 
