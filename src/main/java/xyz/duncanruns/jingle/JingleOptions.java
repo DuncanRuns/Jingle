@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
-    private static final int CURRENT_OPTIONS_VERSION = 4;
+    private static final int CURRENT_OPTIONS_VERSION = 5;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
     public static final JingleOptions DEFAULTS = createNew();
 
@@ -61,7 +61,7 @@ public class JingleOptions {
     // null for auto, [x,y,w,h] for custom
     @Nullable
     public int[] projectorPosition = null;
-    public String projectorWindowPattern = "* Jingle Mag";
+    public String projectorWindowPattern = "*Jingle Mag";
     public boolean minimizeProjector;
 
     @Deprecated
@@ -107,8 +107,8 @@ public class JingleOptions {
         if (this.disabledDefaultScripts != null) {
             this.disabledScripts.addAll(this.disabledDefaultScripts);
         }
-        if (this.optionsVersion < 4) {
-            if (this.projectorWindowPattern.equals("*- Jingle Mag")) {
+        if (this.optionsVersion < 5) {
+            if (this.projectorWindowPattern.equals("* Jingle Mag") || this.projectorWindowPattern.equals("*- Jingle Mag")) {
                 this.projectorWindowPattern = DEFAULTS.projectorWindowPattern;
             }
         }
