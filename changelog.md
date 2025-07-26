@@ -1,3 +1,9 @@
+Changes in v1.2.1:
+
+- Fix benchmark worlds without level.dat not being cleared
+- Fix for Minecraft instances with names containing `minecraft-` (@maskersss)
+- Fix compatibility with broken OBS projector title
+
 Changes in v1.2.0:
 
 - Support MC pre-releases and release candidates, add more snapshots (@tildejustin)
@@ -6,8 +12,8 @@ Changes in v1.2.0:
   depending on what snapshots are manually entered)
 - Add an "Upload Log" button (#20 @marin774)
 - Extended the ability to disable default scripts to custom scripts too
-- Jingle will now keep track of the last used Minecraft instance, allowing file submission packaging and world clearing to
-  work even if the instance is not open
+- Jingle will now keep track of the last used Minecraft instance, allowing file submission packaging and world clearing
+  to work even if the instance is not open
 - Overhauled file submission packaging
 - Fix for new OBS projector title
 
