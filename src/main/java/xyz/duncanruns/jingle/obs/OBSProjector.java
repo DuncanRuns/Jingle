@@ -25,13 +25,13 @@ public final class OBSProjector {
     private static long requestProjector = -1L;
     private static int requestSlowerifier = 0;
 
-    private static boolean coverJultiMag = true;
+    private static boolean coverMag = true;
 
     private OBSProjector() {
     }
 
-    public static boolean shouldCoverJultiMag() {
-        return coverJultiMag;
+    public static boolean shouldCoverMag() {
+        return coverMag;
     }
 
     public static long getRequestProjectorTime() {
@@ -121,7 +121,7 @@ public final class OBSProjector {
     public static synchronized void bringOBSProjectorToTop() {
         if (projectorHwnd != null) {
             unminimizeProjector();
-            coverJultiMag = false;
+            coverMag = false;
             setProjectorZOrder(0);
             setProjectorZOrder(-1);
         }
@@ -146,7 +146,7 @@ public final class OBSProjector {
             }
             setProjectorZOrder(1);
         }
-        coverJultiMag = true;
+        coverMag = true;
     }
 
     public static void minimizeProjector() {
