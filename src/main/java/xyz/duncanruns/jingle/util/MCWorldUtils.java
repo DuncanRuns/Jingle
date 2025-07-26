@@ -1,7 +1,6 @@
 package xyz.duncanruns.jingle.util;
 
 import org.apache.commons.lang3.tuple.Pair;
-import xyz.duncanruns.jingle.packaging.Packaging;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,16 +11,22 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MCWorldUtils {
     private MCWorldUtils() {
     }
 
     public static List<Pair<Path, Long>> getWorldsByCreationTime(Path savesPath) {
-        return Arrays.stream(Objects.requireNonNull(savesPath.toFile().list()))
+        return getWorldsByCreationTime(savesPath, true);
+    }
+
+    public static List<Pair<Path, Long>> getWorldsByCreationTime(Path savesPath, boolean requireLevelDat) {
+        Stream<Path> pathStream = Arrays.stream(Objects.requireNonNull(savesPath.toFile().list()))
                 .parallel()
-                .map(savesPath::resolve)
-                .filter(path -> Files.isRegularFile(path.resolve("level.dat")))
+                .map(savesPath::resolve);
+        if (requireLevelDat) pathStream = pathStream.filter(path -> Files.isRegularFile(path.resolve("level.dat")));
+        return pathStream
                 .map(path -> {
                     try {
                         return Pair.of(path, getCreationTime(path));

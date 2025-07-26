@@ -66,7 +66,8 @@ public final class Bopping {
         }
         // Get all worlds that are allowed to be deleted
 
-        List<Pair<Path, Long>> allWorlds = MCWorldUtils.getWorldsByCreationTime(savesPath);
+        // (Don't require level.dat for now, we will check it later so that we can also clear Benchmark worlds)
+        List<Pair<Path, Long>> allWorlds = MCWorldUtils.getWorldsByCreationTime(savesPath, false);
 
         List<Path> worldsToRemove = allWorlds.stream()
                 .parallel()
