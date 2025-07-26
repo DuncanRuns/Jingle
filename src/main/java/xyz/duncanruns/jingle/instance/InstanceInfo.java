@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public class InstanceInfo {
     // Version Patterns
     private static final Pattern VANILLA_VERSION_PATTERN = Pattern.compile(" --version (fabric-loader-\\d\\.\\d+(\\.\\d+)?-)?(.+?) ");
-    private static final Pattern MULTIMC_VERSION_PATTERN = Pattern.compile("com/mojang/minecraft/[^/\\\\]+/minecraft-([^;]+)-client.jar");
+    private static final Pattern MULTIMC_VERSION_PATTERN = Pattern.compile("com/mojang/minecraft/[^/\\\\]+/minecraft-([^;]+?)-client.jar");
     private static final Pattern MULTIMC_VERSION_PATTERN_2 = Pattern.compile("intermediary/(.+)/intermediary");
     // Vanilla Path Patterns
     private static final Pattern VANILLA_PATH_PATTERN = Pattern.compile("--gameDir (.+?) ");
