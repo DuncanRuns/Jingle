@@ -1,3 +1,7 @@
+Changes in v1.2.2:
+
+- Update PaceMan Tracker to v0.7.1 for compatibility with new 1.15.2 Atum (and hopefully pre 1.16 in general)
+
 Changes in v1.2.1:
 
 - Fix benchmark worlds without level.dat not being cleared
