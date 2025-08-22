@@ -1,7 +1,7 @@
 package xyz.duncanruns.jingle.instance;
 
 import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
-import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.IntByReference;
@@ -10,6 +10,7 @@ import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.FileUtil;
 import xyz.duncanruns.jingle.util.PowerShellUtil;
+import xyz.duncanruns.jingle.util.ProcEnvUtil;
 import xyz.duncanruns.jingle.win32.User32;
 
 import java.io.IOException;
@@ -17,6 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,8 +53,105 @@ public class InstanceInfo {
      */
     public static InstanceInfo getInstanceInfoFromHwnd(WinDef.HWND hwnd) {
         Jingle.log(Level.DEBUG, "InstanceInfoUtil: getting info from " + hwnd);
+        // Get PID from hwnd
+        int pid = getPidFromHwnd(hwnd);
+        // Try getting info from environment variables
+        Optional<InstanceInfo> instanceInfo = getInfoViaVariables(pid);
+        if (instanceInfo.isPresent()) return instanceInfo.get();
+        // Try getting info from command line
+        return getInfoViaCommandLine(pid);
+    }
+
+    private static Optional<InstanceInfo> getInfoViaVariables(int pid) {
+        try {
+            Jingle.log(Level.DEBUG, "InstanceInfoUtil: Getting environment variables from " + pid);
+            Map<String, String> envs = ProcEnvUtil.getEnvironmentVariables(pid);
+            // Standard MultiMC variables, also in Prism and new MCSR Launcher
+            Set<String> keys = envs.keySet();
+            if (!keys.contains("INST_MC_DIR")) {
+                Jingle.log(Level.DEBUG, "InstanceInfoUtil: No INST_MC_DIR in environment variables.");
+                return Optional.empty();
+            }
+            Path instancePath = Paths.get(envs.get("INST_MC_DIR"));
+
+            if (keys.contains("INST_MC_VER")) {
+                Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found INST_MC_VER in environment variables.");
+                return Optional.of(new InstanceInfo(envs.get("INST_MC_VER"), instancePath));
+            }
+
+            Optional<InstanceInfo> instanceInfo = getVersionFromMMCPack(instancePath).map(s -> new InstanceInfo(s, instancePath));
+            if (instanceInfo.isPresent()) return instanceInfo;
+
+
+            instanceInfo = getVersionWithGameJson(instancePath).map(s -> new InstanceInfo(s, instancePath));
+            if (instanceInfo.isPresent()) return instanceInfo;
+
+            Jingle.log(Level.DEBUG, "InstanceInfoUtil: No version found, defaulting to 1.16.1.");
+            return Optional.of(new InstanceInfo("1.16.1", instancePath));
+
+        } catch (Exception e) {
+            Jingle.log(Level.ERROR, "Failed to get environment variables: " + ExceptionUtil.toDetailedString(e));
+        }
+
+        return Optional.empty();
+    }
+
+    private static Optional<String> getVersionFromMMCPack(Path instancePath) throws IOException {
+        Path mmcPack = instancePath.resolveSibling("mmc-pack.json");
+        if (!Files.exists(mmcPack)) return Optional.empty();
+
+        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found mmc-pack.json (MultiMC/Prism).");
+        JsonObject jsonObject = FileUtil.readJson(mmcPack);
+        for (String requiredKey : new String[]{"formatVersion", "components"}) {
+            if (!jsonObject.has(requiredKey)) {
+                Jingle.log(Level.DEBUG, "InstanceInfoUtil: mmc-pack.json does not have " + requiredKey + ".");
+                return Optional.empty();
+            }
+        }
+        if (jsonObject.get("formatVersion").getAsInt() != 1) {
+            Jingle.log(Level.DEBUG, "InstanceInfoUtil: mmc-pack.json format version is not 1.");
+            return Optional.empty();
+        }
+        Optional<String> version = jsonObject.getAsJsonArray("components").asList().stream()
+                .filter(JsonElement::isJsonObject)
+                .map(JsonElement::getAsJsonObject)
+                .filter(j -> j.has("uid"))
+                .filter(j -> Objects.equals(j.get("uid").getAsString(), "net.minecraft"))
+                .filter(j -> j.has("version"))
+                .findFirst()
+                .map(j -> j.get("version").getAsString());
+
+        if (version.isPresent()) {
+            Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found version from mmc-pack.json.");
+            return version;
+        }
+        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Did not find version from mmc-pack.json.");
+        return Optional.empty();
+    }
+
+    private static Optional<String> getVersionWithGameJson(Path instancePath) {
+        try {
+            JsonObject json = FileUtil.readJson(instancePath.resolve("game.json"));
+            if (json.has("Version")) {
+                Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found version from game.json.");
+                return Optional.of(json.get("Version").getAsString());
+            }
+        } catch (Exception ignored) {
+        }
+        return Optional.empty();
+    }
+
+    private static int getPidFromHwnd(WinDef.HWND hwnd) {
+        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Getting PID from " + hwnd);
+        final IntByReference pidPointer = new IntByReference();
+        User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
+        Jingle.log(Level.DEBUG, "InstanceInfoUtil: PID is " + pidPointer.getValue());
+        return pidPointer.getValue();
+    }
+
+    private static InstanceInfo getInfoViaCommandLine(int pid) {
         // Get command line
-        String commandLine = getCommandLine(getPidFromHwnd(hwnd));
+        String commandLine = getCommandLine(pid);
         // If no command line, return null
         if (commandLine == null) {
             Jingle.log(Level.DEBUG, "InstanceInfoUtil: Command line null!");
@@ -60,8 +162,11 @@ public class InstanceInfo {
             if (commandLine.contains("--gameDir")) {
                 if (commandLine.contains("-Djava.library.path=")) {
                     //ColorMC
-                    Jingle.log(Level.DEBUG, "InstanceInfoUtil: Detected ColorMC launcher.");
-                    return getColorMCInfo(commandLine);
+                    InstanceInfo colorMCInfo = getColorMCInfo(commandLine);
+                    if (colorMCInfo != null) {
+                        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Detected ColorMC launcher.");
+                        return colorMCInfo;
+                    }
                 }
                 // Vanilla
                 Jingle.log(Level.DEBUG, "InstanceInfoUtil: Detected vanilla launcher.");
@@ -87,14 +192,6 @@ public class InstanceInfo {
             Jingle.log(Level.ERROR, "Error getting PowerShell output, please send this log in the Jingle discord: " + e.getMessage());
             return null;
         }
-    }
-
-    private static int getPidFromHwnd(WinDef.HWND hwnd) {
-        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Getting PID from " + hwnd);
-        final IntByReference pidPointer = new IntByReference();
-        User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
-        Jingle.log(Level.DEBUG, "InstanceInfoUtil: PID is " + pidPointer.getValue());
-        return pidPointer.getValue();
     }
 
     private static InstanceInfo getVanillaInfo(String commandLine) throws InvalidPathException {
@@ -149,24 +246,12 @@ public class InstanceInfo {
         String pathString = matcher.group(1);
 
         Path instancePath = Paths.get(pathString);
-        String version = getVersionWithColorMC(instancePath);
-        if (Files.isDirectory(instancePath)) {
-            return new InstanceInfo(version, instancePath);
+        Optional<String> versionWithGameJson = getVersionWithGameJson(instancePath);
+        if (Files.isDirectory(instancePath) && versionWithGameJson.isPresent()) {
+            return new InstanceInfo(versionWithGameJson.get(), instancePath);
         }
 
         return null;
-    }
-
-    private static String getVersionWithColorMC(Path instancePath) {
-        try {
-            String contents = FileUtil.readString(instancePath.resolveSibling("game.json"));
-            JsonObject json = new Gson().fromJson(contents, JsonObject.class);
-            if (json.has("Version")) {
-                return json.get("Version").getAsString();
-            }
-        } catch (Exception ignored) {
-        }
-        return "1.16.1";
     }
 
     private static InstanceInfo getMultiMCInfo(String commandLine) throws InvalidPathException {
@@ -187,16 +272,24 @@ public class InstanceInfo {
         // Get the natives path out of the group
         String nativesPathString = pathFindMatcher.group(1);
 
-        String versionString = getVersionWithPattern(commandLine, MULTIMC_VERSION_PATTERN);
-        if (versionString == null) {
-            versionString = getVersionWithPattern(commandLine, MULTIMC_VERSION_PATTERN_2);
-            if (versionString == null) {
-                return null;
-            }
-        }
-
         Path nativesPath = Paths.get(nativesPathString);
         Path instancePath = nativesPath.resolveSibling(".minecraft");
+
+        String versionString = null;
+        try {
+            versionString = getVersionFromMMCPack(instancePath).orElse(null);
+        } catch (IOException ignored) {
+        }
+
+        if (versionString == null) {
+            versionString = getVersionWithPattern(commandLine, MULTIMC_VERSION_PATTERN);
+            if (versionString == null) {
+                versionString = getVersionWithPattern(commandLine, MULTIMC_VERSION_PATTERN_2);
+                if (versionString == null) {
+                    return null;
+                }
+            }
+        }
         if (Files.isDirectory(instancePath)) {
             return new InstanceInfo(versionString, instancePath);
         }
