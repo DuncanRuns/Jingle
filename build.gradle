@@ -50,6 +50,8 @@ dependencies {
     implementation 'org.luaj:luaj-jse:3.0.1'
 
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
+
+    implementation 'org.apache.commons:commons-exec:1.4.0'
 }
 
 jar {
