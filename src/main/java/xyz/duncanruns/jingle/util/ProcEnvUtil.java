@@ -73,8 +73,8 @@ public class ProcEnvUtil {
                 pid
         );
         if (process == null) {
-            throw new IllegalStateException("Failed to open process " + pid + ": " +
-                    Kernel32.INSTANCE.GetLastError());
+            int lastError = Kernel32.INSTANCE.GetLastError();
+            throw new IllegalStateException("Failed to open process " + pid + ": " + lastError);
         }
 
         try {
@@ -113,7 +113,12 @@ public class ProcEnvUtil {
                     bytesRead
             );
             if (!ok) {
-                throw new IllegalStateException("ReadProcessMemory failed: " + Kernel32.INSTANCE.GetLastError());
+                int lastError = Kernel32.INSTANCE.GetLastError();
+                // Error 299 is ERROR_PARTIAL_COPY - process memory protection issue
+                if (lastError == 299) {
+                    throw new IllegalStateException("ReadProcessMemory failed: Access denied (error 299) - process may be protected or elevated");
+                }
+                throw new IllegalStateException("ReadProcessMemory failed: " + lastError);
             }
 
             byte[] data = buffer.getByteArray(0, bytesRead.getValue());
