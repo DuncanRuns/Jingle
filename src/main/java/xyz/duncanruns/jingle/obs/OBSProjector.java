@@ -129,6 +129,7 @@ public final class OBSProjector {
 
     public static void unminimizeProjector() {
         WindowStateUtil.ensureNotMinimized(projectorHwnd);
+        if (Jingle.options.minimizeProjector) applyProjectorPosition();
     }
 
     private static void setProjectorZOrder(int hwndInsertAfter) {
@@ -150,7 +151,7 @@ public final class OBSProjector {
     }
 
     public static void minimizeProjector() {
-        if (projectorHwnd != null) User32.INSTANCE.ShowWindow(projectorHwnd, User32.SW_MINIMIZE);
+        if (projectorHwnd != null) WindowStateUtil.setHwndRectangle(projectorHwnd, new Rectangle(0, -1, 1, 1));
     }
 
     private static boolean isProjectorMagnifier(WinDef.HWND hwnd) {
