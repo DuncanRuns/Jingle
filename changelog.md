@@ -1,3 +1,11 @@
+Changes in v1.2.3:
+
+- Changed logic of "minimize projector when inactive" (@draconix)
+  - Instead of actually minimizing, it is now moved to (0,-1) with a size of 1x1, so a single pixel off-screen.
+- Changed instance detection logic to no longer require powershell. Now using OS level calls to try gather information (command line and environment variables).
+  - In case the new method fails for getting the command line of the process, it will still try to use powershell.
+  - Other tweaks are in place to improve version detection and game directory detection, and as a result, more launchers such as the new MCSRLauncher are also supported with this change.
+
 Changes in v1.2.2:
 
 - Update PaceMan Tracker to v0.7.1 for compatibility with new 1.15.2 Atum (and hopefully pre 1.16 in general)
