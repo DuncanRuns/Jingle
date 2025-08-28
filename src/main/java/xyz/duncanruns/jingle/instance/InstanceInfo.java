@@ -129,12 +129,12 @@ public class InstanceInfo {
 
     }
 
-    private static List<VersionProvider> getVersionProviders(Map<String, String> finalEnvironmentVariables, CommandLineArgs commandLineArgs, Path finalInstancePath) {
+    private static List<VersionProvider> getVersionProviders(Map<String, String> environmentVariables, CommandLineArgs commandLineArgs, Path instancePath) {
         return Arrays.asList(
-                new VersionProvider(() -> Optional.ofNullable(finalEnvironmentVariables.getOrDefault("INST_MC_VER", null)), "environment variables"),
+                new VersionProvider(() -> Optional.ofNullable(environmentVariables.getOrDefault("INST_MC_VER", null)), "environment variables"),
                 new VersionProvider(() -> Optional.ofNullable(commandLineArgs.options.getOrDefault("version", null)).map(InstanceInfo::cleanVanillaVersion), "command line"),
-                new VersionProvider(() -> getVersionFromMMCPack(finalInstancePath), "mmc-pack.json"),
-                new VersionProvider(() -> getVersionWithGameJson(finalInstancePath), "game.json")
+                new VersionProvider(() -> getVersionFromMMCPack(instancePath), "mmc-pack.json"),
+                new VersionProvider(() -> getVersionWithGameJson(instancePath), "game.json")
         );
     }
 
