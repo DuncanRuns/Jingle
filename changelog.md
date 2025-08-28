@@ -1,10 +1,17 @@
+Changes in v1.2.4:
+
+- Fixed version detection for vanilla launcher with a mod loader (this also fixes a crash)
+- Refactored the version detection stuff to be less stupid
+
 Changes in v1.2.3:
 
 - Changed logic of "minimize projector when inactive" (@draconix)
-  - Instead of actually minimizing, it is now moved to (0,-1) with a size of 1x1, so a single pixel off-screen.
-- Changed instance detection logic to no longer require powershell. Now using OS level calls to try gather information (command line and environment variables).
-  - In case the new method fails for getting the command line of the process, it will still try to use powershell.
-  - Other tweaks are in place to improve version detection and game directory detection, and as a result, more launchers such as the new MCSRLauncher are also supported with this change.
+    - Instead of actually minimizing, it is now moved to (0,-1) with a size of 1x1, so a single pixel off-screen
+- Changed instance detection logic to no longer require powershell, now using OS level calls to try gather information (
+  command line and environment variables)
+    - In case the new method fails for getting the command line of the process, it will still try to use powershell
+    - Other tweaks are in place to improve version detection and game directory detection, and as a result, more
+      launchers such as the new MCSRLauncher are also supported with this change
 
 Changes in v1.2.2:
 
@@ -44,7 +51,7 @@ Changes in v1.1.2:
 - Fixed some unknown key names
 - Added a new script library: `srigtevent`
 - Fixed hotkeys conflicting with F3 ([#5](https://github.com/DuncanRuns/Jingle/issues/5))
-    - If you bind a Jingle hotkey to `A`, then press `F3`+`A`, the Jingle hotkey is cancelled.
+    - If you bind a Jingle hotkey to `A`, then press `F3`+`A`, the Jingle hotkey is cancelled
 - Other small tweaks/fixes
 
 Changes in v1.1.1:
@@ -76,7 +83,7 @@ Changes in v1.1.0:
 - Changed default Thin BT size to 280x1000
 - Fixed update suggestion when downloading pre-release from GitHub
 - Window titles (`Minecraft* - Instance 1`) will now revert after they are no longer the main instance on Jingle or if
-  Jingle closes. This helps OBS capture the correct instance
+  Jingle closes, this helps OBS capture the correct instance
 - Moved "Basic Options" to a new options tab
 - The size of the Jingle window will now be remembered when closing
 - Fixed function to ask Windows for key names (@me-nx)
@@ -115,7 +122,7 @@ Changes in v0.2.0:
 - New script functionality for creating better customization menus
 - Improved Resizing script customization with the new customization menus
 - Move "Revert Window after Reset" option to the resizing script customization
-- Close measuring projector(s) upon closing Jingle.
+- Close measuring projector(s) upon closing Jingle
 
 Changes in v0.1.x:
 
