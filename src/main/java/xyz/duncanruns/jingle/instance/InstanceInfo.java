@@ -15,10 +15,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class InstanceInfo {
     public final String versionString;
@@ -36,7 +36,7 @@ public class InstanceInfo {
      * @return the extracted instance info of the Minecraft instance
      */
     public static InstanceInfo getInstanceInfoFromHwnd(WinDef.HWND hwnd) {
-        Jingle.log(Level.DEBUG, "InstanceInfoUtil: getting info from " + hwnd);
+        Jingle.log(Level.DEBUG, "InstanceInfo: getting info from " + hwnd);
         // Get PID from hwnd
         int pid = getPidFromHwnd(hwnd);
 
@@ -50,7 +50,7 @@ public class InstanceInfo {
         Map<String, String> environmentVariables;
         try {
             environmentVariables = ProcEnvUtil.getEnvironmentVariables(pid);
-            Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found environment variables.");
+            Jingle.log(Level.DEBUG, "InstanceInfo: Found environment variables.");
         } catch (Exception e) {
             Jingle.log(Level.ERROR, "Failed to get environment variables: " + ExceptionUtil.toDetailedString(e));
             environmentVariables = Collections.emptyMap();
@@ -58,7 +58,7 @@ public class InstanceInfo {
         String commandLine;
         try {
             commandLine = CommandLineUtil.getCommandLineStringFromPid(pid);
-            Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found command line.");
+            Jingle.log(Level.DEBUG, "InstanceInfo: Found command line (" + commandLine.length() + " chars).");
         } catch (Exception e) {
             Jingle.log(Level.ERROR, "Failed to get command line: " + ExceptionUtil.toDetailedString(e));
             commandLine = null;
@@ -66,6 +66,8 @@ public class InstanceInfo {
         if (commandLine == null) {
             try {
                 commandLine = getCommandLinePS(pid);
+                if (commandLine != null)
+                    Jingle.log(Level.DEBUG, "InstanceInfo: Found command line (" + commandLine.length() + " chars).");
             } catch (Exception e) {
                 Jingle.log(Level.ERROR, "Failed to get command line via powershell: " + ExceptionUtil.toDetailedString(e));
             }
@@ -77,11 +79,11 @@ public class InstanceInfo {
 
         Path instancePath = Optional.ofNullable(environmentVariables.getOrDefault("INST_MC_DIR", null)).map(Paths::get).orElse(null);
         if (instancePath != null) {
-            Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found instance path from environment variables.");
+            Jingle.log(Level.DEBUG, "InstanceInfo: Found instance path from environment variables.");
         } else {
             instancePath = Optional.ofNullable(commandLineArgs.options.getOrDefault("gameDir", null)).map(Paths::get).orElse(null);
             if (instancePath != null) {
-                Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found instance path from command line.");
+                Jingle.log(Level.DEBUG, "InstanceInfo: Found instance path from command line.");
             } else {
                 // Djava.library.path
                 Path libraryPath = Optional.ofNullable(commandLineArgs.options.getOrDefault("Djava.library.path", null)).map(Paths::get).orElse(null);
@@ -97,56 +99,77 @@ public class InstanceInfo {
                     instancePath = minecraftSibling;
                 }
                 if (instancePath != null) {
-                    Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found instance path from Djava.library.path.");
+                    Jingle.log(Level.DEBUG, "InstanceInfo: Found instance path from Djava.library.path.");
                 } else {
                     return null;
                 }
             }
         }
-        String versionString = environmentVariables.getOrDefault("INST_MC_VER", null);
-        if (versionString != null) {
-            Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found version from environment variables.");
-        } else {
-            versionString = commandLineArgs.options.getOrDefault("version", null);
-            if (versionString != null) {
-                Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found version from command line.");
-            } else {
-                try {
-                    versionString = getVersionFromMMCPack(instancePath).orElse(null);
-                } catch (IOException e) {
-                    Jingle.log(Level.ERROR, "Failed to get version from mmc-pack.json: " + ExceptionUtil.toDetailedString(e));
+
+
+        String versionString = null;
+        for (VersionProvider versionProvider : getVersionProviders(environmentVariables, commandLineArgs, instancePath)) {
+            Optional<String> versionAttempt = versionProvider.getVersion();
+            if (versionAttempt.isPresent()) {
+                if (!isValidMCVersion(versionAttempt.get())) {
+                    Jingle.log(Level.DEBUG, "InstanceInfo: Found invalid version from " + versionProvider.getName() + " (" + versionAttempt.get() + ").");
+                    continue;
                 }
-                if (versionString != null) {
-                    Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found version from mmc-pack.json.");
-                } else {
-                    versionString = getVersionWithGameJson(instancePath).orElse(null);
-                    if (versionString != null) {
-                        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found version from game.json.");
-                    } else {
-                        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Defaulting to 1.16.1.");
-                        versionString = "1.16.1";
-                    }
-                }
+                versionString = versionAttempt.get();
+                Jingle.log(Level.DEBUG, "InstanceInfo: Found version from " + versionProvider.getName() + " (" + versionString + ").");
+                break;
             }
         }
+        if (versionString == null) {
+            Jingle.log(Level.DEBUG, "InstanceInfo: Defaulting to 1.16.1.");
+            versionString = "1.16.1";
+        }
+
         return new InstanceInfo(versionString, instancePath);
 
     }
 
-    private static Optional<String> getVersionFromMMCPack(Path instancePath) throws IOException {
+    private static List<VersionProvider> getVersionProviders(Map<String, String> finalEnvironmentVariables, CommandLineArgs commandLineArgs, Path finalInstancePath) {
+        return Arrays.asList(
+                new VersionProvider(() -> Optional.ofNullable(finalEnvironmentVariables.getOrDefault("INST_MC_VER", null)), "environment variables"),
+                new VersionProvider(() -> Optional.ofNullable(commandLineArgs.options.getOrDefault("version", null)).map(InstanceInfo::cleanVanillaVersion), "command line"),
+                new VersionProvider(() -> getVersionFromMMCPack(finalInstancePath), "mmc-pack.json"),
+                new VersionProvider(() -> getVersionWithGameJson(finalInstancePath), "game.json")
+        );
+    }
+
+    private static boolean isValidMCVersion(String versionString) {
+        VersionUtil.Version version = MCVersionUtil.findVersion(versionString);
+        return version != null;
+    }
+
+    private static String cleanVanillaVersion(String versionString) {
+        Matcher matcher = Pattern.compile("([a-zA-Z-]+-[\\d.]+-?)").matcher(versionString);
+        if (matcher.find()) {
+            return versionString.replace(matcher.group(1), "");
+        }
+        return versionString;
+    }
+
+    private static Optional<String> getVersionFromMMCPack(Path instancePath) {
         Path mmcPack = instancePath.resolveSibling("mmc-pack.json");
         if (!Files.exists(mmcPack)) return Optional.empty();
 
-        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Found mmc-pack.json (MultiMC/Prism).");
-        JsonObject jsonObject = FileUtil.readJson(mmcPack);
+        JsonObject jsonObject;
+        try {
+            jsonObject = FileUtil.readJson(mmcPack);
+        } catch (IOException e) {
+            Jingle.log(Level.ERROR, "Failed to read mmc-pack.json: " + ExceptionUtil.toDetailedString(e));
+            return Optional.empty();
+        }
         for (String requiredKey : new String[]{"formatVersion", "components"}) {
             if (!jsonObject.has(requiredKey)) {
-                Jingle.log(Level.DEBUG, "InstanceInfoUtil: mmc-pack.json does not have " + requiredKey + ".");
+                Jingle.log(Level.DEBUG, "InstanceInfo: mmc-pack.json does not have " + requiredKey + ".");
                 return Optional.empty();
             }
         }
         if (jsonObject.get("formatVersion").getAsInt() != 1) {
-            Jingle.log(Level.DEBUG, "InstanceInfoUtil: mmc-pack.json format version is not 1.");
+            Jingle.log(Level.DEBUG, "InstanceInfo: mmc-pack.json format version is not 1.");
             return Optional.empty();
         }
 
@@ -172,20 +195,37 @@ public class InstanceInfo {
     }
 
     private static int getPidFromHwnd(WinDef.HWND hwnd) {
-        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Getting PID from " + hwnd);
+        Jingle.log(Level.DEBUG, "InstanceInfo: Getting PID from " + hwnd);
         final IntByReference pidPointer = new IntByReference();
         User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
-        Jingle.log(Level.DEBUG, "InstanceInfoUtil: PID is " + pidPointer.getValue());
+        Jingle.log(Level.DEBUG, "InstanceInfo: PID is " + pidPointer.getValue());
         return pidPointer.getValue();
     }
 
     private static String getCommandLinePS(int pid) {
-        Jingle.log(Level.DEBUG, "InstanceInfoUtil: Getting command line from " + pid);
         try {
             return PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
         } catch (PowerShellExecutionException | IOException e) {
             Jingle.logError("Failed to get command line via powershell.", e);
             return null;
+        }
+    }
+
+    private static class VersionProvider {
+        private final Supplier<Optional<String>> versionSupplier;
+        private final String name;
+
+        public VersionProvider(Supplier<Optional<String>> versionSupplier, String name) {
+            this.versionSupplier = versionSupplier;
+            this.name = name;
+        }
+
+        public final Optional<String> getVersion() {
+            return this.versionSupplier.get();
+        }
+
+        public String getName() {
+            return this.name;
         }
     }
 

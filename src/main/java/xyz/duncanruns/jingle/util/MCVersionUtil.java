@@ -72,7 +72,7 @@ public final class MCVersionUtil {
         return Collections.unmodifiableMap(map);
     }
 
-    private static Version findVersion(String versionString) {
+    public static Version findVersion(String versionString) {
         try {
             // hack for pre-releases & release candidates
             int idx = versionString.indexOf('-');
