@@ -3,6 +3,7 @@ package xyz.duncanruns.jingle.util;
 import java.awt.*;
 
 public final class MonitorUtil {
+    public static int minY = 0;
 
     private MonitorUtil() {
     }
@@ -27,6 +28,13 @@ public final class MonitorUtil {
             );
         }
         return monitors;
+    }
+
+    public static void retrieveMinY() {
+        minY = 0;
+        for (Monitor monitor : getAllMonitors()) {
+            if (monitor.y < minY) minY = monitor.y;
+        }
     }
 
     public static class Monitor {
