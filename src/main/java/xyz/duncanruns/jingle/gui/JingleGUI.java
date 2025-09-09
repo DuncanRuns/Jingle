@@ -779,7 +779,7 @@ public class JingleGUI extends JFrame {
         resetProjNameButton.setText("Reset");
         panel8.add(resetProjNameButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         minimizeProjectorBox = new JCheckBox();
-        minimizeProjectorBox.setText("Minimize Projector When Inactive");
+        minimizeProjectorBox.setText("Hide Projector When Inactive");
         panel6.add(minimizeProjectorBox, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane8 = new JScrollPane();
         mainTabbedPane.addTab("Donate", scrollPane8);
