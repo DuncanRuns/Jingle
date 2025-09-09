@@ -95,6 +95,8 @@ public final class Jingle {
 
         JingleUpdater.checkDeleteOldJar();
 
+        MonitorUtil.retrieveMinY();
+
         mainLoop();
     }
 

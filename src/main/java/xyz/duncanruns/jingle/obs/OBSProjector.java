@@ -151,7 +151,7 @@ public final class OBSProjector {
     }
 
     public static void minimizeProjector() {
-        if (projectorHwnd != null) WindowStateUtil.setHwndRectangle(projectorHwnd, new Rectangle(0, -1, 1, 1));
+        if (projectorHwnd != null) WindowStateUtil.setHwndRectangle(projectorHwnd, new Rectangle(0, MonitorUtil.minY - 1, 1, 1));
     }
 
     private static boolean isProjectorMagnifier(WinDef.HWND hwnd) {
