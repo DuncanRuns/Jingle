@@ -106,7 +106,7 @@ public final class OBSProjector {
         setProjectorZOrder(1);
         requestProjector = -1L;
         requestSlowerifier = 0;
-        if (Jingle.options.minimizeProjector) minimizeProjector();
+        if (Jingle.options.hideProjector) hideProjector();
     }
 
     private static boolean isPowerOfTwo(int x) {
@@ -120,16 +120,16 @@ public final class OBSProjector {
 
     public static synchronized void bringOBSProjectorToTop() {
         if (projectorHwnd != null) {
-            unminimizeProjector();
+            showProjector();
             coverMag = false;
             setProjectorZOrder(0);
             setProjectorZOrder(-1);
         }
     }
 
-    public static void unminimizeProjector() {
+    public static void showProjector() {
         WindowStateUtil.ensureNotMinimized(projectorHwnd);
-        if (Jingle.options.minimizeProjector) applyProjectorPosition();
+        if (Jingle.options.hideProjector) applyProjectorPosition();
     }
 
     private static void setProjectorZOrder(int hwndInsertAfter) {
@@ -142,15 +142,15 @@ public final class OBSProjector {
 
     public static synchronized void dumpOBSProjector() {
         if (projectorHwnd != null) {
-            if (Jingle.options.minimizeProjector) {
-                minimizeProjector();
+            if (Jingle.options.hideProjector) {
+                hideProjector();
             }
             setProjectorZOrder(1);
         }
         coverMag = true;
     }
 
-    public static void minimizeProjector() {
+    public static void hideProjector() {
         if (projectorHwnd != null) WindowStateUtil.setHwndRectangle(projectorHwnd, new Rectangle(0, MonitorUtil.minY - 1, 1, 1));
     }
 

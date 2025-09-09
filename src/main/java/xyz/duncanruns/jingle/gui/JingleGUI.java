@@ -496,10 +496,10 @@ public class JingleGUI extends JFrame {
             }
             OBSProjector.applyProjectorPosition();
         });
-        setCheckBoxBoolean(this.minimizeProjectorBox, Jingle.options.minimizeProjector, b -> {
-            Jingle.options.minimizeProjector = b;
-            if (b) OBSProjector.minimizeProjector();
-            else OBSProjector.unminimizeProjector();
+        setCheckBoxBoolean(this.minimizeProjectorBox, Jingle.options.hideProjector, b -> {
+            Jingle.options.hideProjector = b;
+            if (b) OBSProjector.hideProjector();
+            else OBSProjector.showProjector();
         });
         this.projPosApplyButton.addActionListener(a -> {
             int[] newPos = new int[4];

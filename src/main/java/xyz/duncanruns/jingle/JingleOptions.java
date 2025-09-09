@@ -62,7 +62,7 @@ public class JingleOptions {
     @Nullable
     public int[] projectorPosition = null;
     public String projectorWindowPattern = "*Jingle Mag";
-    public boolean minimizeProjector;
+    public boolean hideProjector = true;
 
     @Deprecated
     @LoadOnly
