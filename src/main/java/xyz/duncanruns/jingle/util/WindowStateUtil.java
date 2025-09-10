@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public final class WindowStateUtil {
-    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
     private static final Pattern OBS_EXECUTABLE_PATTERN = Pattern.compile("^.+(\\/|\\\\)obs\\d\\d.exe$");
     private static final int BORDERLESS_STYLE = ~(User32.WS_BORDER
             | User32.WS_DLGFRAME
@@ -92,10 +91,6 @@ public final class WindowStateUtil {
         RECT rect = new RECT();
         User32.INSTANCE.GetWindowRect(hwnd, rect);
         return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
-    }
-
-    public static void queueSetHwndRectangle(HWND hwnd, Rectangle rectangle) {
-        EXECUTOR.execute(() -> setHwndRectangle(hwnd, rectangle));
     }
 
     public static void setHwndRectangle(HWND hwnd, Rectangle rectangle) {
