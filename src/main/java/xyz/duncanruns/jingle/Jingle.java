@@ -235,7 +235,28 @@ public final class Jingle {
         resetStates();
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
         if (instance != null) seeInstancePath(instance.instancePath);
-        if (options.autoBorderless) goBorderless();
+        if (options.autoBorderless) {
+            Thread t = new Thread(() -> {
+                try {
+                    while (true) {
+                        boolean done = getMainInstance().map(inst -> {
+                            StateTracker st = inst.stateTracker;
+                            if (st.isCurrentState(InstanceState.TITLE)) {
+                                goBorderless();
+                                return true; 
+                            }
+                            return false;
+                        }).orElse(false);
+                        if (done) break; 
+                        Thread.sleep(500);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }, "wait-for-title-screen");
+            t.setDaemon(true); 
+            t.start();
+        }
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath + ", " + instance.versionString));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
         ScriptStuff.MAIN_INSTANCE_CHANGED.runAll();
