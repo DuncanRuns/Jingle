@@ -176,6 +176,10 @@ public final class Jingle {
         getMainInstance().ifPresent(i -> i.stateTracker.tryUpdate());
         OBSProjector.tick();
         OBSLink.tick();
+        if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
+            goBorderless();                  // make the window borderless
+            borderlessScheduledTime = -1;    // reset so it runs only once
+        }
         PluginEvents.END_TICK.runAll();
         ScriptStuff.END_TICK.runAll();
     }
@@ -227,6 +231,8 @@ public final class Jingle {
         return Optional.ofNullable(mainInstance);
     }
 
+    private static long borderlessScheduledTime = -1;
+
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         undoWindowTitle(mainInstance);
         if (mainInstance == instance) return;
@@ -235,27 +241,14 @@ public final class Jingle {
         resetStates();
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
         if (instance != null) seeInstancePath(instance.instancePath);
-        if (options.autoBorderless) {
-            Thread t = new Thread(() -> {
-                try {
-                    while (true) {
-                        boolean done = getMainInstance().map(inst -> {
-                            StateTracker st = inst.stateTracker;
-                            if (st.isCurrentState(InstanceState.TITLE)) {
-                                goBorderless();
-                                return true; 
-                            }
-                            return false;
-                        }).orElse(false);
-                        if (done) break; 
-                        Thread.sleep(500);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }, "wait-for-title-screen");
-            t.setDaemon(true); 
-            t.start();
+        if (options.autoBorderless && mainInstance != null && User32.INSTANCE.IsWindow(mainInstance.hwnd)) {
+            if (borderlessScheduledTime == -1) {
+                // schedule to run in 3 seconds
+                borderlessScheduledTime = System.currentTimeMillis() + 3000;
+            }
+        } else {
+            // reset if conditions are no longer met
+            borderlessScheduledTime = -1;
         }
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath + ", " + instance.versionString));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
