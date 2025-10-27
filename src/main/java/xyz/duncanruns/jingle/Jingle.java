@@ -177,8 +177,8 @@ public final class Jingle {
         OBSProjector.tick();
         OBSLink.tick();
         if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
-            goBorderless();                  // make the window borderless
-            borderlessScheduledTime = -1;    // reset so it runs only once
+            goBorderless();                
+            borderlessScheduledTime = -1;    
         }
         PluginEvents.END_TICK.runAll();
         ScriptStuff.END_TICK.runAll();
@@ -231,7 +231,7 @@ public final class Jingle {
         return Optional.ofNullable(mainInstance);
     }
 
-    private static long borderlessScheduledTime = -1;
+    private static volatile long borderlessScheduledTime = -1;
 
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         undoWindowTitle(mainInstance);
@@ -243,11 +243,9 @@ public final class Jingle {
         if (instance != null) seeInstancePath(instance.instancePath);
         if (options.autoBorderless && mainInstance != null && User32.INSTANCE.IsWindow(mainInstance.hwnd)) {
             if (borderlessScheduledTime == -1) {
-                // schedule to run in 3 seconds
                 borderlessScheduledTime = System.currentTimeMillis() + 3000;
             }
         } else {
-            // reset if conditions are no longer met
             borderlessScheduledTime = -1;
         }
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath + ", " + instance.versionString));
