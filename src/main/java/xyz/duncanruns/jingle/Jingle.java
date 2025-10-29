@@ -231,7 +231,7 @@ public final class Jingle {
         return Optional.ofNullable(mainInstance);
     }
 
-    private static volatile long borderlessScheduledTime = -1;
+    private static long borderlessScheduledTime = -1;
 
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         undoWindowTitle(mainInstance);
