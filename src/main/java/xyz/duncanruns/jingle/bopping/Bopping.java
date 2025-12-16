@@ -26,11 +26,11 @@ public final class Bopping {
         // English
         "New World", 
         // Western European (French, Spanish, German, Italian, Portuguese)
-        "Nouveau monde", "Nuevo mundo", "Neue Welt", "Nuovo mondo", "Mundo novo", 
+        "Nouveau monde", "Nuevo mundo", "Neue Welt", "Nuovo mondo", "Novo Mundo", 
         // Eastern European (Ukrainian, Polish, Czech)
-        "Новий світ", "Nowy Świat", "Nový svět",
-        // Asian Languages (Japanese, Chinese Simp., Chinese Trad., Korean)
-        "新たなワールド", "新的世界", "新世界", "새로운 세계",
+        "Новий світ", "Nowy świat", "Nový svět",
+        // Asian Languages (Japanese, Chinese,  Korean)
+        "新しい世界", "新的世界",  "새로운 월드",
         // Northern European (Dutch, Swedish, Danish, Finnish)
         "Nieuwe wereld", "Ny värld", "Ny verden", "Uusi maailma"
     );
