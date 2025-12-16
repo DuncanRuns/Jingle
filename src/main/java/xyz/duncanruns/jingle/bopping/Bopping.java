@@ -18,8 +18,23 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Arrays;
 
 public final class Bopping {
+
+    private static final List<String> NEW_WORLD_NAMES = Arrays.asList(
+        // English
+        "New World", 
+        // Western European (French, Spanish, German, Italian, Portuguese)
+        "Nouveau monde", "Nuevo mundo", "Neue Welt", "Nuovo mondo", "Mundo novo", 
+        // Eastern European (Ukrainian, Polish, Czech)
+        "Новий світ", "Nowy Świat", "Nový svět",
+        // Asian Languages (Japanese, Chinese Simp., Chinese Trad., Korean)
+        "新たなワールド", "新的世界", "新世界", "새로운 세계",
+        // Northern European (Dutch, Swedish, Danish, Finnish)
+        "Nieuwe wereld", "Ny värld", "Ny verden", "Uusi maailma"
+    );
+
     private Bopping() {
     }
 
@@ -123,6 +138,9 @@ public final class Bopping {
         if (!Files.isRegularFile(path.resolve("level.dat"))) return false;
         if (name.startsWith("_")) return false;
 
-        return name.startsWith("New World") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
+        return NEW_WORLD_NAMES.stream().anyMatch(name::startsWith)
+                || name.contains("Speedrun #")
+                || name.contains("Practice Seed")
+                || name.contains("Seed Paster");
     }
 }
