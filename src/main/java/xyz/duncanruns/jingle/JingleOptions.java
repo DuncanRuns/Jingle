@@ -18,6 +18,7 @@ public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
     private static final int CURRENT_OPTIONS_VERSION = 5;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
+    public static final Path OPTIONS_BACKUP_PATH = Jingle.FOLDER.resolve("options.json.backup").toAbsolutePath();
     public static final JingleOptions DEFAULTS = createNew();
 
     private static final Gson LOAD_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
@@ -79,16 +80,22 @@ public class JingleOptions {
     }
 
     public static JingleOptions load() {
-        if (Files.exists(OPTIONS_PATH)) {
+        JingleOptions options = loadFrom(OPTIONS_PATH).orElseGet(() -> loadFrom(OPTIONS_BACKUP_PATH).orElse(null));
+        if (options != null) return options;
+        return createNew();
+    }
+
+    private static Optional<JingleOptions> loadFrom(Path path) {
+        if (Files.exists(path)) {
             try {
-                JingleOptions options = FileUtil.readJson(OPTIONS_PATH, JingleOptions.class, LOAD_GSON);
+                JingleOptions options = FileUtil.readJson(path, JingleOptions.class, LOAD_GSON);
                 options.fix();
-                return options;
+                return Optional.of(options);
             } catch (Exception e) {
-                Jingle.logError("Failed to load options.json", e);
+                Jingle.logError("Failed to load " + path.getFileName().toString(), e);
             }
         }
-        return createNew();
+        return Optional.empty();
     }
 
     public static void ensureFolderExists() {
@@ -119,6 +126,7 @@ public class JingleOptions {
     public void save() {
         try {
             FileUtil.writeString(OPTIONS_PATH, SAVE_GSON.toJson(this));
+            FileUtil.writeString(OPTIONS_BACKUP_PATH, SAVE_GSON.toJson(this));
         } catch (Exception e) {
             Jingle.logError("Failed to save options.json:", e);
         }
