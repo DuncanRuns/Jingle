@@ -835,6 +835,10 @@ public class JingleGUI extends JFrame {
     }
 
     public void showSupporters(String[] supporters) {
+        if(!SwingUtilities.isEventDispatchThread()){
+            SwingUtilities.invokeLater(() -> showSupporters(supporters));
+            return;
+        }
         AtomicInteger lastShownSupporter = new AtomicInteger(-1);
         Supplier<String> nextSupporterSupplier = () -> {
             int i = lastShownSupporter.incrementAndGet();
