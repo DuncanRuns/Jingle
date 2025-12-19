@@ -13,7 +13,7 @@ end
 
 function get_reset_key()
     return jingle.getInstanceKeyOption("key_Create New World") or
-            jingle.getInstanceKeyOption("key_Create New World§r")
+        jingle.getInstanceKeyOption("key_Create New World§r")
 end
 
 function can_run_reset()
@@ -82,7 +82,7 @@ function run_start_coping()
 end
 
 function run_minimize()
-    if(jingle.isInstanceActive()) then
+    if (jingle.isInstanceActive()) then
         jingle.minimizeInstance()
     end
 end
