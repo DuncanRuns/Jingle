@@ -90,6 +90,9 @@ public final class KeyboardUtil {
         for (int vKey : new int[]{User32.VK_LCONTROL, User32.VK_LSHIFT, User32.VK_LMENU}) {
             names[vKey] = "Left " + names[vKey];
         }
+        for (int vKey = 13; vKey <= 24; vKey++) {
+            names[0x70 + vKey - 1] = "F" + (vKey);
+        }
         names[1] = "Left Click";
         names[2] = "Right Click";
         names[4] = "Middle Click";
