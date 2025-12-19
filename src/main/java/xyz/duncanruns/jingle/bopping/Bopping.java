@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 public final class Bopping {
     private static final Pattern WORLD_NAME_EXTRACTOR = Pattern.compile("^(.+?)(?: \\(\\d+\\))?$");
-    private static final Set<String> NEW_WORLD_NAMES = new HashSet<>(Arrays.asList(
+    private static final Set<String> NEW_WORLD_NAMES = Stream.of(
             "Nieuwe wereld",
             "Nýggjur heimur",
             "新規ワールド",
@@ -161,7 +161,7 @@ public final class Bopping {
             "Ach' balumil",
             "Яңы ғәләм",
             "Novi svet"
-    ));
+    ).map(String::toLowerCase).collect(Collectors.toCollection(HashSet::new));
 
     private Bopping() {
     }
@@ -277,6 +277,6 @@ public final class Bopping {
         Matcher matcher = WORLD_NAME_EXTRACTOR.matcher(name);
         if (!matcher.matches()) return false;
         String nameNoNumber = matcher.group(1);
-        return NEW_WORLD_NAMES.contains(nameNoNumber);
+        return NEW_WORLD_NAMES.contains(nameNoNumber.toLowerCase());
     }
 }
