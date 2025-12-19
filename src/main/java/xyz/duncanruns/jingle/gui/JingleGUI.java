@@ -100,6 +100,7 @@ public class JingleGUI extends JFrame {
     private JCheckBox autoBorderlessCheckBox;
     private JPanel quickActionsPanel;
     private JPanel communityButtonsPanel;
+    private JLabel communityButtonsLabel;
 
     private JingleGUI() {
         this.$$$setupUI$$$();
@@ -831,13 +832,13 @@ public class JingleGUI extends JFrame {
         communityButtonsPanel = new JPanel();
         communityButtonsPanel.setLayout(new GridBagLayout());
         panel9.add(communityButtonsPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JLabel label15 = new JLabel();
-        label15.setText("Loading Community Buttons...");
+        communityButtonsLabel = new JLabel();
+        communityButtonsLabel.setText("Loading Community Buttons...");
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        communityButtonsPanel.add(label15, gbc);
+        communityButtonsPanel.add(communityButtonsLabel, gbc);
     }
 
     /**
@@ -858,6 +859,11 @@ public class JingleGUI extends JFrame {
             return;
         }
         this.communityButtonsPanel.removeAll();
+        if (buttons == null) {
+            this.communityButtonsLabel.setText("Failed to load community buttons!");
+            this.communityButtonsPanel.add(communityButtonsLabel);
+            return;
+        }
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = -1;

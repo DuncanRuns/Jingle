@@ -138,6 +138,7 @@ public final class Jingle {
                 JingleGUI.get().showCommunityButtons(buttons);
             }catch (Exception e) {
                 logError("Failed to obtain list of community buttons!", e);
+                JingleGUI.get().showCommunityButtons(null);
             }
         }, "community-loader").start();
     }
