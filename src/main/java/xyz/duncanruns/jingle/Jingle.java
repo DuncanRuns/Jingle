@@ -176,6 +176,10 @@ public final class Jingle {
         getMainInstance().ifPresent(i -> i.stateTracker.tryUpdate());
         OBSProjector.tick();
         OBSLink.tick();
+        if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
+            goBorderless();                
+            borderlessScheduledTime = -1;    
+        }
         PluginEvents.END_TICK.runAll();
         ScriptStuff.END_TICK.runAll();
     }
@@ -227,6 +231,8 @@ public final class Jingle {
         return Optional.ofNullable(mainInstance);
     }
 
+    private static long borderlessScheduledTime = -1;
+
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         undoWindowTitle(mainInstance);
         if (mainInstance == instance) return;
@@ -235,7 +241,13 @@ public final class Jingle {
         resetStates();
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
         if (instance != null) seeInstancePath(instance.instancePath);
-        if (options.autoBorderless) goBorderless();
+        if (options.autoBorderless && mainInstance != null && User32.INSTANCE.IsWindow(mainInstance.hwnd)) {
+            if (borderlessScheduledTime == -1) {
+                borderlessScheduledTime = System.currentTimeMillis() + 3000;
+            }
+        } else {
+            borderlessScheduledTime = -1;
+        }
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath + ", " + instance.versionString));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
         ScriptStuff.MAIN_INSTANCE_CHANGED.runAll();
