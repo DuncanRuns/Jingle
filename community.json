@@ -1,14 +1,16 @@
-[
-  {
-    "display": "Jingle GitHub (Source Code, Issues, etc.)",
-    "link": "https://github.com/DuncanRuns/Jingle"
-  },
-  {
-    "display": "Jingle Discord (Support/Development)",
-    "link": "https://discord.com/invite/cXf86mXAWR"
-  },
-  {
-    "display": "Java Edition Speedrunning Discord",
-    "link": "https://discord.com/invite/jmdFn3C"
-  }
-]
+{
+  "buttons": [
+    {
+      "display": "Jingle GitHub (Source Code, Issues, etc.)",
+      "link": "https://github.com/DuncanRuns/Jingle"
+    },
+    {
+      "display": "Jingle Discord (Support/Development)",
+      "link": "https://discord.com/invite/cXf86mXAWR"
+    },
+    {
+      "display": "Java Edition Speedrunning Discord",
+      "link": "https://discord.com/invite/jmdFn3C"
+    }
+  ]
+}
