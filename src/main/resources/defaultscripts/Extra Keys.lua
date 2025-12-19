@@ -81,6 +81,12 @@ function run_start_coping()
     jingle.sendChatMessage("/gamemode spectator")
 end
 
+function run_minimize()
+    if(jingle.isInstanceActive()) then
+        jingle.minimizeInstance()
+    end
+end
+
 function customize()
     jingle.addCustomizationMenuText("Allowed states for 'Safe Reset' and 'Reset Before 20s':")
     jingle.addCustomizationMenuCheckBox("iwu", true, "In World, Unpaused")
@@ -96,4 +102,5 @@ jingle.listen("ENTER_WORLD", save_enter_world_time)
 jingle.addHotkey("Safe Reset", run_safe_reset)
 jingle.addHotkey("Reset Before 20s", run_reset_before_20s)
 jingle.addHotkey("Start Coping", run_start_coping)
+jingle.addHotkey("Minimize Instance", run_minimize)
 jingle.setCustomization(customize)

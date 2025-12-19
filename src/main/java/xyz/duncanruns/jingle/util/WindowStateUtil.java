@@ -117,4 +117,8 @@ public final class WindowStateUtil {
             }
         }
     }
+
+    public static void minimizeHwnd(HWND hwnd) {
+        User32.INSTANCE.ShowWindow(hwnd, User32.SW_MINIMIZE);
+    }
 }

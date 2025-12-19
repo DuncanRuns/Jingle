@@ -354,4 +354,9 @@ class JingleLuaLibrary extends LuaLibrary {
     public String getInstancePath() {
         return Jingle.getMainInstance().map(openedInstance -> openedInstance.instancePath.toString()).orElse(null);
     }
+
+    @LuaDocumentation(description = "Minimizes the instance, even if it is borderless.")
+    public void minimizeInstance() {
+        Jingle.getMainInstance().ifPresent(instance -> WindowStateUtil.minimizeHwnd(instance.hwnd));
+    }
 }
