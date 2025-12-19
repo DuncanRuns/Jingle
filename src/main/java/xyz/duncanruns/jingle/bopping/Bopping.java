@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +22,7 @@ import java.util.stream.Stream;
 
 public final class Bopping {
     private static final Pattern WORLD_NAME_EXTRACTOR = Pattern.compile("^(.+?)(?: \\(\\d+\\))?$");
-    private static final List<String> NEW_WORLD_NAMES = Arrays.asList(
+    private static final Set<String> NEW_WORLD_NAMES = new HashSet<>(Arrays.asList(
             "Nieuwe wereld",
             "Nýggjur heimur",
             "新規ワールド",
@@ -163,7 +161,7 @@ public final class Bopping {
             "Ach' balumil",
             "Яңы ғәләм",
             "Novi svet"
-    );
+    ));
 
     private Bopping() {
     }
