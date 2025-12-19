@@ -1,8 +1,12 @@
 {
   "buttons": [
     {
-      "display": "Jingle GitHub (Source Code, Issues, etc.)",
+      "display": "Jingle GitHub (Source Code)",
       "link": "https://github.com/DuncanRuns/Jingle"
+    },
+    {
+      "display": "Jingle Issues Tracker",
+      "link": "https://github.com/DuncanRuns/Jingle/issues"
     },
     {
       "display": "Jingle Discord (Support/Development)",
@@ -11,6 +15,18 @@
     {
       "display": "MCJE Speedrunning Discord",
       "link": "https://discord.com/invite/jmdFn3C"
+    },
+    {
+      "display": "PaceMan.gg",
+      "link": "https://paceman.gg/"
+    },
+    {
+      "display": "Legal Mods List",
+      "link": "https://mods.tildejustin.dev/"
+    },
+    {
+      "display": "MCSR Launcher",
+      "link": "https://github.com/MCSRLauncher/Launcher"
     }
   ]
 }
