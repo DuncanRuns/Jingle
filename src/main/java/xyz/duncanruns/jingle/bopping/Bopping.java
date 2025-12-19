@@ -17,11 +17,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Bopping {
-
+    private static final Pattern WORLD_NAME_EXTRACTOR = Pattern.compile("^(.+?)(?: \\(\\d+\\))?$");
     private static final List<String> NEW_WORLD_NAMES = Arrays.asList(
             "Nieuwe wereld",
             "Nýggjur heimur",
@@ -273,6 +275,10 @@ public final class Bopping {
     }
 
     private static boolean isNewWorld(String name) {
-        return NEW_WORLD_NAMES.stream().anyMatch(name::startsWith);
+        if(name.isEmpty()) return false;
+        Matcher matcher = WORLD_NAME_EXTRACTOR.matcher(name);
+        if(!matcher.matches()) return false;
+        String nameNoNumber = matcher.group(1);
+        return NEW_WORLD_NAMES.contains(nameNoNumber);
     }
 }
