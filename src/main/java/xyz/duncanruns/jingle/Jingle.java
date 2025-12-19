@@ -43,6 +43,8 @@ public final class Jingle {
     private static long lastInstanceCheck = 0;
     private static boolean legalModCheckNeeded = false;
 
+    private static long borderlessScheduledTime = -1;
+
     public static JingleOptions options = null;
 
     @Nullable
@@ -127,7 +129,7 @@ public final class Jingle {
         }, "supporter-loader").start();
     }
 
-    private static void loadCommunity(){
+    private static void loadCommunity() {
         new Thread(() -> {
             try {
                 JsonObject json = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Jingle/main/community.json");
@@ -136,7 +138,7 @@ public final class Jingle {
                         .map(j -> Pair.of(j.get("display").getAsString(), j.get("link").getAsString()))
                         .collect(Collectors.toList());
                 JingleGUI.get().showCommunityButtons(buttons);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 logError("Failed to obtain list of community buttons!", e);
                 JingleGUI.get().showCommunityButtons(null);
             }
@@ -199,8 +201,8 @@ public final class Jingle {
         OBSProjector.tick();
         OBSLink.tick();
         if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
-            goBorderless();                
-            borderlessScheduledTime = -1;    
+            goBorderless();
+            borderlessScheduledTime = -1;
         }
         PluginEvents.END_TICK.runAll();
         ScriptStuff.END_TICK.runAll();
@@ -252,8 +254,6 @@ public final class Jingle {
     public static synchronized Optional<OpenedInstance> getMainInstance() {
         return Optional.ofNullable(mainInstance);
     }
-
-    private static long borderlessScheduledTime = -1;
 
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         undoWindowTitle(mainInstance);
