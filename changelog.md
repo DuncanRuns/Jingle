@@ -1,3 +1,20 @@
+Changes in v1.3.0:
+
+- `Minimize Projector When Inactive` OBS option renamed to `Hide Projector When Inactive` and now defaults to true
+- `Hide OBS Projector` will now move the OBS projector higher than all available monitors, ensuring it is hidden
+- Added support for clearing "New World" worlds in all languages (#38 by Granome)
+    - The translations are taken from language files from 1.16.1 and 1.21.11, it's possible there's other translations
+      for other versions that have been missed, feel free to report them!
+- Fix auto borderless being applied too quickly (#11, #35 by qMaxXen)
+- Changed "Donation" tab to a "Community" tab, including some buttons that link to useful places related to Jingle (#34)
+- Improved java version detection, added a warning for Java <=8
+- Added a backup options file, to be used in case the main one is corrupted/missing.
+- Jingle will now save options when the GUI is unfocused.
+- Added a minimize key lua function, and a hotkey action for it in the `Extra Keys` script
+    - Also works for borderless
+- Jingle GUI will reposition to the top left of the main monitor if the position loaded from options is out of bounds
+- Various tiny fixes
+
 Changes in v1.2.4:
 
 - Fixed version detection for vanilla launcher with a mod loader (this also fixes a crash)
