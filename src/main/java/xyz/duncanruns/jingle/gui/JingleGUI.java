@@ -107,8 +107,7 @@ public class JingleGUI extends JFrame {
         this.finalizeComponents();
         this.setTitle("Jingle v" + Jingle.VERSION);
         this.setContentPane(this.mainPanel);
-        this.setPreferredSize(new Dimension(Jingle.options.lastSize[0], Jingle.options.lastSize[1]));
-        this.setLocation(Jingle.options.lastPosition[0], Jingle.options.lastPosition[1]);
+        this.initPosition(new Point(Jingle.options.lastPosition[0], Jingle.options.lastPosition[1]), new Dimension(Jingle.options.lastSize[0], Jingle.options.lastSize[1]));
         this.setIconImage(getLogo());
         this.noInstanceYet();
         this.addWindowListener(new WindowAdapter() {
@@ -937,4 +936,26 @@ public class JingleGUI extends JFrame {
         }
         return tab == this;
     }
+
+    public void initPosition(Point topLeft, Dimension size) {
+        this.setPreferredSize(size);
+        boolean topLeftInBounds = false;
+        boolean topRightInBounds = false;
+        Point topRight = new Point(topLeft.x + size.width, topLeft.y);
+        for (MonitorUtil.Monitor monitor : MonitorUtil.getAllMonitors()) {
+            if (monitor.getVBounds().contains(topLeft)) {
+                topLeftInBounds = true;
+            }
+            if (monitor.getVBounds().contains(topRight)) {
+                topRightInBounds = true;
+            }
+            if (topLeftInBounds && topRightInBounds) break;
+        }
+        if (topLeftInBounds && topRightInBounds) {
+            this.setLocation(topLeft);
+        } else {
+            setLocation(0, 0);
+        }
+    }
+
 }
