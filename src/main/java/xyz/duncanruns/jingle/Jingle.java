@@ -53,6 +53,8 @@ public final class Jingle {
     @Nullable
     public static WinDef.HWND activeHwnd = null;
 
+    private static boolean guiWasFocused = false;
+
     private static boolean openedToLan = false;
 
     private Jingle() {
@@ -216,8 +218,21 @@ public final class Jingle {
             goBorderless();
             borderlessScheduledTime = -1;
         }
+        if (JingleGUI.instanceExists()) {
+            tickSaveCheck();
+        }
         PluginEvents.END_TICK.runAll();
         ScriptStuff.END_TICK.runAll();
+    }
+
+    private static void tickSaveCheck() {
+        boolean focused = JingleGUI.get().isFocused();
+        if (focused == guiWasFocused) return;
+        guiWasFocused = focused;
+        if (!focused) {
+            log(Level.DEBUG, "Unfocused, saving options...");
+            options.save();
+        }
     }
 
     private static void checkLegalMods() {
