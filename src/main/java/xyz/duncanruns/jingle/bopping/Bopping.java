@@ -13,13 +13,156 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Bopping {
+    private static final Pattern WORLD_NAME_EXTRACTOR = Pattern.compile("^(.+?)(?: \\(\\d+\\))?$");
+    private static final Set<String> NEW_WORLD_NAMES = new HashSet<>(Arrays.asList(
+            "Nieuwe wereld",
+            "Nýggjur heimur",
+            "新規ワールド",
+            "Naujas pasaulis",
+            "Saoghal ùr",
+            "Nuwe Wêreld",
+            "Ụwa ọhụrụ",
+            "Νέος Κόσμος",
+            "Neui Welt",
+            "ໂລກໃໝ່",
+            "Uusi maailma",
+            "Ny wärd",
+            "Dunia Baharu",
+            "Яңа дөнья",
+            "Ny värld",
+            "Nový svět",
+            "Шинэ дэлхий",
+            "Nowe wirreld",
+            "ಹೊಸ ಪ್ರಪಂಚ",
+            "Neie Wöd",
+            "Novi svijet",
+            "Monde Novèl",
+            "Noveu mundeu",
+            "Новий світ",
+            "ao hou",
+            "Яңы донъя",
+            "Vinya ambar",
+            "Mundo nuevo",
+            "Саҥа дойду",
+            "新生界",
+            "สร้างเวิลด์ใหม่",
+            "Lume nouă",
+            "Uus maailm",
+            "Neue Weld",
+            "Nowy śwjot",
+            "Nova mondo",
+            "Byd Newydd",
+            "Nowy świŏt",
+            "新的世界",
+            "Новий сьвіт",
+            "Nei Welt",
+            "Նոր Աշխարհ",
+            "دنيا بهارو",
+            "Nuovo mondo",
+            "Új világ",
+            "Mundus Nouus",
+            "Mond noeuv",
+            "Nuevo mundo",
+            "Nuie Welt",
+            "Ny heim",
+            "Novo Mundo",
+            "Novy svět",
+            "دنیای جدید",
+            "Bagong Daigdig",
+            "Ođđa máilbmi",
+            "Новый світ",
+            "Dunida cusub",
+            "Gnûf mont",
+            "cnino munje",
+            "Нов свет",
+            "ახალი სამყარო",
+            "Hou Honua",
+            "Nouveau monde",
+            "נייַע וועלט",
+            "New Sea",
+            "Nýr Heimur",
+            "Novo mundo",
+            "새로운 세계",
+            "Niujis Fairƕus",
+            "Mundus novus",
+            "Sasendajni narua",
+            "Jauna Pasaule",
+            "New World",
+            "Oshki-aki",
+            "Nowy świat",
+            "Nieje waereld",
+            "Νέος κόσμος",
+            "Новый мир",
+            "Dinja Ġdida",
+            "Нов свят",
+            "Nuuje Welt",
+            "Novy sviet",
+            "עולם חדש",
+            "Ođđa Máilbmi",
+            "Mondo Novo",
+            "Nije wrâld",
+            "Dunia Baru",
+            "qo' chu'",
+            "ma sin",
+            "Нови свет",
+            "Bys Nowydh",
+            "Neo velt",
+            "Jauna pasaule",
+            "Mundu nuevu",
+            "Neue Welt",
+            "Seihll Noa",
+            "Ny verd",
+            "دنيای جديد",
+            "Новый міръ",
+            "Neu Welt",
+            "Thế giới mới",
+            "புதிய உலகம்",
+            "Doenia baroe",
+            "Жаңа дүние",
+            "Vinya Ambar",
+            "Bagong Mundo",
+            "Mundu berria",
+            "Yeni Dünya",
+            "Жаңа әлем",
+            "Neie Weyd",
+            "โลกใหม่",
+            "Monde nòu",
+            "Nov svet",
+            "Nie Wiält",
+            "New Wurld",
+            "नई दुनिया",
+            "Nou món",
+            "pꞁɹoM ʍǝN",
+            "Mundo nuebo",
+            "Новы свет",
+            "Aye tuntun",
+            "Жаңы дүйнө",
+            "Yankwīk tlāltipaktli",
+            "Bed Nevez",
+            "Nový svet",
+            "Mundo Nuevo",
+            "عالم جديد",
+            "Nee Wiält",
+            "Ny verden",
+            "Hou honua",
+            "Munnu novu",
+            "New sea",
+            "Domhan Nua",
+            "Botë e re",
+            "Amaḍal amaynut",
+            "Ach' balumil",
+            "Яңы ғәләм",
+            "Novi svet"
+    ));
+
     private Bopping() {
     }
 
@@ -123,6 +266,17 @@ public final class Bopping {
         if (!Files.isRegularFile(path.resolve("level.dat"))) return false;
         if (name.startsWith("_")) return false;
 
-        return name.startsWith("New World") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
+        return isNewWorld(name)
+                || name.contains("Speedrun #")
+                || name.contains("Practice Seed")
+                || name.contains("Seed Paster");
+    }
+
+    private static boolean isNewWorld(String name) {
+        if(name.isEmpty()) return false;
+        Matcher matcher = WORLD_NAME_EXTRACTOR.matcher(name);
+        if(!matcher.matches()) return false;
+        String nameNoNumber = matcher.group(1);
+        return NEW_WORLD_NAMES.contains(nameNoNumber);
     }
 }
