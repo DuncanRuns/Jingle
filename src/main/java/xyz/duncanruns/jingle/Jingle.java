@@ -105,7 +105,14 @@ public final class Jingle {
 
         MonitorUtil.retrieveMinY();
 
+        checkJava8();
+
         mainLoop();
+    }
+
+    private static void checkJava8() {
+        if (!JavaVersionUtil.getMajorJavaVersion().isPresent())
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(JingleGUI.get(), "You are running Jingle with Java 8 or lower. Things may not work as expected. Updating to Java 17 or higher is recommended.", "Jingle: Java 8 Warning", JOptionPane.ERROR_MESSAGE));
     }
 
     private static void loadLegalMods() {
