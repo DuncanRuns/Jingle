@@ -19,7 +19,7 @@ import static xyz.duncanruns.jingle.util.SleepUtil.sleep;
 public final class HotkeyManager {
     public static final CopyOnWriteArrayList<Pair<Hotkey, Runnable>> HOTKEYS = new CopyOnWriteArrayList<>(); // This lets us run the hotkey checker without ever having to stop it
     private static final Set<Integer> F3_INCOMPATIBLES = new HashSet<>(Arrays.asList(
-            Win32VK.VK_F4.code, // F4
+            Win32VK.VK_F4.code, Win32VK.VK_F6.code,
             65, 66, 67, 68, 70, 71, 72, 73, 76, 78, 80, 81, 83, 84, // A, B, C, D, F, G, H, I, L, N, P, Q, S, T
             49, 50, 51 // 1, 2, 3
     ));
