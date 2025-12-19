@@ -266,9 +266,13 @@ public final class Bopping {
         if (!Files.isRegularFile(path.resolve("level.dat"))) return false;
         if (name.startsWith("_")) return false;
 
-        return NEW_WORLD_NAMES.stream().anyMatch(name::startsWith)
+        return isNewWorld(name)
                 || name.contains("Speedrun #")
                 || name.contains("Practice Seed")
                 || name.contains("Seed Paster");
+    }
+
+    private static boolean isNewWorld(String name) {
+        return NEW_WORLD_NAMES.stream().anyMatch(name::startsWith);
     }
 }
