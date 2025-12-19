@@ -211,6 +211,14 @@ public class InstanceInfo {
         }
     }
 
+    @Override
+    public String toString() {
+        return "InstanceInfo{" +
+                "versionString='" + this.versionString + '\'' +
+                ", instancePath=" + this.instancePath +
+                '}';
+    }
+
     private static class VersionProvider {
         private final Supplier<Optional<String>> versionSupplier;
         private final String name;
@@ -227,13 +235,5 @@ public class InstanceInfo {
         public String getName() {
             return this.name;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "InstanceInfo{" +
-                "versionString='" + this.versionString + '\'' +
-                ", instancePath=" + this.instancePath +
-                '}';
     }
 }

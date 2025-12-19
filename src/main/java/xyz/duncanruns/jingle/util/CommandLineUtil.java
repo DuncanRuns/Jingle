@@ -27,51 +27,6 @@ public class CommandLineUtil {
     // Max command line size (32 KB should be enough)
     private static final int MAX_CMDLINE_SIZE = 32 * 1024;
 
-    // Structure for PROCESS_BASIC_INFORMATION (simplified)
-    public static class PROCESS_BASIC_INFORMATION extends Structure {
-        public Pointer Reserved1;
-        public Pointer PebBaseAddress;
-        public Pointer Reserved2_0;
-        public Pointer Reserved2_1;
-        public Pointer UniqueProcessId;
-        public Pointer Reserved3;
-
-        @Override
-        protected List<String> getFieldOrder() {
-            return Arrays.asList(
-                    "Reserved1",
-                    "PebBaseAddress",
-                    "Reserved2_0",
-                    "Reserved2_1",
-                    "UniqueProcessId",
-                    "Reserved3"
-            );
-        }
-    }
-
-    // UNICODE_STRING structure
-    public static class UNICODE_STRING extends Structure {
-        public short Length;
-        public short MaximumLength;
-        public Pointer Buffer;
-
-        @Override
-        protected List<String> getFieldOrder() {
-            return Arrays.asList("Length", "MaximumLength", "Buffer");
-        }
-    }
-
-    // Ntdll interface
-    public interface Ntdll extends Library {
-        Ntdll INSTANCE = Native.load("Ntdll", Ntdll.class, W32APIOptions.UNICODE_OPTIONS);
-
-        int NtQueryInformationProcess(HANDLE processHandle,
-                                      int processInformationClass,
-                                      Structure processInformation,
-                                      int processInformationLength,
-                                      IntByReference returnLength);
-    }
-
     /**
      * Reads the command line of another process by PID.
      */
@@ -195,6 +150,61 @@ public class CommandLineUtil {
         return outOptions;
     }
 
+    public static CommandLineArgs getCommandLineArgs(int pid) throws Exception {
+        String cmdLineStr = getCommandLineStringFromPid(pid);
+        return getCommandLineArgs(cmdLineStr);
+    }
+
+    public static CommandLineArgs getCommandLineArgs(String cmdLineStr) {
+        CommandLine commandLine = CommandLine.parse(cmdLineStr);
+        return new CommandLineArgs(commandLine.getArguments());
+    }
+
+    // Ntdll interface
+    public interface Ntdll extends Library {
+        Ntdll INSTANCE = Native.load("Ntdll", Ntdll.class, W32APIOptions.UNICODE_OPTIONS);
+
+        int NtQueryInformationProcess(HANDLE processHandle,
+                                      int processInformationClass,
+                                      Structure processInformation,
+                                      int processInformationLength,
+                                      IntByReference returnLength);
+    }
+
+    // Structure for PROCESS_BASIC_INFORMATION (simplified)
+    public static class PROCESS_BASIC_INFORMATION extends Structure {
+        public Pointer Reserved1;
+        public Pointer PebBaseAddress;
+        public Pointer Reserved2_0;
+        public Pointer Reserved2_1;
+        public Pointer UniqueProcessId;
+        public Pointer Reserved3;
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return Arrays.asList(
+                    "Reserved1",
+                    "PebBaseAddress",
+                    "Reserved2_0",
+                    "Reserved2_1",
+                    "UniqueProcessId",
+                    "Reserved3"
+            );
+        }
+    }
+
+    // UNICODE_STRING structure
+    public static class UNICODE_STRING extends Structure {
+        public short Length;
+        public short MaximumLength;
+        public Pointer Buffer;
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return Arrays.asList("Length", "MaximumLength", "Buffer");
+        }
+    }
+
     public static class CommandLineArgs {
         public final List<String> args;
         public final Map<String, String> options;
@@ -222,16 +232,6 @@ public class CommandLineUtil {
                     ", options=" + options +
                     '}';
         }
-    }
-
-    public static CommandLineArgs getCommandLineArgs(int pid) throws Exception {
-        String cmdLineStr = getCommandLineStringFromPid(pid);
-        return getCommandLineArgs(cmdLineStr);
-    }
-
-    public static CommandLineArgs getCommandLineArgs(String cmdLineStr) {
-        CommandLine commandLine = CommandLine.parse(cmdLineStr);
-        return new CommandLineArgs(commandLine.getArguments());
     }
 
 }

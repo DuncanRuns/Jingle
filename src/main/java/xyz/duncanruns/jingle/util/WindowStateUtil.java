@@ -6,8 +6,6 @@ import com.sun.jna.platform.win32.WinUser;
 import xyz.duncanruns.jingle.win32.User32;
 
 import java.awt.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public final class WindowStateUtil {

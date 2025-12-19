@@ -30,39 +30,6 @@ public class ProcEnvUtil {
     // Max environment block size (64 KB is enough for Windows)
     private static final int MAX_ENV_SIZE = 64 * 1024;
 
-    // Structure for PROCESS_BASIC_INFORMATION (simplified)
-    public static class PROCESS_BASIC_INFORMATION extends Structure {
-        public Pointer Reserved1;
-        public Pointer PebBaseAddress;
-        public Pointer Reserved2_0;
-        public Pointer Reserved2_1;
-        public Pointer UniqueProcessId;
-        public Pointer Reserved3;
-
-        @Override
-        protected List<String> getFieldOrder() {
-            return Arrays.asList(
-                    "Reserved1",
-                    "PebBaseAddress",
-                    "Reserved2_0",
-                    "Reserved2_1",
-                    "UniqueProcessId",
-                    "Reserved3"
-            );
-        }
-    }
-
-    // Ntdll interface
-    public interface Ntdll extends Library {
-        Ntdll INSTANCE = Native.load("Ntdll", Ntdll.class, W32APIOptions.UNICODE_OPTIONS);
-
-        int NtQueryInformationProcess(HANDLE processHandle,
-                                      int processInformationClass,
-                                      Structure processInformation,
-                                      int processInformationLength,
-                                      IntByReference returnLength);
-    }
-
     /**
      * Reads the environment variables of another process by PID.
      */
@@ -173,5 +140,38 @@ public class ProcEnvUtil {
                 : buffer.getInt(0) & 0xFFFFFFFFL;
 
         return new Pointer(value);
+    }
+
+    // Ntdll interface
+    public interface Ntdll extends Library {
+        Ntdll INSTANCE = Native.load("Ntdll", Ntdll.class, W32APIOptions.UNICODE_OPTIONS);
+
+        int NtQueryInformationProcess(HANDLE processHandle,
+                                      int processInformationClass,
+                                      Structure processInformation,
+                                      int processInformationLength,
+                                      IntByReference returnLength);
+    }
+
+    // Structure for PROCESS_BASIC_INFORMATION (simplified)
+    public static class PROCESS_BASIC_INFORMATION extends Structure {
+        public Pointer Reserved1;
+        public Pointer PebBaseAddress;
+        public Pointer Reserved2_0;
+        public Pointer Reserved2_1;
+        public Pointer UniqueProcessId;
+        public Pointer Reserved3;
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return Arrays.asList(
+                    "Reserved1",
+                    "PebBaseAddress",
+                    "Reserved2_0",
+                    "Reserved2_1",
+                    "UniqueProcessId",
+                    "Reserved3"
+            );
+        }
     }
 }

@@ -273,9 +273,9 @@ public final class Bopping {
     }
 
     private static boolean isNewWorld(String name) {
-        if(name.isEmpty()) return false;
+        if (name.isEmpty()) return false;
         Matcher matcher = WORLD_NAME_EXTRACTOR.matcher(name);
-        if(!matcher.matches()) return false;
+        if (!matcher.matches()) return false;
         String nameNoNumber = matcher.group(1);
         return NEW_WORLD_NAMES.contains(nameNoNumber);
     }

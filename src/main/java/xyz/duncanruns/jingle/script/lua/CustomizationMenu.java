@@ -14,8 +14,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 
 class CustomizationMenu extends JDialog {
