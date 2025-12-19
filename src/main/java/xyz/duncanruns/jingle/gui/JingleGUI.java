@@ -99,6 +99,7 @@ public class JingleGUI extends JFrame {
     private JButton customizeBorderlessButton;
     private JCheckBox autoBorderlessCheckBox;
     private JPanel quickActionsPanel;
+    private JPanel communityButtonsPanel;
 
     private JingleGUI() {
         this.$$$setupUI$$$();
@@ -376,16 +377,9 @@ public class JingleGUI extends JFrame {
         });
 
         this.finalizeOBSComponents();
+        this.finalizeCommunityComponents();
 
         this.openPluginsFolderButton.addActionListener(a -> OpenUtil.openFile(Jingle.FOLDER.resolve("plugins").toString()));
-
-        this.donateButton.addActionListener(a -> {
-            try {
-                Desktop.getDesktop().browse(URI.create("https://ko-fi.com/duncanruns"));
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Failed to open link. Donations can be done at https://ko-fi.com/duncanruns.", "Jingle: Failed to open link", JOptionPane.ERROR_MESSAGE);
-            }
-        });
 
         this.packageSubmissionFilesButton.addActionListener(a -> packageSubmissionFiles());
 
@@ -523,6 +517,22 @@ public class JingleGUI extends JFrame {
         this.projWindowPatternField.setEnabled(Jingle.options.projectorEnabled);
         this.minimizeProjectorBox.setEnabled(Jingle.options.projectorEnabled);
         this.resetProjNameButton.setEnabled(Jingle.options.projectorEnabled);
+    }
+
+    private void finalizeCommunityComponents() {
+        donateButton.addActionListener(a -> openLink("https://ko-fi.com/DuncanRuns"));
+
+        // Might be a good idea to put the invite link in some meta file on GitHub
+//        discordButton.addActionListener(a -> openLink("https://discord.gg/cXf86mXAWR"));
+//        githubButton.addActionListener(a -> openLink("https://github.com/DuncanRuns/Jingle"));
+    }
+
+    private void openLink(String url) {
+        try {
+            Desktop.getDesktop().browse(URI.create(url));
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Failed to open link. Open a browser and go to " + url, "Jingle: Failed to open link", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void refreshPPFields(JTextField[] ppFields) {
@@ -782,14 +792,14 @@ public class JingleGUI extends JFrame {
         minimizeProjectorBox.setText("Hide Projector When Inactive");
         panel6.add(minimizeProjectorBox, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane8 = new JScrollPane();
-        mainTabbedPane.addTab("Donate", scrollPane8);
+        mainTabbedPane.addTab("Community", scrollPane8);
         scrollPane8.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel9 = new JPanel();
         panel9.setLayout(new GridLayoutManager(6, 1, new Insets(5, 5, 5, 5), -1, -1));
         scrollPane8.setViewportView(panel9);
         final JPanel panel10 = new JPanel();
         panel10.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel9.add(panel10, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel9.add(panel10, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label13 = new JLabel();
         label13.setForeground(new Color(-14894848));
         label13.setOpaque(false);
@@ -801,10 +811,10 @@ public class JingleGUI extends JFrame {
         panel10.add(donateButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label14 = new JLabel();
         label14.setText("Thank you supporters!");
-        panel9.add(label14, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel9.add(label14, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel11 = new JPanel();
         panel11.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
-        panel9.add(panel11, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel9.add(panel11, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         supporter1Label = new JLabel();
         supporter1Label.setText(" ");
         panel11.add(supporter1Label, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -816,10 +826,18 @@ public class JingleGUI extends JFrame {
         panel11.add(supporter3Label, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer6 = new Spacer();
         panel9.add(spacer6, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer7 = new Spacer();
-        panel9.add(spacer7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer8 = new Spacer();
-        panel9.add(spacer8, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JSeparator separator7 = new JSeparator();
+        panel9.add(separator7, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        communityButtonsPanel = new JPanel();
+        communityButtonsPanel.setLayout(new GridBagLayout());
+        panel9.add(communityButtonsPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label15 = new JLabel();
+        label15.setText("Loading Community Buttons...");
+        GridBagConstraints gbc;
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        communityButtonsPanel.add(label15, gbc);
     }
 
     /**
@@ -834,8 +852,27 @@ public class JingleGUI extends JFrame {
         this.scriptListPanel = new ScriptListPanel();
     }
 
+    public void showCommunityButtons(List<Pair<String, String>> buttons) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> showCommunityButtons(buttons));
+            return;
+        }
+        this.communityButtonsPanel.removeAll();
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = -1;
+        constraints.insets = new Insets(0, 0, 5, 0);
+        constraints.weightx = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        buttons.forEach(pair -> {
+            JButton button = new JButton(pair.getLeft());
+            button.addActionListener(a -> openLink(pair.getRight()));
+            this.communityButtonsPanel.add(button, constraints.clone());
+        });
+    }
+
     public void showSupporters(String[] supporters) {
-        if(!SwingUtilities.isEventDispatchThread()){
+        if (!SwingUtilities.isEventDispatchThread()) {
             SwingUtilities.invokeLater(() -> showSupporters(supporters));
             return;
         }

@@ -1,6 +1,9 @@
 package xyz.duncanruns.jingle;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static xyz.duncanruns.jingle.util.SleepUtil.sleep;
 
@@ -85,6 +90,7 @@ public final class Jingle {
         HotkeyManager.start();
 
         loadSupporters();
+        loadCommunity();
         loadLegalMods();
         new Thread(JingleUpdater::checkForUpdates, "update-checker").start();
 
@@ -119,6 +125,21 @@ public final class Jingle {
                 logError("Failed to obtain list of supporters!", e);
             }
         }, "supporter-loader").start();
+    }
+
+    private static void loadCommunity(){
+        new Thread(() -> {
+            try {
+                JsonObject json = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Jingle/main/community.json");
+                List<Pair<String, String>> buttons = json.getAsJsonArray("buttons").asList().stream()
+                        .map(JsonElement::getAsJsonObject)
+                        .map(j -> Pair.of(j.get("display").getAsString(), j.get("link").getAsString()))
+                        .collect(Collectors.toList());
+                JingleGUI.get().showCommunityButtons(buttons);
+            }catch (Exception e) {
+                logError("Failed to obtain list of community buttons!", e);
+            }
+        }, "community-loader").start();
     }
 
     private static void generateResources() {
