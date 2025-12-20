@@ -80,9 +80,7 @@ public class JingleOptions {
     }
 
     public static JingleOptions load() {
-        JingleOptions options = loadFrom(OPTIONS_PATH).orElseGet(() -> loadFrom(OPTIONS_BACKUP_PATH).orElse(null));
-        if (options != null) return options;
-        return createNew();
+        return loadFrom(OPTIONS_PATH).orElseGet(() -> loadFrom(OPTIONS_BACKUP_PATH).orElseGet(JingleOptions::createNew));
     }
 
     private static Optional<JingleOptions> loadFrom(Path path) {
