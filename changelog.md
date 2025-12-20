@@ -13,7 +13,9 @@ Changes in v1.3.0:
 - Added a minimize key lua function, and a hotkey action for it in the `Extra Keys` script
     - Also works for borderless
 - Jingle GUI will reposition to the top left of the main monitor if the position loaded from options is out of bounds
-- Various tiny fixes
+- Program Launcher Plugin updated to v1.1.1: Fixed Jingle crashing when options were corrupted, and added a backup
+  options file
+- Various tiny tweaks/fixes
 
 Changes in v1.2.4:
 
