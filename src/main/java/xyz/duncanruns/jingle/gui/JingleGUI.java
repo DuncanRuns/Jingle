@@ -29,7 +29,6 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
@@ -520,19 +519,11 @@ public class JingleGUI extends JFrame {
     }
 
     private void finalizeCommunityComponents() {
-        donateButton.addActionListener(a -> openLink("https://ko-fi.com/DuncanRuns"));
+        donateButton.addActionListener(a -> OpenUtil.openLink("https://ko-fi.com/DuncanRuns", this));
 
         // Might be a good idea to put the invite link in some meta file on GitHub
 //        discordButton.addActionListener(a -> openLink("https://discord.gg/cXf86mXAWR"));
 //        githubButton.addActionListener(a -> openLink("https://github.com/DuncanRuns/Jingle"));
-    }
-
-    private void openLink(String url) {
-        try {
-            Desktop.getDesktop().browse(URI.create(url));
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Failed to open link. Open a browser and go to " + url, "Jingle: Failed to open link", JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     private void refreshPPFields(JTextField[] ppFields) {
@@ -871,7 +862,7 @@ public class JingleGUI extends JFrame {
         constraints.fill = GridBagConstraints.HORIZONTAL;
         buttons.forEach(pair -> {
             JButton button = new JButton(pair.getLeft());
-            button.addActionListener(a -> openLink(pair.getRight()));
+            button.addActionListener(a -> OpenUtil.openLink(pair.getRight(), button));
             this.communityButtonsPanel.add(button, constraints.clone());
         });
     }
