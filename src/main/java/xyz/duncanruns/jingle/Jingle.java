@@ -118,8 +118,15 @@ public final class Jingle {
             log(Level.INFO, "Java Major Version: " + majorJavaVersion.get());
         } else {
             log(Level.WARN, "Java Major Version unknown. Likely running on Java 8 or lower. Jingle may not work correctly.");
-            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(JingleGUI.get(), "You are running Jingle with Java 8 or lower. Things may not work as expected. Updating to Java 17 or higher is recommended.", "Jingle: Java 8 Warning", JOptionPane.ERROR_MESSAGE));
         }
+        if (majorJavaVersion.isPresent() && majorJavaVersion.get() > 8) return;
+        SwingUtilities.invokeLater(() -> {
+            JingleGUI gui = JingleGUI.get();
+            int ans = JOptionPane.showOptionDialog(gui, "You are running Jingle with Java 8 or lower. Things may not work as expected. Updating to Java 17 or higher is recommended.", "Jingle: Java 8 Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Download Adoptium Java 21", "Ignore"}, "Download Adoptium Java 21");
+            if (ans == 0) {
+                OpenUtil.openLink("https://adoptium.net/temurin/releases?version=21", gui);
+            }
+        });
     }
 
     private static void loadLegalMods() {
