@@ -7,7 +7,7 @@ Changes in v1.3.0:
       for other versions that have been missed, feel free to report them!
 - Fix auto borderless being applied too quickly (#11, #35 by qMaxXen)
 - Changed "Donation" tab to a "Community" tab, including some buttons that link to useful places related to Jingle (#34)
-- Improved java version detection, added a warning for Java <=8
+- Improved java version detection, added a warning for Java <=8 with a button to download Java 21 from Adoptium
 - Added a backup options file, to be used in case the main one is corrupted/missing.
 - Jingle will now save options when the GUI is unfocused.
 - Added a minimize key lua function, and a hotkey action for it in the `Extra Keys` script
