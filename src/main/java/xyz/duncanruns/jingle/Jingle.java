@@ -38,7 +38,8 @@ public final class Jingle {
     public static final Logger LOGGER = LogManager.getLogger("Jingle");
 
     private static boolean started = false;
-    private static boolean running = false;
+    private static volatile boolean running = false;
+    private static volatile boolean mainLoopEnded = false;
 
     private static long lastInstanceCheck = 0;
     private static boolean legalModCheckNeeded = false;
@@ -111,7 +112,12 @@ public final class Jingle {
 
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
 
-        mainLoop();
+        try {
+            mainLoop();
+        } finally {
+            mainLoopEnded = true;
+            running = false;
+        }
     }
 
     private static void checkJavaVersion() {
@@ -352,23 +358,49 @@ public final class Jingle {
         options.seenPaths.put(instancePath.toAbsolutePath().toString(), System.currentTimeMillis());
     }
 
-    public synchronized static void stop(boolean doSystemExit) {
+    public static void stop(boolean doSystemExit) {
         try {
             running = false;
-            assert options != null;
+            waitForMainLoopStopOrTerminate(5000);
             PluginEvents.STOP.runAll();
-            try {
-                OBSProjector.closeAnyMeasuringProjectors();
-            } catch (Throwable ignored) { // We really don't care if this fails lol
+            synchronized (Jingle.class) {
+                assert options != null;
+                try {
+                    OBSProjector.closeAnyMeasuringProjectors();
+                } catch (Throwable ignored) { // We really don't care if this fails lol
+                }
+                getMainInstance().ifPresent(Jingle::undoWindowTitle);
+                options.save();
+                log(Level.INFO, "Shutdown successful");
             }
-            getMainInstance().ifPresent(Jingle::undoWindowTitle);
-            options.save();
-            log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {
             logError("Failed to shutdown:", t);
             if (doSystemExit) System.exit(1);
         }
-        if (doSystemExit) System.exit(0);
+
+        if (!doSystemExit) return;
+        Thread finalShutdownThread = new Thread(() -> {
+            log(Level.DEBUG, "Started final shutdown thread. Waiting 20 seconds for JVM to exit...");
+            sleep(20000);
+            log(Level.ERROR, "JVM did not exit after 20 seconds! Force exiting!");
+            System.exit(1);
+        }, "final-shutdown");
+        finalShutdownThread.setDaemon(true);
+        finalShutdownThread.start();
+    }
+
+    private static void waitForMainLoopStopOrTerminate(@SuppressWarnings("SameParameterValue") final long timeout) {
+        log(Level.DEBUG, "Waiting up to 5 seconds for main loop to stop...");
+        long end = System.currentTimeMillis() + timeout;
+        while (!mainLoopEnded && System.currentTimeMillis() <= end) {
+            sleep(5);
+        }
+        if (!mainLoopEnded) {
+            log(Level.ERROR, "Main loop did not stop in time! Force exiting!");
+            System.exit(1);
+        } else {
+            log(Level.DEBUG, "Main loop stopped in time!");
+        }
     }
 
     public static synchronized void goBorderless() {
