@@ -109,6 +109,8 @@ public final class Jingle {
 
         checkJavaVersion();
 
+        log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
+
         mainLoop();
     }
 
