@@ -371,8 +371,9 @@ public final class Jingle {
                 }
                 getMainInstance().ifPresent(Jingle::undoWindowTitle);
                 options.save();
-                log(Level.INFO, "Shutdown successful");
             }
+            JingleAppLaunch.releaseLock();
+            log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {
             logError("Failed to shutdown:", t);
             if (doSystemExit) System.exit(1);
