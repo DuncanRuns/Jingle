@@ -77,7 +77,11 @@ public final class ResourceUtil {
         if (!folder.startsWith("/")) {
             folder = "/" + folder;
         }
-        return Arrays.stream(Objects.requireNonNull(new File(ResourceUtil.class.getResource(folder).getPath()).list())).collect(Collectors.toList());
+        URL resource = ResourceUtil.class.getResource(folder);
+        if (resource == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(Objects.requireNonNull(new File(resource.getPath()).list())).collect(Collectors.toList());
     }
 
     private static List<String> getResourcesFromFolderJAR(String folder) throws URISyntaxException, IOException {
