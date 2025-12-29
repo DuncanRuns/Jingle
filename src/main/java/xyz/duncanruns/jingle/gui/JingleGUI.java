@@ -110,6 +110,7 @@ public class JingleGUI extends JFrame {
         this.setIconImage(getLogo());
         this.noInstanceYet();
         JingleTrayIcon jingleTrayIcon = new JingleTrayIcon(this, getLogo());
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
