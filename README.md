@@ -15,11 +15,14 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
       right-clicked for customization of the behaviour.
     - `Package Submission Files` will automatically package worlds and logs needed for speedrun verification. This
       feature works best when used with SpeedRunIGT 14.0 or later!
+        - MCSR Fairplay also includes file packaging, this should be preferred in versions of the game supported by
+          MCSR Fairplay.
     - `Open Minecraft Folder` will open the `.minecraft` directory of the instance.
 - Only a s**ingle** instance can be J**ingle**'s focus at any time, it will automatically switch to whatever instance
-  you activate.
+  you focus.
 - "Quick Actions" is a section for buttons added by plugins to do actions that are frequent enough to be featured on the
   main tab in Jingle but not frequent enough to need a hotkey.
+    - Right-clicking quick action buttons may bring you to relevant configuration screens or plugin tabs.
 - `Clear Worlds from All Instances` will do the action of `Clear Worlds` but for all instances that Jingle has ever
   seen.
 - `Open Jingle Folder` will open the folder containing configurations, save data, scripts, plugins, and more files for
@@ -27,17 +30,18 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 
 ## Options
 
-- `Check for Updates` will enable checking for updates when launching Jingle, `Enable Pre-Release Updates` will make
-  change it to include development versions.
+- `Check for Updates` will enable checking for updates when launching Jingle, `Enable Pre-Release Updates` will change
+  it to include development versions.
 - `Minimize to Tray` will make it so hiding the Jingle window will also hide it on the task bar, putting it in the "
   tray" (the up arrow at the bottom left of the screen).
 - `Customize Borderless` will let you customize borderless behaviour.
-- `Auto Borderless` will automatically put detected instances into borderless when detected.
+- `Auto Borderless` will automatically put detected instances into borderless 3 seconds after it is detected.
 
 ### Log
 
 - "A log is a file or record containing information about activities in a computer system" -lenovo.com
 - Each log line can come from Jingle itself, a plugin, or a script.
+- `Upload Log` will upload the latest.log file to [MCLogs](https://mclogs.org/) and copy the URL to your clipboard.
 - Select `Show Debug Logs` to see even more spam. Unlike Julti, this will show debug logs from the past as well!
 
 ### Hotkeys
@@ -64,14 +68,14 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
     - `Customize` will show customization defined by a function in the script. It can be showing a whole menu of
       options, or asking a single question. Scripts are also able to not define any customization function, and the
       button will be greyed out.
-    - `More...` will show a menu of extra buttons defined by the script. As of v1.1.1, the default scripts do not have
+    - `More...` will show a menu of extra buttons defined by the script. As of v1.3.0, the default scripts do not have
       any extra buttons.
     - `Enable`/`Disable` is for default scripts packaged with Jingle, since you can't remove them from the folder, you
       can disable them from running by pressing `Disable`, or bring back their functionality by pressing `Enable`.
 - `Open Scripts Folder` will open the folder where .lua files will be placed. The folder also contains a `libs` folder
   containing all the functions a script can use.
 - `Reload Scripts` will reload all scripts and load new ones added to the scripts folder.
-- As of v1.1.1 there are 3 default scripts packaged with Jingle.
+- As of v1.3.0, there are 3 default scripts packaged with Jingle.
     - **Coop Mode**: This script will automatically open to lan when joining a world. It will always do this if the
       script is enabled. Press `Customize` to decide if you want cheats enabled (for /difficulty and /time set 0).
     - **Extra Keys**: This script adds 4 hotkeys actions, and some customization for 2 of them.
@@ -85,6 +89,7 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
         - `Clear Worlds` is exactly like pressing the button from the `Jingle` tab.
         - `Start Coping` will open to lan with cheats enabled and send "/gamemode spectator" to the in game chat. **This
           will only work if you have an "Open Chat" key set in game.**
+        - `Minimize Instance` will minimize the Minecraft window to the task bar. Works with borderless windows.
     - **Resizing**: This script adds 3 hotkey actions and customization for each.
         - `Eye Measuring` makes your Minecraft window really tall (and skinny to save on lag), this makes it so each
           pixel represents a tiny angle on screen, useful for eye measuring. This hotkey will also show and uncover the
@@ -110,14 +115,12 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
   anything else that can be added to a GUI).
 - There are 4 default plugins as of Jingle v1.1.1:
     - [`PaceMan Tracker`](https://github.com/PaceMan-MCSR/PaceMan-Tracker/) tracks RSG Any% speedruns
-      for [PaceMan.gg](https://paceman.gg/). Setup and further information
-      can be found through the website.
+      for [PaceMan.gg](https://paceman.gg/). Setup and further information can be found through the website.
     - [`Standard Switcher`](https://github.com/DuncanRuns/Jingle-Standard-Switcher) allows changing out the standard
-      settings file for the
-      game. [Standard Settings](https://github.com/KingContaria/StandardSettings/) is a mod that will reset your
-      settings every time a new world is created. As of the release of SpeedrunAPI, all options can be customized in
-      game, so no options will be shown within Jingle itself (Unlike Standard manager in Julti, which came before in
-      game customization existed).
+      settings file for the game. [Standard Settings](https://github.com/KingContaria/StandardSettings/) is a mod that
+      will reset your settings every time a new world is created. As of the release of SpeedrunAPI, all options can be
+      customized in game, so no options will be shown within Jingle itself (Unlike Standard manager in Julti, which came
+      before in game customization existed).
         - `Open Standard Switcher Folder` will open the folder containing created settings files. Deleting files should
           be done through this folder using Windows File Explorer.
         - `Create New File` will create a new standard settings file, copying the instance's current standard settings.
@@ -139,19 +142,26 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
   updated by Jingle whenever Jingle updates and opens, so you should use this file path so that it can stay updated, and
   not a different copy of the script.
 - The following options will only work after following the instructions and linking Jingle to OBS.
-    - `Enable Eye Meauring Projector` will automatically open an OBS projector for eye measuring, by default it should
-      appear black until using a hotkey action that activates it. See the information in the scripts section about the
-      eye measuring hotkey action.
-    - `Automatically Position Eye Measuring Projector` will set a good widely used position for the projector, disabling
-      this allows a specific custom position to be set.
-    - `Projector Name Pattern` allows changing the window title searched for by Jingle for the Eye Measuring Projector.
-      It is recommended to keep this on the default value `*- Jingle Mag`.
+    - `Enable OBS Eye Meauring Projector` will automatically open an OBS projector for eye measuring, by default it
+      should appear black until using a hotkey action that activates it. See the information in the scripts section
+      about the eye measuring hotkey action.
+    - `Automatically Position OBS Eye Measuring Projector` will set a good widely used position for the projector,
+      disabling this allows a specific custom position to be set.
+    - `OBS Projector Name Pattern` allows changing the window title searched for by Jingle for the Eye Measuring
+      Projector. It is recommended to keep this on the default value `*Jingle Mag`.
+    - `Hide Projector When Inactive` will move the projector off-screen when it is not needed. If you experience issues
+      with Minecraft minimizing/unfocusing when using the eye measuring projector, you can try disabling this option.
 - **The Eye Measuring Projector will not work if OBS is run in administrator mode while Jingle is not in administrator
   mode!**
 
-### Donate
+### Community
 
-- Should be a pretty self-explanatory tab. Thanks to everyone who has supported Julti and Jingle!
+- This tab contains a list of buttons that link to various community resources that have some relation to Jingle.
+    - Retrieves buttons and links from
+      [community.json](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/main/community.json).
+- Includes a support section, with a button that links to [my ko-fi](https://ko-fi.com/DuncanRuns), and shows 3 random
+  supporters from [supporters.txt](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/main/supporters.txt)
+  every 5 seconds.
 
 ## Jingle Launcher
 
