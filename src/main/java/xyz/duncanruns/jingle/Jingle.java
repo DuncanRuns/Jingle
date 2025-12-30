@@ -358,7 +358,7 @@ public final class Jingle {
         options.seenPaths.put(instancePath.toAbsolutePath().toString(), System.currentTimeMillis());
     }
 
-    public static void stop(boolean doSystemExit) {
+    public static void stop(boolean allowSystemExit) {
         try {
             running = false;
             waitForMainLoopStopOrTerminate(5000);
@@ -376,10 +376,10 @@ public final class Jingle {
             log(Level.INFO, "Shutdown successful");
         } catch (Throwable t) {
             logError("Failed to shutdown:", t);
-            if (doSystemExit) System.exit(1);
+            if (allowSystemExit) System.exit(1);
         }
 
-        if (!doSystemExit) return;
+        if (!allowSystemExit) return;
         Thread finalShutdownThread = new Thread(() -> {
             log(Level.DEBUG, "Started final shutdown thread. Waiting 20 seconds for JVM to exit...");
             sleep(20000);
