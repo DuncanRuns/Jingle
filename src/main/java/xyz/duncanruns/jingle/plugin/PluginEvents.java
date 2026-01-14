@@ -20,6 +20,9 @@ public final class PluginEvents {
     // Runs when a measuring projector is supposed to be shown/dumped
     public static RunnableEventType SHOW_PROJECTOR = new RunnableEventType();
     public static RunnableEventType DUMP_PROJECTOR = new RunnableEventType();
+    // Runs when a thin projector is supposed to be shown/dumped
+    public static RunnableEventType SHOW_THIN_PROJECTOR = new RunnableEventType();
+    public static RunnableEventType DUMP_THIN_PROJECTOR = new RunnableEventType();
 
     private PluginEvents() {
     }

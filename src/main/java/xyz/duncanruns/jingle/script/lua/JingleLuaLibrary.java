@@ -90,6 +90,17 @@ class JingleLuaLibrary extends LuaLibrary {
         Jingle.dumpMeasuringProjector();
     }
 
+    @LuaDocumentation(description = "Shows any thin projector")
+    public void showThinProjector() {
+        System.out.println("Showing Thin Projector");
+        Jingle.showThinProjector();
+    }
+
+    @LuaDocumentation(description = "Dumps any thin projector")
+    public void dumpThinProjector() {
+        Jingle.dumpThinProjector();
+    }
+
     @LuaDocumentation(description = "Gets the current Windows cursor speed.")
     public int getCursorSpeed() {
         return MouseUtil.getCurrentCursorSpeed();
