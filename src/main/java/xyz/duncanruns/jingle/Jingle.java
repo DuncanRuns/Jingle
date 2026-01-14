@@ -505,6 +505,14 @@ public final class Jingle {
         PluginEvents.DUMP_PROJECTOR.runAll();
     }
 
+    public static void showThinProjector() {
+        PluginEvents.SHOW_THIN_PROJECTOR.runAll();
+    }
+
+    public static void dumpThinProjector() {
+        PluginEvents.DUMP_THIN_PROJECTOR.runAll();
+    }
+
     public static Optional<Path> getLatestInstancePath() {
         return Optional.ofNullable(getMainInstance().map(i -> i.instancePath).orElse(
                 Jingle.options.seenPaths.entrySet().stream()

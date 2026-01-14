@@ -66,6 +66,8 @@ function run_thin_bt()
     end
     check_undo_dirties()
     if jingle.toggleResize(thin_bt_width, thin_bt_height) then
+        jingle.showThinProjector()
+        projector_dirty = true
         currently_resized = true
     else
         currently_resized = false
@@ -88,6 +90,7 @@ function run_eye_measuring()
     if not should_run() then
         return
     end
+    check_undo_dirties()
     if jingle.toggleResize(eye_measuring_width, eye_measuring_height) then
         jingle.showMeasuringProjector()
         projector_dirty = true
@@ -98,7 +101,6 @@ function run_eye_measuring()
         end
         currently_resized = true
     else
-        check_undo_dirties()
         currently_resized = false
     end
 end
