@@ -35,10 +35,8 @@ public class InstanceInfo {
      * @param hwnd the window pointer object of the Minecraft instance
      * @return the extracted instance info of the Minecraft instance
      */
-    public static InstanceInfo getInstanceInfoFromHwnd(WinDef.HWND hwnd) {
+    public static InstanceInfo getInstanceInfoFromHwnd(WinDef.HWND hwnd, int pid) {
         Jingle.log(Level.DEBUG, "InstanceInfo: getting info from " + hwnd);
-        // Get PID from hwnd
-        int pid = getPidFromHwnd(hwnd);
 
         /*
          * Get environment variables, or keep an empty map if it fails

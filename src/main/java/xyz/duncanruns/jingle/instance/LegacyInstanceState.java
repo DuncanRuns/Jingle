@@ -1,6 +1,6 @@
 package xyz.duncanruns.jingle.instance;
 
-public enum InstanceState {
+public enum LegacyInstanceState {
     WAITING,
     INWORLD,
     TITLE,

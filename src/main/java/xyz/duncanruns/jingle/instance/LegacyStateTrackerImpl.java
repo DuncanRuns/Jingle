@@ -2,7 +2,7 @@ package xyz.duncanruns.jingle.instance;
 
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
-import xyz.duncanruns.jingle.instance.InstanceState.InWorldState;
+import xyz.duncanruns.jingle.instance.LegacyInstanceState.InWorldState;
 import xyz.duncanruns.jingle.util.ExceptionUtil;
 import xyz.duncanruns.jingle.util.FileUtil;
 
@@ -13,28 +13,30 @@ import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 
-public class StateTracker {
+/**
+ * A LegacyStateTracker that uses output from the State Output mod.
+ */
+public class LegacyStateTrackerImpl implements LegacyStateTracker {
     private static final Pattern PROGRESS_PATTERN = Pattern.compile("^(?:previewing|generating),(?:0|[1-9]\\d?|100)$");
 
     private final Path path;
-    private final BiConsumer<InstanceState, InstanceState> onStateChange;
+    private final BiConsumer<LegacyInstanceState, LegacyInstanceState> onStateChange;
 
     private boolean fileExists = false;
     private long mTime = 0L;
 
-    private InstanceState instanceState = InstanceState.TITLE;
+    private LegacyInstanceState instanceState = LegacyInstanceState.TITLE;
     private InWorldState inWorldState = InWorldState.UNPAUSED;
-    private byte loadingPercent = 0;
 
     private final long[] lastStartArr;
     private final long[] lastOccurrenceArr;
 
 
-    public StateTracker(Path path, BiConsumer<InstanceState, InstanceState> onStateChange) {
+    public LegacyStateTrackerImpl(Path path, BiConsumer<LegacyInstanceState, LegacyInstanceState> onStateChange) {
         this.path = path;
         this.onStateChange = onStateChange;
 
-        int totalStates = InstanceState.values().length;
+        int totalStates = LegacyInstanceState.values().length;
         this.lastStartArr = new long[totalStates];
         this.lastOccurrenceArr = new long[totalStates];
         for (int i = 0; i < totalStates; i++) {
@@ -62,8 +64,7 @@ public class StateTracker {
         }
 
         // Store previous state
-        InstanceState previousState = this.instanceState;
-        byte previousPercentage = this.loadingPercent;
+        LegacyInstanceState previousState = this.instanceState;
 
         if (!this.trySetStatesFromFile()) {
             return;
@@ -96,25 +97,25 @@ public class StateTracker {
         // Check for literal states
         switch (out) {
             case "waiting":
-                this.setState(InstanceState.WAITING);
+                this.setState(LegacyInstanceState.WAITING);
                 return true;
             case "title":
-                this.setState(InstanceState.TITLE);
+                this.setState(LegacyInstanceState.TITLE);
                 return true;
             case "inworld,paused":
-                this.setState(InstanceState.INWORLD);
+                this.setState(LegacyInstanceState.INWORLD);
                 this.inWorldState = InWorldState.PAUSED;
                 return true;
             case "inworld,unpaused":
-                this.setState(InstanceState.INWORLD);
+                this.setState(LegacyInstanceState.INWORLD);
                 this.inWorldState = InWorldState.UNPAUSED;
                 return true;
             case "inworld,gamescreenopen":
-                this.setState(InstanceState.INWORLD);
+                this.setState(LegacyInstanceState.INWORLD);
                 this.inWorldState = InWorldState.GAMESCREENOPEN;
                 return true;
             case "wall":
-                this.setState(InstanceState.WALL);
+                this.setState(LegacyInstanceState.WALL);
                 return true;
         }
 
@@ -129,10 +130,10 @@ public class StateTracker {
 
         // Get previewing vs generating
         // Checking if the previous state was previewing fixes a bug where world preview states "generating" at around 98%
-        if (this.instanceState == InstanceState.PREVIEWING || args[0].equals("previewing")) {
-            this.setState(InstanceState.PREVIEWING);
+        if (this.instanceState == LegacyInstanceState.PREVIEWING || args[0].equals("previewing")) {
+            this.setState(LegacyInstanceState.PREVIEWING);
         } else if (args[0].equals("generating")) {
-            this.setState(InstanceState.GENERATING);
+            this.setState(LegacyInstanceState.GENERATING);
         } else {
             // This should never happen
             Jingle.log(Level.DEBUG, "Invalid state in " + this.path + ": \"" + out + "\"");
@@ -142,7 +143,7 @@ public class StateTracker {
         if (args.length > 1) {
             // Get loading percent
             try {
-                this.loadingPercent = Byte.parseByte(args[1]);
+                Byte.parseByte(args[1]);
             } catch (NumberFormatException e) {
                 // This should never happen
                 Jingle.log(Level.DEBUG, "Invalid state in " + this.path + ": \"" + out + "\"");
@@ -155,7 +156,7 @@ public class StateTracker {
         return true;
     }
 
-    private void setState(InstanceState state) {
+    private void setState(LegacyInstanceState state) {
         this.instanceState = state;
     }
 
@@ -169,27 +170,23 @@ public class StateTracker {
         }
     }
 
-    public long getLastOccurrenceOf(InstanceState state) {
+    public long getLastOccurrenceOf(LegacyInstanceState state) {
         if (this.instanceState.equals(state)) {
             return System.currentTimeMillis();
         }
         return this.lastOccurrenceArr[state.ordinal()];
     }
 
-    public long getLastStartOf(InstanceState state) {
+    public long getLastStartOf(LegacyInstanceState state) {
         return this.lastStartArr[state.ordinal()];
     }
 
-    public InstanceState getInstanceState() {
+    public LegacyInstanceState getInstanceState() {
         return this.instanceState;
     }
 
-    public boolean isCurrentState(InstanceState state) {
+    public boolean isCurrentState(LegacyInstanceState state) {
         return this.instanceState == state;
-    }
-
-    public byte getLoadingPercent() {
-        return this.loadingPercent;
     }
 
     public InWorldState getInWorldState() {
@@ -204,7 +201,6 @@ public class StateTracker {
                 ", mTime=" + this.mTime +
                 ", instanceState=" + this.instanceState +
                 ", inWorldState=" + this.inWorldState +
-                ", loadingPercent=" + this.loadingPercent +
                 ", lastStartArr=" + Arrays.toString(this.lastStartArr) +
                 ", lastOccurrenceArr=" + Arrays.toString(this.lastOccurrenceArr) +
                 '}';

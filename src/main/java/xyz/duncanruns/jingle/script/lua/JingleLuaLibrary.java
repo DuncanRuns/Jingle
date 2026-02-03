@@ -7,8 +7,8 @@ import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
-import xyz.duncanruns.jingle.instance.FabricModFolder;
-import xyz.duncanruns.jingle.instance.InstanceState;
+import xyz.duncanruns.jingle.instance.InstanceMods;
+import xyz.duncanruns.jingle.instance.LegacyInstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstance;
 import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.CustomizableManager;
@@ -215,22 +215,22 @@ class JingleLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Gets the current state of the instance. Returns \"WAITING\", \"INWORLD\", \"TITLE\", \"GENERATING\", \"WALL\", or \"PREVIEWING\".")
     @Nullable
     public String getInstanceState() {
-        return Jingle.getMainInstance().map(i -> i.stateTracker.getInstanceState().name()).orElse(null);
+        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getInstanceState().name()).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets a more detailed state of the \"INWORLD\" state. Returns \"UNPAUSED\", \"PAUSED\", or \"GAMESCREENOPEN\".")
     public String getInstanceInWorldState() {
-        return Jingle.getMainInstance().map(i -> i.stateTracker.getInWorldState().name()).orElse(null);
+        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getInWorldState().name()).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets the last time the specified state started. Input values are equal to return values given by jingle.getInstanceInWorldState().")
     public Long getLastStateStartOf(String stateName) {
-        return Jingle.getMainInstance().map(i -> i.stateTracker.getLastStartOf(InstanceState.valueOf(stateName))).orElse(null);
+        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getLastStartOf(LegacyInstanceState.valueOf(stateName))).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets the last time the specified state ended. Input values are equal to return values given by jingle.getInstanceInWorldState().")
     public Long getLastStateOccurrenceOf(String stateName) {
-        return Jingle.getMainInstance().map(i -> i.stateTracker.getLastOccurrenceOf(InstanceState.valueOf(stateName))).orElse(null);
+        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getLastOccurrenceOf(LegacyInstanceState.valueOf(stateName))).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets the current time in milliseconds.")
@@ -254,7 +254,7 @@ class JingleLuaLibrary extends LuaLibrary {
         LuaTable table = tableOf();
         Jingle.getMainInstance().ifPresent(instance -> {
             int i = 0;
-            for (FabricModFolder.FabricJarInfo jar : instance.fabricModFolder.getInfos()) {
+            for (InstanceMods.ModInfo jar : instance.mods.getInfos()) {
                 table.set(valueOf(++i), valueOf(jar.id));
             }
         });
@@ -264,12 +264,12 @@ class JingleLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Gets the version of a fabric mod installed on the instance.")
     @Nullable
     public String getFabricModVersion(String modid) {
-        return Jingle.getMainInstance().flatMap(instance -> instance.fabricModFolder.getInfos().stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst().map(i -> i.version)).orElse(null);
+        return Jingle.getMainInstance().flatMap(instance -> instance.mods.getInfos().stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst().map(i -> i.version)).orElse(null);
     }
 
     @LuaDocumentation(description = "Checks if the instance has a mod of the specified modid.")
     public boolean hasFabricMod(String modid) {
-        return Jingle.getMainInstance().flatMap(instance -> instance.fabricModFolder.getInfos().stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst()).isPresent();
+        return Jingle.getMainInstance().flatMap(instance -> instance.mods.getInfos().stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst()).isPresent();
     }
 
     @LuaDocumentation(description = "Compares two version strings. Examples:\njinglecompareVersionStrings(\"1.0.0\", \"1.0.1\") -> -1\njinglecompareVersionStrings(\"1.1.0\", \"1.0.1\") -> 1\njinglecompareVersionStrings(\"1.1.0\", \"1.1.0\") -> 0\njinglecompareVersionStrings(\"mario\", \"1.1.0\", 100) -> 100")

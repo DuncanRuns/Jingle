@@ -1,7 +1,7 @@
 package xyz.duncanruns.jingle.obs;
 
 import xyz.duncanruns.jingle.Jingle;
-import xyz.duncanruns.jingle.instance.InstanceState;
+import xyz.duncanruns.jingle.instance.LegacyInstanceState;
 import xyz.duncanruns.jingle.util.FileUtil;
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ public final class OBSLink {
     private static String createOutput() {
         long requestProjectorTime = OBSProjector.getRequestProjectorTime();
         return String.join("|",
-                Jingle.getMainInstance().map(i -> i.stateTracker.isCurrentState(InstanceState.WALL)).orElse(false) ? "W" : "P", // 1: Wall vs Playing ('W' vs 'P')
+                Jingle.getMainInstance().map(i -> i.legacyStateTracker.isCurrentState(LegacyInstanceState.WALL)).orElse(false) ? "W" : "P", // 1: Wall vs Playing ('W' vs 'P')
                 requestProjectorTime == -1L ? "N" : "Y" + requestProjectorTime,  // 2: Should open projector ('N' for no, any other arbitrary string for requesting)
                 OBSProjector.shouldCoverMag() ? "Y" : "N" // 3: Should cover projector ('Y' for yes, any other arbitrary string for no)
         );

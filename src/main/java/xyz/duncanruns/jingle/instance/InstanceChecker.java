@@ -1,13 +1,14 @@
 package xyz.duncanruns.jingle.instance;
 
+import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
+import xyz.duncanruns.jingle.util.PidUtil;
 import xyz.duncanruns.jingle.util.WindowTitleUtil;
 import xyz.duncanruns.jingle.win32.User32;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The instance checker will run checks for Minecraft instances every second while Jingle has missing instances.
@@ -17,8 +18,7 @@ import java.util.Set;
 public final class InstanceChecker {
 
     private static final Set<OpenedInstanceInfo> OPENED_INSTANCE_INFOS = new HashSet<>();
-    private static Set<HWND> lastCheckedWindows = new HashSet<>();
-
+    private static Map<HWND, Integer> lastCheckedWindows = new HashMap<>();
 
     private InstanceChecker() {
     }
@@ -32,13 +32,29 @@ public final class InstanceChecker {
      * <li>Otherwise 0.5ms-1.2ms</li>
      */
     private static void runChecks() {
-        Set<HWND> checkedWindows = new HashSet<>();
+        Map<HWND, Integer> checkedWindows = new HashMap<>();
+        List<Integer> newPids = HermesInstanceDepot.get().getNewPids();
+        // Recheck windows that we now have hermes info for
+        lastCheckedWindows.entrySet().removeIf(e -> newPids.contains(e.getValue()));
 
         User32.INSTANCE.EnumWindows((hWnd, arg) -> {
             // Add the window to checked windows
-            checkedWindows.add(hWnd);
+            checkedWindows.put(hWnd, -1);
             // Return if the window was in the last checked windows
-            if (lastCheckedWindows.contains(hWnd)) {
+            if (lastCheckedWindows.containsKey(hWnd)) {
+                return true;
+            }
+            int pid;
+            try {
+                pid = PidUtil.getPidFromHwnd(hWnd);
+            } catch (Exception e) {
+                // Not allowed?
+                return true;
+            }
+            checkedWindows.put(hWnd, pid);
+            Optional<JsonObject> hermesInfo = HermesInstanceDepot.get().getInstance(pid);
+            if (hermesInfo.isPresent()) {
+                OPENED_INSTANCE_INFOS.add(OpenedInstanceInfo.getInstanceInfoFromHermes(hermesInfo.get(), hWnd, pid));
                 return true;
             }
             // Get the title, return if it is not a minecraft title
@@ -48,7 +64,7 @@ public final class InstanceChecker {
             }
             Jingle.log(Level.DEBUG, "InstanceChecker: Minecraft title matched: " + title);
             // Get instance info, return if failing to get the path
-            InstanceInfo instanceInfo = InstanceInfo.getInstanceInfoFromHwnd(hWnd);
+            InstanceInfo instanceInfo = InstanceInfo.getInstanceInfoFromHwnd(hWnd, pid);
             if (instanceInfo == null) {
                 Jingle.log(Level.DEBUG, "InstanceChecker: FoundInstanceInfo invalid!");
                 return true;
@@ -56,7 +72,7 @@ public final class InstanceChecker {
             Jingle.log(Level.DEBUG, "InstanceChecker: FoundInstanceInfo found.");
             // Create the instance object
             // Add the minecraft instance to the set of opened instances
-            OPENED_INSTANCE_INFOS.add(new OpenedInstanceInfo(instanceInfo, hWnd));
+            OPENED_INSTANCE_INFOS.add(new OpenedInstanceInfo(instanceInfo, hWnd, pid));
             Jingle.log(Level.DEBUG, "InstanceChecker: Added instance to opened instances.");
 
             return true;

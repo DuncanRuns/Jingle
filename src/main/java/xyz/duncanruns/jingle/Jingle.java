@@ -3,6 +3,7 @@ package xyz.duncanruns.jingle;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef;
+import me.duncanruns.kerykeion.Kerykeion;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,9 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static xyz.duncanruns.jingle.util.SleepUtil.sleep;
@@ -37,9 +41,10 @@ public final class Jingle {
     public static final String VERSION = Optional.ofNullable(Jingle.class.getPackage().getImplementationVersion()).orElse("DEV");
     public static final Logger LOGGER = LogManager.getLogger("Jingle");
 
+    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+
     private static boolean started = false;
     private static volatile boolean running = false;
-    private static volatile boolean mainLoopEnded = false;
 
     private static long lastInstanceCheck = 0;
     private static boolean legalModCheckNeeded = false;
@@ -112,12 +117,10 @@ public final class Jingle {
 
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
 
-        try {
-            mainLoop();
-        } finally {
-            mainLoopEnded = true;
-            running = false;
-        }
+        Kerykeion.addListener(HermesInstanceDepot.get(), 100, EXECUTOR);
+        HermesFakeStateTracker.registerKerykeionListener(EXECUTOR);
+        Kerykeion.start(true);
+        EXECUTOR.scheduleWithFixedDelay(Jingle::tryTick, 0, 1, TimeUnit.MILLISECONDS);
     }
 
     private static void checkJavaVersion() {
@@ -192,13 +195,6 @@ public final class Jingle {
         }
     }
 
-    private static void mainLoop() {
-        while (running) {
-            sleep(1);
-            tryTick();
-        }
-    }
-
     private static void tryTick() {
         try {
             tick();
@@ -226,7 +222,7 @@ public final class Jingle {
                 }
             });
         }
-        getMainInstance().ifPresent(i -> i.stateTracker.tryUpdate());
+        getMainInstance().map(i -> i.legacyStateTracker).ifPresent(LegacyStateTracker::tryUpdate);
         OBSProjector.tick();
         OBSLink.tick();
         if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
@@ -252,7 +248,8 @@ public final class Jingle {
 
     private static void checkLegalMods() {
         assert getMainInstance().isPresent();
-        for (FabricModFolder.FabricJarInfo jar : getMainInstance().get().fabricModFolder.getInfos()) {
+        for (InstanceMods.ModInfo jar : getMainInstance().get().mods.getInfos()) {
+            if (!jar.fromModsFolder) continue;
             if (!LegalModsUtil.isLegalMod(jar.id)) {
                 Jingle.log(Level.WARN, "Warning: Mod " + jar.name + " is not a legal mod!");
             }
@@ -328,9 +325,9 @@ public final class Jingle {
         openedToLan = false;
     }
 
-    private static void onInstanceStateChange(InstanceState previousState, InstanceState newState) {
-        boolean previouslyInWorld = previousState.equals(InstanceState.INWORLD);
-        boolean currentlyInWorld = newState.equals(InstanceState.INWORLD);
+    private static void onInstanceStateChange(LegacyInstanceState previousState, LegacyInstanceState newState) {
+        boolean previouslyInWorld = previousState.equals(LegacyInstanceState.INWORLD);
+        boolean currentlyInWorld = newState.equals(LegacyInstanceState.INWORLD);
         if (previouslyInWorld && !currentlyInWorld) {
             onExitWorld();
         } else if (!previouslyInWorld && currentlyInWorld) {
@@ -359,8 +356,10 @@ public final class Jingle {
     }
 
     public static void stop(boolean allowSystemExit) {
+        Kerykeion.stop();
         try {
             running = false;
+            EXECUTOR.shutdown();
             waitForMainLoopStopOrTerminate(5000);
             PluginEvents.STOP.runAll();
             synchronized (Jingle.class) {
@@ -392,15 +391,14 @@ public final class Jingle {
 
     private static void waitForMainLoopStopOrTerminate(@SuppressWarnings("SameParameterValue") final long timeout) {
         log(Level.DEBUG, "Waiting up to 5 seconds for main loop to stop...");
-        long end = System.currentTimeMillis() + timeout;
-        while (!mainLoopEnded && System.currentTimeMillis() <= end) {
-            sleep(5);
-        }
-        if (!mainLoopEnded) {
-            log(Level.ERROR, "Main loop did not stop in time! Force exiting!");
+        try {
+            if (!EXECUTOR.awaitTermination(timeout, TimeUnit.MILLISECONDS)) {
+                log(Level.ERROR, "Main loop did not stop in time! Force exiting!");
+                System.exit(1);
+            }
+        } catch (InterruptedException e) {
+            log(Level.ERROR, "Main loop wait was interrupted! Force exiting!");
             System.exit(1);
-        } else {
-            log(Level.DEBUG, "Main loop stopped in time!");
         }
     }
 
@@ -453,14 +451,14 @@ public final class Jingle {
 
         if (openedToLan) {
             return;
-        } else {
-            if (!getMainInstance().get().stateTracker.isCurrentState(InstanceState.INWORLD)) {
-                return;
-            } else if (WindowTitleUtil.getHwndTitle(hwnd).endsWith("(LAN)")) {
-                openedToLan = true;
-                return;
-            }
         }
+        if (!getMainInstance().get().legacyStateTracker.isCurrentState(LegacyInstanceState.INWORLD)) {
+            return;
+        } else if (WindowTitleUtil.getHwndTitle(hwnd).endsWith("(LAN)")) {
+            openedToLan = true;
+            return;
+        }
+
 
         KeyPresser keyPresser = getMainInstance().get().keyPresser;
         keyPresser.releaseAllModifiers();
