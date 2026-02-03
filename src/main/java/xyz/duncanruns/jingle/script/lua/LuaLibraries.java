@@ -11,12 +11,15 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
 public final class LuaLibraries {
-    private static final List<BiFunction<ScriptFile, Globals, LuaLibrary>> LIBRARY_PROVIDERS = new ArrayList<>(Arrays.asList(JingleLuaLibrary::new, SRIGTEventLuaLibrary::new));
+    private static final List<BiFunction<ScriptFile, Globals, LuaLibrary>> LIBRARY_PROVIDERS;
+    static {
+        LIBRARY_PROVIDERS = new ArrayList<>();
+        LIBRARY_PROVIDERS.add(JingleLuaLibrary::new);
+    }
 
     private LuaLibraries() {
     }
