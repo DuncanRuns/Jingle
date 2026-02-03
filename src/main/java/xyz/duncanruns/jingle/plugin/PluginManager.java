@@ -34,6 +34,7 @@ public final class PluginManager {
     private PluginManager() {
     }
 
+    @SuppressWarnings("unused")
     public static Path getPluginsPath() {
         return PLUGINS_PATH;
     }

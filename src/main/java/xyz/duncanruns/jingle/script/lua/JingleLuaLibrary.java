@@ -8,9 +8,7 @@ import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.InstanceMods;
-import xyz.duncanruns.jingle.instance.LegacyInstanceState;
 import xyz.duncanruns.jingle.instance.OpenedInstance;
-import xyz.duncanruns.jingle.resizing.Resizing;
 import xyz.duncanruns.jingle.script.CustomizableManager;
 import xyz.duncanruns.jingle.script.ScriptFile;
 import xyz.duncanruns.jingle.script.ScriptStuff;
@@ -65,29 +63,9 @@ class JingleLuaLibrary extends LuaLibrary {
         ScriptStuff.addExtraFunction(this.script, functionName, wrapFunction(extraFunction));
     }
 
-    @LuaDocumentation(description = "Runs a resize toggle of the given width and height. Returns true if the size is applied, and returns false if the size is undone.")
-    public boolean toggleResize(int width, int height) {
-        return Resizing.toggleResize(width, height);
-    }
-
-    @LuaDocumentation(description = "Undoes any resizing applied by jingle.toggleResize().")
-    public void undoResize() {
-        Resizing.undoResize();
-    }
-
     @LuaDocumentation(description = "Returns true if the instance is active, otherwise false.")
     public boolean isInstanceActive() {
         return Jingle.isInstanceActive();
-    }
-
-    @LuaDocumentation(description = "Sets the any available eye measuring projectors to be directly behind the instance, bringing it above everything except for the game itself.")
-    public void showMeasuringProjector() {
-        Jingle.showMeasuringProjector();
-    }
-
-    @LuaDocumentation(description = "Dumps the OBS eye measuring projector to the bottom of the window Z order.")
-    public void dumpMeasuringProjector() {
-        Jingle.dumpMeasuringProjector();
     }
 
     @LuaDocumentation(description = "Gets the current Windows cursor speed.")
@@ -210,27 +188,6 @@ class JingleLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Sleeps for the specified amount of milliseconds.")
     public void sleep(long millis) {
         SleepUtil.sleep(millis);
-    }
-
-    @LuaDocumentation(description = "Gets the current state of the instance. Returns \"WAITING\", \"INWORLD\", \"TITLE\", \"GENERATING\", \"WALL\", or \"PREVIEWING\".")
-    @Nullable
-    public String getInstanceState() {
-        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getInstanceState().name()).orElse(null);
-    }
-
-    @LuaDocumentation(description = "Gets a more detailed state of the \"INWORLD\" state. Returns \"UNPAUSED\", \"PAUSED\", or \"GAMESCREENOPEN\".")
-    public String getInstanceInWorldState() {
-        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getInWorldState().name()).orElse(null);
-    }
-
-    @LuaDocumentation(description = "Gets the last time the specified state started. Input values are equal to return values given by jingle.getInstanceInWorldState().")
-    public Long getLastStateStartOf(String stateName) {
-        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getLastStartOf(LegacyInstanceState.valueOf(stateName))).orElse(null);
-    }
-
-    @LuaDocumentation(description = "Gets the last time the specified state ended. Input values are equal to return values given by jingle.getInstanceInWorldState().")
-    public Long getLastStateOccurrenceOf(String stateName) {
-        return Jingle.getMainInstance().map(i -> i.legacyStateTracker.getLastOccurrenceOf(LegacyInstanceState.valueOf(stateName))).orElse(null);
     }
 
     @LuaDocumentation(description = "Gets the current time in milliseconds.")

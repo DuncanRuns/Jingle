@@ -19,7 +19,6 @@ public final class ScriptStuff {
     public static final RunnableEventType START_TICK = new RunnableEventType();
     public static final RunnableEventType END_TICK = new RunnableEventType();
     public static final RunnableEventType MAIN_INSTANCE_CHANGED = new RunnableEventType();
-    public static final RunnableEventType STATE_CHANGE = new RunnableEventType();
     public static final RunnableEventType EXIT_WORLD = new RunnableEventType();
     public static final RunnableEventType ENTER_WORLD = new RunnableEventType();
 
@@ -29,7 +28,6 @@ public final class ScriptStuff {
         SCRIPT_EVENTS.put("START_TICK", START_TICK);
         SCRIPT_EVENTS.put("END_TICK", END_TICK);
         SCRIPT_EVENTS.put("MAIN_INSTANCE_CHANGED", MAIN_INSTANCE_CHANGED);
-        SCRIPT_EVENTS.put("STATE_CHANGE", STATE_CHANGE);
         SCRIPT_EVENTS.put("EXIT_WORLD", EXIT_WORLD);
         SCRIPT_EVENTS.put("ENTER_WORLD", ENTER_WORLD);
     }

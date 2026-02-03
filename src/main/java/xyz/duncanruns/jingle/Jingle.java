@@ -11,8 +11,6 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.*;
-import xyz.duncanruns.jingle.obs.OBSLink;
-import xyz.duncanruns.jingle.obs.OBSProjector;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.*;
@@ -118,7 +116,6 @@ public final class Jingle {
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
 
         Kerykeion.addListener(HermesInstanceDepot.get(), 100, EXECUTOR);
-        HermesFakeStateTracker.registerKerykeionListener(EXECUTOR);
         Kerykeion.start(true);
         EXECUTOR.scheduleWithFixedDelay(Jingle::tryTick, 0, 1, TimeUnit.MILLISECONDS);
     }
@@ -222,9 +219,6 @@ public final class Jingle {
                 }
             });
         }
-        getMainInstance().map(i -> i.legacyStateTracker).ifPresent(LegacyStateTracker::tryUpdate);
-        OBSProjector.tick();
-        OBSLink.tick();
         if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
             goBorderless();
             borderlessScheduledTime = -1;
@@ -297,7 +291,7 @@ public final class Jingle {
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
         undoWindowTitle(mainInstance);
         if (mainInstance == instance) return;
-        mainInstance = instance == null ? null : new OpenedInstance(instance, Jingle::onInstanceStateChange);
+        mainInstance = instance == null ? null : new OpenedInstance(instance);
         legalModCheckNeeded = instance != null;
         resetStates();
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
@@ -323,18 +317,6 @@ public final class Jingle {
 
     private static void resetStates() {
         openedToLan = false;
-    }
-
-    private static void onInstanceStateChange(LegacyInstanceState previousState, LegacyInstanceState newState) {
-        boolean previouslyInWorld = previousState.equals(LegacyInstanceState.INWORLD);
-        boolean currentlyInWorld = newState.equals(LegacyInstanceState.INWORLD);
-        if (previouslyInWorld && !currentlyInWorld) {
-            onExitWorld();
-        } else if (!previouslyInWorld && currentlyInWorld) {
-            onEnterWorld();
-        }
-        PluginEvents.STATE_CHANGE.runAll();
-        ScriptStuff.STATE_CHANGE.runAll();
     }
 
     private static void onExitWorld() {
@@ -364,10 +346,6 @@ public final class Jingle {
             PluginEvents.STOP.runAll();
             synchronized (Jingle.class) {
                 assert options != null;
-                try {
-                    OBSProjector.closeAnyMeasuringProjectors();
-                } catch (Throwable ignored) { // We really don't care if this fails lol
-                }
                 getMainInstance().ifPresent(Jingle::undoWindowTitle);
                 options.save();
             }
@@ -445,20 +423,8 @@ public final class Jingle {
     }
 
     public static void openToLan(boolean alreadyPaused, boolean enableCheats) {
-        if (!getMainInstance().isPresent()) return;
-
-        WinDef.HWND hwnd = getMainInstance().get().hwnd;
-
-        if (openedToLan) {
-            return;
-        }
-        if (!getMainInstance().get().legacyStateTracker.isCurrentState(LegacyInstanceState.INWORLD)) {
-            return;
-        } else if (WindowTitleUtil.getHwndTitle(hwnd).endsWith("(LAN)")) {
-            openedToLan = true;
-            return;
-        }
-
+        if (true) return;
+        // TODO rewrite prevention from multiple open to lan
 
         KeyPresser keyPresser = getMainInstance().get().keyPresser;
         keyPresser.releaseAllModifiers();
@@ -491,16 +457,6 @@ public final class Jingle {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void showMeasuringProjector() {
-        OBSProjector.bringOBSProjectorToTop();
-        PluginEvents.SHOW_PROJECTOR.runAll();
-    }
-
-    public static void dumpMeasuringProjector() {
-        OBSProjector.dumpOBSProjector();
-        PluginEvents.DUMP_PROJECTOR.runAll();
     }
 
     public static Optional<Path> getLatestInstancePath() {

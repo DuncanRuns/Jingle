@@ -8,10 +8,12 @@ public final class PluginHotkeys {
     private PluginHotkeys() {
     }
 
+    @SuppressWarnings("unused")
     public static void addHotkeyAction(String name, Runnable runnable) {
         HOTKEYS_ACTIONS.put(name, runnable);
     }
 
+    @SuppressWarnings("unused")
     public static void removeHotkeyAction(String name) {
         HOTKEYS_ACTIONS.remove(name);
     }
