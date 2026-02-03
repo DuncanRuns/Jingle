@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
-    private static final int CURRENT_OPTIONS_VERSION = 5;
+    private static final int CURRENT_OPTIONS_VERSION = 6;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
     public static final Path OPTIONS_BACKUP_PATH = Jingle.FOLDER.resolve("options.json.backup").toAbsolutePath();
     public static final JingleOptions DEFAULTS = createNew();
@@ -56,14 +56,6 @@ public class JingleOptions {
     public boolean minimizeToTray = false;
     public int[] lastPosition = new int[]{50, 50};
     public int[] lastSize = new int[]{600, 400};
-
-    // OBS Projector
-    public boolean projectorEnabled;
-    // null for auto, [x,y,w,h] for custom
-    @Nullable
-    public int[] projectorPosition = null;
-    public String projectorWindowPattern = "*Jingle Mag";
-    public boolean hideProjector = true;
 
     @Deprecated
     @LoadOnly
@@ -111,11 +103,6 @@ public class JingleOptions {
         }
         if (this.disabledDefaultScripts != null) {
             this.disabledScripts.addAll(this.disabledDefaultScripts);
-        }
-        if (this.optionsVersion < 5) {
-            if (this.projectorWindowPattern.equals("* Jingle Mag") || this.projectorWindowPattern.equals("*- Jingle Mag")) {
-                this.projectorWindowPattern = DEFAULTS.projectorWindowPattern;
-            }
         }
 
         this.optionsVersion = DEFAULTS.optionsVersion;
