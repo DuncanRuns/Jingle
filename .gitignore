@@ -119,7 +119,6 @@ Temporary Items
 
 # I should probably make actual tests but for now I just exclude my janky stuff
 src/test/
-OBS Link/obslua.lua
 *.pyc
 update-meta.py
 Launcher/.zig*
