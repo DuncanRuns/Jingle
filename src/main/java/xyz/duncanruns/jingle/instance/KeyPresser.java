@@ -4,6 +4,7 @@ import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import xyz.duncanruns.jingle.util.KeyboardUtil;
 
+@SuppressWarnings("unused")
 public class KeyPresser {
     private final HWND hwnd;
 
