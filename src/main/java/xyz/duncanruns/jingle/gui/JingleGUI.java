@@ -446,17 +446,6 @@ public class JingleGUI extends JFrame {
 //        githubButton.addActionListener(a -> openLink("https://github.com/DuncanRuns/Jingle"));
     }
 
-    private void refreshPPFields(JTextField[] ppFields) {
-        boolean projectorEnabled = Jingle.options.projectorEnabled;
-        this.autoProjectorPosBox.setEnabled(projectorEnabled);
-        boolean positionIsCustomizable = projectorEnabled && !(Jingle.options.projectorPosition == null);
-        for (JTextField ppField : ppFields) {
-            ppField.setEnabled(positionIsCustomizable);
-            ppField.setEditable(positionIsCustomizable);
-        }
-        this.projPosApplyButton.setEnabled(positionIsCustomizable);
-    }
-
     private void jumpToEndOfLog() {
         this.logTextArea.setCaretPosition(this.logTextArea.getDocument().getLength());
     }
