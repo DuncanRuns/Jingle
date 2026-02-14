@@ -1,5 +1,7 @@
 should_run = -1
 
+-- TODO: replace ENTER_WORLD and stuff
+
 function on_world_enter()
     should_run = jingle.getCurrentTime() + 50
 end

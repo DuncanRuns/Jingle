@@ -1,3 +1,5 @@
+-- TODO: replace ENTER_WORLD and stuff
+
 function run_clear_worlds()
     if not jingle.isInstanceActive() then
         return

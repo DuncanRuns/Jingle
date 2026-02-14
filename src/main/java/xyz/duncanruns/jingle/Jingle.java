@@ -175,13 +175,6 @@ public final class Jingle {
     }
 
     private static void generateResources() {
-        try {
-            ResourceUtil.copyResourceToFile("/jingle-obs-link.lua", FOLDER.resolve("jingle-obs-link.lua"));
-            Jingle.log(Level.INFO, "Regenerated obs link script");
-        } catch (IOException e) {
-            Jingle.logError("Failed to write Script!", e);
-            Jingle.log(Level.ERROR, "You can download the script manually from https://github.com/DuncanRuns/Jingle/blob/main/src/main/resources/jingle-obs-link.lua");
-        }
         Path overlayPngPath = FOLDER.resolve("measuring_overlay.png");
         if (Files.exists(overlayPngPath)) return;
         try {
@@ -317,18 +310,6 @@ public final class Jingle {
 
     private static void resetStates() {
         openedToLan = false;
-    }
-
-    private static void onExitWorld() {
-        PluginEvents.EXIT_WORLD.runAll();
-        ScriptStuff.EXIT_WORLD.runAll();
-
-        openedToLan = false;
-    }
-
-    private static void onEnterWorld() {
-        PluginEvents.ENTER_WORLD.runAll();
-        ScriptStuff.ENTER_WORLD.runAll();
     }
 
     private static void seeInstancePath(Path instancePath) {
