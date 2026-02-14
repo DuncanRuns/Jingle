@@ -122,3 +122,4 @@ src/test/
 *.pyc
 update-meta.py
 Launcher/.zig*
+/src/main/resources/defaultscripts/libs
