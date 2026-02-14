@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ResourceUtil {
     private ResourceUtil() {
@@ -98,8 +99,9 @@ public final class ResourceUtil {
 
         // file list JAR
         URI uri = URI.create("jar:" + jarPath);
-        try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-            result = Files.list(fs.getPath(folder))
+        try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
+             Stream<Path> list = Files.list(fs.getPath(folder))) {
+            result = list
                     .map(path -> path.getFileName().toString())
                     .collect(Collectors.toList());
         }

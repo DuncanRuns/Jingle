@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 public final class ScriptStuff {
     private static final Map<String, Runnable> HOTKEYS_ACTIONS = new HashMap<>(); // Example: "test.lua:run" -> (runHotkey, cancellingFunction)
@@ -82,8 +83,8 @@ public final class ScriptStuff {
                 return;
             }
         }
-        try {
-            Files.list(scriptsFolder).filter(path -> path.getFileName().toString().endsWith(".lua")).forEach(path -> {
+        try (Stream<Path> list = Files.list(scriptsFolder)) {
+            list.filter(path -> path.getFileName().toString().endsWith(".lua")).forEach(path -> {
                 try {
                     ScriptFile script = ScriptFile.loadFile(path);
                     if (!Jingle.options.disabledScripts.contains(script.name)) {

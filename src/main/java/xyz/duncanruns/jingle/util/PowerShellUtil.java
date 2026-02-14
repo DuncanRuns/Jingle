@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class PowerShellUtil {
     private static PowerShell POWER_SHELL = null;
@@ -20,8 +21,8 @@ public final class PowerShellUtil {
             return POWER_SHELL;
         }
         Optional<Path> powerShellExecutable = Optional.empty();
-        try {
-            powerShellExecutable = Files.walk(Paths.get("C:\\Windows\\System32\\WindowsPowerShell")).filter(path -> path.getFileName().toString().equals("powershell.exe")).findAny();
+        try (Stream<Path> walk = Files.walk(Paths.get("C:\\Windows\\System32\\WindowsPowerShell"))) {
+            powerShellExecutable = walk.filter(path -> path.getFileName().toString().equals("powershell.exe")).findAny();
         } catch (IOException ignored) {
         }
         POWER_SHELL = powerShellExecutable.isPresent() ? PowerShell.open(powerShellExecutable.get().toString()) : PowerShell.open();
