@@ -47,7 +47,7 @@ local function on_hermes_state_change()
 
     screen_open = hermes_state["screen"]["class"] ~= nil
     screen_is_pause = hermes_state["screen"]["is_pause"]
-    opened_to_lan = hermes_state["opened_to_lan"] == true
+    opened_to_lan = hermes_state["open_to_lan"] == true
 end
 
 local function get_reset_key()
@@ -113,18 +113,16 @@ local function run_start_coping()
     if not jingle.isInstanceActive() then
         return
     end
-    if opened_to_lan then
-        return
-    end
     if not world_loaded then
         return
     end
     if screen_open then
         return
     end
-    jingle.openToLan(false, true)
-    jingle.sendChatMessage("/gamemode spectator")
-    opened_to_lan = true
+    if not opened_to_lan then
+        jingle.openToLan(false, true)
+    end
+    jingle.sendChatMessage("/gamemode spectator") -- might fail if opened to lan with cheats disabled
 end
 
 local function run_minimize()
