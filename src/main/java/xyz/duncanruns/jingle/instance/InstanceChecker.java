@@ -1,14 +1,10 @@
 package xyz.duncanruns.jingle.instance;
 
-import com.google.gson.JsonObject;
-import com.sun.jna.platform.win32.WinDef.HWND;
-import org.apache.logging.log4j.Level;
-import xyz.duncanruns.jingle.Jingle;
-import xyz.duncanruns.jingle.util.PidUtil;
-import xyz.duncanruns.jingle.util.WindowTitleUtil;
-import xyz.duncanruns.jingle.win32.User32;
+import com.sun.jna.platform.win32.PsapiUtil;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The instance checker will run checks for Minecraft instances every second while Jingle has missing instances.
@@ -18,7 +14,7 @@ import java.util.*;
 public final class InstanceChecker {
 
     private static final Set<OpenedInstanceInfo> OPENED_INSTANCE_INFOS = new HashSet<>();
-    private static Map<HWND, Integer> lastCheckedWindows = new HashMap<>();
+    private static Set<Integer> lastCheckedPids = new HashSet<>();
 
     private InstanceChecker() {
     }
@@ -32,56 +28,28 @@ public final class InstanceChecker {
      * <li>Otherwise 0.5ms-1.2ms</li>
      */
     private static void runChecks() {
-        Map<HWND, Integer> checkedWindows = new HashMap<>();
+        Set<Integer> checkedPids = new HashSet<>();
         List<Integer> newPids = HermesInstanceDepot.get().getNewPids();
         // Recheck windows that we now have hermes info for
-        lastCheckedWindows.entrySet().removeIf(e -> newPids.contains(e.getValue()));
+        newPids.forEach(lastCheckedPids::remove);
 
-        User32.INSTANCE.EnumWindows((hWnd, arg) -> {
-            // Add the window to checked windows
-            checkedWindows.put(hWnd, -1);
-            // Return if the window was in the last checked windows
-            if (lastCheckedWindows.containsKey(hWnd)) {
-                return true;
+        for (int pid : PsapiUtil.enumProcesses()) {
+            if (lastCheckedPids.contains(pid)) {
+                continue;
             }
-            int pid;
-            try {
-                pid = PidUtil.getPidFromHwnd(hWnd);
-            } catch (Exception e) {
-                // Not allowed?
-                return true;
-            }
-            checkedWindows.put(hWnd, pid);
-            Optional<JsonObject> hermesInfo = HermesInstanceDepot.get().getInstance(pid);
-            if (hermesInfo.isPresent()) {
-                OPENED_INSTANCE_INFOS.add(OpenedInstanceInfo.getInstanceInfoFromHermes(hermesInfo.get(), hWnd, pid));
-                return true;
-            }
-            // Get the title, return if it is not a minecraft title
-            String title = WindowTitleUtil.getHwndTitle(hWnd);
-            if (!WindowTitleUtil.matchesMinecraft(title)) {
-                return true;
-            }
-            Jingle.log(Level.DEBUG, "InstanceChecker: Minecraft title matched: " + title);
-            // Get instance info, return if failing to get the path
-            InstanceInfo instanceInfo = InstanceInfo.getInstanceInfoFromHwnd(hWnd, pid);
-            if (instanceInfo == null) {
-                Jingle.log(Level.DEBUG, "InstanceChecker: FoundInstanceInfo invalid!");
-                return true;
-            }
-            Jingle.log(Level.DEBUG, "InstanceChecker: FoundInstanceInfo found.");
-            // Create the instance object
-            // Add the minecraft instance to the set of opened instances
-            OPENED_INSTANCE_INFOS.add(new OpenedInstanceInfo(instanceInfo, hWnd, pid));
-            Jingle.log(Level.DEBUG, "InstanceChecker: Added instance to opened instances.");
+            checkedPids.add(pid);
+            HermesInstanceDepot.get()
+                    .getInstance(pid)
+                    .ifPresent(jsonObject ->
+                            OPENED_INSTANCE_INFOS.add(
+                                    OpenedInstanceInfo.getInstanceInfoFromHermes(jsonObject, pid)
+                            ));
+        }
 
-            return true;
-        }, null);
-
-        // Remove any opened instance windows that are NOT REAL!!!
-        OPENED_INSTANCE_INFOS.removeIf(i -> !User32.INSTANCE.IsWindow(i.hwnd));
+        // Remove any opened instances that are NOT REAL!!!
+        OPENED_INSTANCE_INFOS.removeIf(i -> !checkedPids.contains(i.pid));
         // Replace the last checked windows set
-        lastCheckedWindows = checkedWindows;
+        lastCheckedPids = checkedPids;
     }
 
     /**

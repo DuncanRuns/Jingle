@@ -40,4 +40,13 @@ public final class PidUtil {
         Kernel32.INSTANCE.CloseHandle(process);
         return out.toString();
     }
+
+    public static boolean isProcessRunning(int pid) {
+        WinNT.HANDLE process = Kernel32.INSTANCE.OpenProcess(Kernel32.SYNCHRONIZE, false, pid);
+        if (process == null) {
+            return false;
+        }
+        Kernel32.INSTANCE.CloseHandle(process);
+        return true;
+    }
 }

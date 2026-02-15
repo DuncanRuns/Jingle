@@ -50,6 +50,7 @@ public final class Jingle {
     private static long lastInstanceCheck = 0;
     private static boolean legalModCheckNeeded = false;
 
+    private static boolean shouldScheduleBorderless = false;
     private static long borderlessScheduledTime = -1;
 
     public static JingleOptions options = null;
@@ -59,6 +60,7 @@ public final class Jingle {
 
     @Nullable
     public static WinDef.HWND activeHwnd = null;
+    public static int activePid = -1;
 
     private static boolean guiWasFocused = false;
 
@@ -205,6 +207,11 @@ public final class Jingle {
         PluginEvents.START_TICK.runAll();
         ScriptStuff.START_TICK.runAll();
         activeHwnd = User32.INSTANCE.GetForegroundWindow();
+        try {
+            activePid = PidUtil.getPidFromHwnd(activeHwnd);
+        } catch (Exception e) {
+            activePid = -1;
+        }
         long currentTime = System.currentTimeMillis();
         if (Math.abs(currentTime - lastInstanceCheck) > 500) {
             lastInstanceCheck = currentTime;
@@ -218,6 +225,10 @@ public final class Jingle {
                 }
             });
         }
+        if (shouldScheduleBorderless) getMainInstance().flatMap(OpenedInstance::getHwnd).ifPresent(hwnd -> {
+            shouldScheduleBorderless = false;
+            borderlessScheduledTime = System.currentTimeMillis() + 3000;
+        });
         if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
             goBorderless();
             borderlessScheduledTime = -1;
@@ -252,34 +263,37 @@ public final class Jingle {
     }
 
     private static void updateWindowTitle(OpenedInstance instance) {
-        if (!WindowTitleUtil.getHwndTitle(instance.hwnd).equals("Minecraft* - Instance 1")) {
-            User32.INSTANCE.SetWindowTextA(instance.hwnd, "Minecraft* - Instance 1");
-        }
+        instance.getHwnd().ifPresent(hwnd -> {
+            if (!WindowTitleUtil.getHwndTitle(hwnd).equals("Minecraft* - Instance 1")) {
+                User32.INSTANCE.SetWindowTextA(hwnd, "Minecraft* - Instance 1");
+            }
+        });
     }
 
     public static synchronized boolean isInstanceActive() {
-        return getMainInstance().map(i -> Objects.equals(i.hwnd, activeHwnd)).orElse(false);
+        return getMainInstance().map(i -> i.hasWindow(activeHwnd)).orElse(false);
     }
 
     private static void updateMainInstance() {
         if (isInstanceActive()) return;
         final boolean mainInstancePreviouslyExists = getMainInstance().isPresent();
 
-        if (mainInstancePreviouslyExists && getMainInstance().get().hwnd == activeHwnd) return;
+        if (mainInstancePreviouslyExists && (getMainInstance().get().pid == activePid || getMainInstance().get().hasWindow(activeHwnd)))
+            return;
 
         Set<OpenedInstanceInfo> allOpenedInstances = InstanceChecker.getAllOpenedInstances();
         if (allOpenedInstances.isEmpty()) {
-            setMainInstance(null);
+            setMainInstance(null, null);
             return;
         }
 
-        Optional<OpenedInstanceInfo> newActiveInstance = allOpenedInstances.stream().filter(openedInstanceInfo -> Objects.equals(activeHwnd, openedInstanceInfo.hwnd)).findAny();
+        Optional<OpenedInstanceInfo> newActiveInstance = allOpenedInstances.stream().filter(openedInstanceInfo -> Objects.equals(activePid, openedInstanceInfo.pid)).findAny();
         if (newActiveInstance.isPresent()) {
-            setMainInstance(newActiveInstance.get());
+            setMainInstance(newActiveInstance.get(), activeHwnd);
             return;
         }
-        if (!(mainInstancePreviouslyExists && User32.INSTANCE.IsWindow(getMainInstance().get().hwnd))) {
-            setMainInstance(allOpenedInstances.stream().findAny().orElse(null));
+        if (!(mainInstancePreviouslyExists && getMainInstance().get().getHwnd().map(User32.INSTANCE::IsWindow).orElse(PidUtil.isProcessRunning(getMainInstance().get().pid)))) {
+            setMainInstance(allOpenedInstances.stream().findAny().orElse(null), null);
         }
     }
 
@@ -287,19 +301,29 @@ public final class Jingle {
         return Optional.ofNullable(mainInstance);
     }
 
-    public static void setMainInstance(@Nullable OpenedInstanceInfo instance) {
+    public static Optional<WinDef.HWND> getMainInstanceHwnd() {
+        return getMainInstance().flatMap(OpenedInstance::getHwnd);
+    }
+
+    public static void setMainInstance(@Nullable OpenedInstanceInfo instance, WinDef.HWND hwnd) {
         undoWindowTitle(mainInstance);
         if (mainInstance == instance) return;
         mainInstance = instance == null ? null : new OpenedInstance(instance);
         legalModCheckNeeded = instance != null;
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
-        if (instance != null) seeInstancePath(instance.instancePath);
-        if (options.autoBorderless && mainInstance != null && User32.INSTANCE.IsWindow(mainInstance.hwnd)) {
-            if (borderlessScheduledTime == -1) {
-                borderlessScheduledTime = System.currentTimeMillis() + 3000;
-            }
+        if (instance != null) {
+            seeInstancePath(instance.instancePath);
+            mainInstance.setHwnd(hwnd);
+        }
+        if (options.autoBorderless && mainInstance != null) {
+            borderlessScheduledTime = -1;
+            shouldScheduleBorderless = true;
+//            if (borderlessScheduledTime == -1) {
+//                borderlessScheduledTime = System.currentTimeMillis() + 3000;
+//            }
         } else {
             borderlessScheduledTime = -1;
+            shouldScheduleBorderless = false;
         }
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath + ", " + instance.versionString));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
@@ -307,10 +331,11 @@ public final class Jingle {
     }
 
     private static void undoWindowTitle(OpenedInstance instance) {
-        if (instance == null) return;
-        if (User32.INSTANCE.IsWindow(instance.hwnd)) {
-            User32.INSTANCE.SetWindowTextA(instance.hwnd, "Minecraft*");
-        }
+        getMainInstance().flatMap(OpenedInstance::getHwnd).ifPresent(hwnd -> {
+            if (User32.INSTANCE.IsWindow(hwnd)) {
+                User32.INSTANCE.SetWindowTextA(hwnd, "Minecraft*");
+            }
+        });
     }
 
     private static void seeInstancePath(Path instancePath) {
@@ -364,16 +389,16 @@ public final class Jingle {
     }
 
     public static synchronized void goBorderless() {
-        getMainInstance().ifPresent(mainInstance -> {
-            WindowStateUtil.ensureNotMinimized(mainInstance.hwnd);
-            WindowStateUtil.setHwndBorderless(mainInstance.hwnd);
+        getMainInstance().flatMap(OpenedInstance::getHwnd).ifPresent(hwnd -> {
+            WindowStateUtil.ensureNotMinimized(hwnd);
+            WindowStateUtil.setHwndBorderless(hwnd);
             int[] bp = Jingle.options.borderlessPosition;
             if (bp == null) {
                 Rectangle pBounds = MonitorUtil.getPrimaryMonitor().getPBounds();
-                WindowStateUtil.setHwndRectangle(mainInstance.hwnd, new Rectangle(pBounds.x, pBounds.y, pBounds.width, pBounds.height - 1));
-                WindowStateUtil.setHwndRectangle(mainInstance.hwnd, pBounds);
+                WindowStateUtil.setHwndRectangle(hwnd, new Rectangle(pBounds.x, pBounds.y, pBounds.width, pBounds.height - 1));
+                WindowStateUtil.setHwndRectangle(hwnd, pBounds);
             } else {
-                WindowStateUtil.setHwndRectangle(mainInstance.hwnd, new Rectangle(bp[0], bp[1], bp[2], bp[3]));
+                WindowStateUtil.setHwndRectangle(hwnd, new Rectangle(bp[0], bp[1], bp[2], bp[3]));
             }
         });
     }

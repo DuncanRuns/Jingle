@@ -3,13 +3,10 @@ package xyz.duncanruns.jingle.instance;
 import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.ptr.IntByReference;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.*;
 import xyz.duncanruns.jingle.util.CommandLineUtil.CommandLineArgs;
-import xyz.duncanruns.jingle.win32.User32;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,8 +32,8 @@ public class InstanceInfo {
      * @param hwnd the window pointer object of the Minecraft instance
      * @return the extracted instance info of the Minecraft instance
      */
-    public static InstanceInfo getInstanceInfoFromHwnd(WinDef.HWND hwnd, int pid) {
-        Jingle.log(Level.DEBUG, "InstanceInfo: getting info from " + hwnd);
+    public static InstanceInfo getInstanceInfoFromHwnd(int pid) {
+        Jingle.log(Level.DEBUG, "InstanceInfo: getting info from " + pid);
 
         /*
          * Get environment variables, or keep an empty map if it fails
@@ -190,14 +187,6 @@ public class InstanceInfo {
         } catch (Exception ignored) {
         }
         return Optional.empty();
-    }
-
-    private static int getPidFromHwnd(WinDef.HWND hwnd) {
-        Jingle.log(Level.DEBUG, "InstanceInfo: Getting PID from " + hwnd);
-        final IntByReference pidPointer = new IntByReference();
-        User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
-        Jingle.log(Level.DEBUG, "InstanceInfo: PID is " + pidPointer.getValue());
-        return pidPointer.getValue();
     }
 
     private static String getCommandLinePS(int pid) {

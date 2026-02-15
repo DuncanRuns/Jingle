@@ -152,7 +152,7 @@ class JingleLuaLibrary extends LuaLibrary {
         instance.keyPresser.pressKey(chatKey.get());
         SleepUtil.sleep(100);
         for (char c : message.toCharArray()) {
-            KeyboardUtil.sendCharToHwnd(instance.hwnd, c);
+            instance.getHwnd().ifPresent(hwnd -> KeyboardUtil.sendCharToHwnd(hwnd, c));
         }
         instance.keyPresser.pressEnter();
         return true;
@@ -165,7 +165,7 @@ class JingleLuaLibrary extends LuaLibrary {
 
     @LuaDocumentation(description = "Closes the instance.")
     public void closeInstance() {
-        Jingle.getMainInstance().ifPresent(instance -> User32.INSTANCE.SendNotifyMessageA(instance.hwnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0)));
+        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> User32.INSTANCE.SendNotifyMessageA(hwnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0)));
     }
 
     @LuaDocumentation(description = "Replicates a hotkey action exactly. For example, jingle.replicateHotkey('script','test.lua:Test Hotkey')")
@@ -251,22 +251,22 @@ class JingleLuaLibrary extends LuaLibrary {
 
     @LuaDocumentation(description = "Sends a key down and up message to the instance with no delay between.")
     public void sendKeyToInstance(int key) {
-        Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyToHwnd(instance.hwnd, key));
+        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyToHwnd(hwnd, key));
     }
 
     @LuaDocumentation(description = "Sends a key down message to the instance.")
     public void sendKeyDownToInstance(int key) {
-        Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyDownToHwnd(instance.hwnd, key));
+        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyDownToHwnd(hwnd, key));
     }
 
     @LuaDocumentation(description = "Sends a key up message to the instance.")
     public void sendKeyUpToInstance(int key) {
-        Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyUpToHwnd(instance.hwnd, key));
+        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyUpToHwnd(hwnd, key));
     }
 
     @LuaDocumentation(description = "Sends a key down and up message to the instance with a specified delay between.")
     public void sendKeyHoldToInstance(int key, long millis) {
-        Jingle.getMainInstance().ifPresent(instance -> KeyboardUtil.sendKeyToHwnd(instance.hwnd, key, millis));
+        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyToHwnd(hwnd, key, millis));
     }
 
     @LuaDocumentation(description = "Logs a message to the Jingle log.")
@@ -314,6 +314,6 @@ class JingleLuaLibrary extends LuaLibrary {
 
     @LuaDocumentation(description = "Minimizes the instance, even if it is borderless.")
     public void minimizeInstance() {
-        Jingle.getMainInstance().ifPresent(instance -> WindowStateUtil.minimizeHwnd(instance.hwnd));
+        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> WindowStateUtil.minimizeHwnd(hwnd));
     }
 }
