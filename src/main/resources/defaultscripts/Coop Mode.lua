@@ -1,16 +1,16 @@
 local initialized = false
 local world_loaded = nil
 
-function is_number(value)
+local function is_number(value)
     return tonumber(value) ~= nil
 end
 
-function on_main_instance_changed()
+local function on_main_instance_changed()
     initialized = false
     world_loaded = nil
 end
 
-function customize()
+local function customize()
     jingle.addCustomizationMenuCheckBox("cheats_enabled", true, "Enable cheats when opening to lan")
     jingle.addCustomizationMenuText(" ") -- intended way to add spacing
     jingle.addCustomizationMenuText("Delay (ms):")
@@ -18,7 +18,7 @@ function customize()
     jingle.showCustomizationMenu()
 end
 
-function on_hermes_state_change()
+local function on_hermes_state_change()
     local hermes_state = hermes.getState()
 
     local new_world = hermes_state["world"]

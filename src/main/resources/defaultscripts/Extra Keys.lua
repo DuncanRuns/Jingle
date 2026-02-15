@@ -1,4 +1,4 @@
-function run_clear_worlds()
+local function run_clear_worlds()
     if not jingle.isInstanceActive() then
         return
     end
@@ -12,7 +12,7 @@ local opened_to_lan = false
 local screen_open = false
 local screen_is_pause = false
 
-function on_main_instance_changed()
+local function on_main_instance_changed()
     last_enter_world = 0
     world = nil
     world_loaded = false
@@ -21,7 +21,7 @@ function on_main_instance_changed()
     screen_is_pause = false
 end
 
-function on_hermes_state_change()
+local function on_hermes_state_change()
     local hermes_state = hermes.getState()
     local previous_world = world
     local new_world = hermes_state["world"]
@@ -50,12 +50,12 @@ function on_hermes_state_change()
     opened_to_lan = hermes_state["opened_to_lan"] == true
 end
 
-function get_reset_key()
+local function get_reset_key()
     return jingle.getInstanceKeyOption("key_Create New World") or
         jingle.getInstanceKeyOption("key_Create New World§r")
 end
 
-function can_run_reset()
+local function can_run_reset()
     if not jingle.isInstanceActive() then
         return false
     end
@@ -83,7 +83,7 @@ function can_run_reset()
     return false
 end
 
-function run_safe_reset()
+local function run_safe_reset()
     if can_run_reset() then
         local key = get_reset_key()
         if key == nil then
@@ -94,7 +94,7 @@ function run_safe_reset()
     end
 end
 
-function run_reset_before_20s()
+local function run_reset_before_20s()
     if not can_run_reset() then
         return
     end
@@ -109,7 +109,7 @@ function run_reset_before_20s()
     jingle.sendKeyToInstance(key)
 end
 
-function run_start_coping()
+local function run_start_coping()
     if not jingle.isInstanceActive() then
         return
     end
@@ -127,13 +127,13 @@ function run_start_coping()
     opened_to_lan = true
 end
 
-function run_minimize()
+local function run_minimize()
     if (jingle.isInstanceActive()) then
         jingle.minimizeInstance()
     end
 end
 
-function customize()
+local function customize()
     jingle.addCustomizationMenuText("Allowed states for 'Safe Reset' and 'Reset Before 20s':")
     jingle.addCustomizationMenuCheckBox("iwu", true, "In World, Unpaused")
     jingle.addCustomizationMenuCheckBox("iwp", true, "In World, Paused")
