@@ -8,15 +8,14 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class OpenedInstance extends OpenedInstanceInfo {
-    public final KeyPresser keyPresser;
     public final OptionsTxt optionsTxt;
     public final StandardSettings standardSettings;
 
     private WinDef.HWND hwnd = null;
+    private KeyPresser keyPresser = null;
 
     public OpenedInstance(OpenedInstanceInfo openedInstanceInfo) {
         super(openedInstanceInfo, openedInstanceInfo.hasHermesCore, openedInstanceInfo.hermesInfo, openedInstanceInfo.mods, openedInstanceInfo.pid);
-        this.keyPresser = new KeyPresser(this.hwnd);
         this.optionsTxt = new OptionsTxt(this.instancePath.resolve("options.txt"), this.versionString);
         this.standardSettings = new StandardSettings(this.instancePath);
     }
@@ -25,8 +24,12 @@ public class OpenedInstance extends OpenedInstanceInfo {
         return Optional.ofNullable(this.hwnd);
     }
 
-    public boolean hasWindow(WinDef.HWND hwnd) {
-        if (this.hwnd == null) return false;
+    /**
+     * Checks if the window is of this instance, if it is, it will set the hwnd if it is not already set.
+     * Returns true if the window is of this instance.
+     */
+    public boolean checkWindow(WinDef.HWND hwnd) {
+        if (hwnd == null) return false;
         if (Objects.equals(hwnd, this.hwnd)) return true;
         int pidFromHwnd;
         try {
@@ -35,17 +38,19 @@ public class OpenedInstance extends OpenedInstanceInfo {
             Jingle.logError("Failed to get pid from hwnd:", e);
             return false;
         }
-        boolean b = pidFromHwnd == this.pid;
-        if (b) {
-            if (this.hwnd == null) {
-                this.hwnd = hwnd;
-            }
-            return true;
+        if (pidFromHwnd != this.pid) return false;
+        if (this.hwnd == null) {
+            setHwnd(hwnd);
         }
-        return false;
+        return true;
     }
 
     public void setHwnd(WinDef.HWND hwnd) {
         this.hwnd = hwnd;
+        this.keyPresser = new KeyPresser(hwnd);
+    }
+
+    public Optional<KeyPresser> getKeyPresser() {
+        return Optional.ofNullable(this.keyPresser);
     }
 }

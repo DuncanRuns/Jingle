@@ -225,10 +225,12 @@ public final class Jingle {
                 }
             });
         }
-        if (shouldScheduleBorderless) getMainInstance().flatMap(OpenedInstance::getHwnd).ifPresent(hwnd -> {
+        // Try assign hwnd to main instance
+        getMainInstance().ifPresent(i -> i.checkWindow(activeHwnd));
+        if (shouldScheduleBorderless && getMainInstanceHwnd().isPresent()) {
             shouldScheduleBorderless = false;
             borderlessScheduledTime = System.currentTimeMillis() + 3000;
-        });
+        }
         if (borderlessScheduledTime != -1 && System.currentTimeMillis() >= borderlessScheduledTime) {
             goBorderless();
             borderlessScheduledTime = -1;
@@ -271,14 +273,14 @@ public final class Jingle {
     }
 
     public static synchronized boolean isInstanceActive() {
-        return getMainInstance().map(i -> i.hasWindow(activeHwnd)).orElse(false);
+        return getMainInstance().map(i -> i.checkWindow(activeHwnd)).orElse(false);
     }
 
     private static void updateMainInstance() {
         if (isInstanceActive()) return;
         final boolean mainInstancePreviouslyExists = getMainInstance().isPresent();
 
-        if (mainInstancePreviouslyExists && (getMainInstance().get().pid == activePid || getMainInstance().get().hasWindow(activeHwnd)))
+        if (mainInstancePreviouslyExists && (getMainInstance().get().pid == activePid || getMainInstance().get().checkWindow(activeHwnd)))
             return;
 
         Set<OpenedInstanceInfo> allOpenedInstances = InstanceChecker.getAllOpenedInstances();
@@ -305,25 +307,22 @@ public final class Jingle {
         return getMainInstance().flatMap(OpenedInstance::getHwnd);
     }
 
+    public static Optional<KeyPresser> getMainInstanceKeyPresser() {
+        return getMainInstance().flatMap(OpenedInstance::getKeyPresser);
+    }
+
     public static void setMainInstance(@Nullable OpenedInstanceInfo instance, WinDef.HWND hwnd) {
         undoWindowTitle(mainInstance);
         if (mainInstance == instance) return;
         mainInstance = instance == null ? null : new OpenedInstance(instance);
         legalModCheckNeeded = instance != null;
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
+        borderlessScheduledTime = -1;
+        shouldScheduleBorderless = false;
         if (instance != null) {
             seeInstancePath(instance.instancePath);
             mainInstance.setHwnd(hwnd);
-        }
-        if (options.autoBorderless && mainInstance != null) {
-            borderlessScheduledTime = -1;
-            shouldScheduleBorderless = true;
-//            if (borderlessScheduledTime == -1) {
-//                borderlessScheduledTime = System.currentTimeMillis() + 3000;
-//            }
-        } else {
-            borderlessScheduledTime = -1;
-            shouldScheduleBorderless = false;
+            shouldScheduleBorderless = options.autoBorderless && hwnd != null;
         }
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath + ", " + instance.versionString));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
@@ -435,8 +434,14 @@ public final class Jingle {
      * it is in a world. Scripts/plugins should determine these things before running this.
      */
     public static void openToLan(boolean alreadyPaused, boolean enableCheats) {
-        if (!getMainInstance().isPresent()) return;
-        KeyPresser keyPresser = getMainInstance().get().keyPresser;
+        Optional<OpenedInstance> instanceOpt = getMainInstance();
+        if (!instanceOpt.isPresent()) return;
+        OpenedInstance instance = instanceOpt.get();
+
+        Optional<KeyPresser> keyPresserOpt = instance.getKeyPresser();
+        if (!keyPresserOpt.isPresent()) return;
+        KeyPresser keyPresser = keyPresserOpt.get();
+
         keyPresser.releaseAllModifiers();
         if (!alreadyPaused) {
             keyPresser.pressEsc();
@@ -444,7 +449,7 @@ public final class Jingle {
         keyPresser.pressTab(7);
         keyPresser.pressEnter();
         keyPresser.pressShiftTab(1);
-        String versionString = getMainInstance().get().versionString;
+        String versionString = instance.versionString;
         if (MCVersionUtil.isNewerThan(versionString, "1.16.5")) {
             keyPresser.pressTab(2);
         }

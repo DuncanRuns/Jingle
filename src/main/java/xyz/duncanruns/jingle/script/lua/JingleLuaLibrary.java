@@ -8,6 +8,7 @@ import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.InstanceMods;
+import xyz.duncanruns.jingle.instance.KeyPresser;
 import xyz.duncanruns.jingle.instance.OpenedInstance;
 import xyz.duncanruns.jingle.script.CustomizableManager;
 import xyz.duncanruns.jingle.script.ScriptFile;
@@ -147,14 +148,18 @@ class JingleLuaLibrary extends LuaLibrary {
         if (!instanceOpt.isPresent()) return false;
         OpenedInstance instance = instanceOpt.get();
 
+        Optional<KeyPresser> keyPresserOpt = instance.getKeyPresser();
+        if (!keyPresserOpt.isPresent()) return false;
+        KeyPresser keyPresser = keyPresserOpt.get();
+
         Optional<Integer> chatKey = instance.optionsTxt.getKeyOption("key_key.chat");
         if (!chatKey.isPresent()) return false;
-        instance.keyPresser.pressKey(chatKey.get());
+        keyPresser.pressKey(chatKey.get());
         SleepUtil.sleep(100);
         for (char c : message.toCharArray()) {
             instance.getHwnd().ifPresent(hwnd -> KeyboardUtil.sendCharToHwnd(hwnd, c));
         }
-        instance.keyPresser.pressEnter();
+        keyPresser.pressEnter();
         return true;
     }
 

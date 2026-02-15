@@ -34,10 +34,10 @@ public final class InstanceChecker {
         newPids.forEach(lastCheckedPids::remove);
 
         for (int pid : PsapiUtil.enumProcesses()) {
+            checkedPids.add(pid);
             if (lastCheckedPids.contains(pid)) {
                 continue;
             }
-            checkedPids.add(pid);
             HermesInstanceDepot.get()
                     .getInstance(pid)
                     .ifPresent(jsonObject ->

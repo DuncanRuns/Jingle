@@ -176,6 +176,10 @@ public final class KeyboardUtil {
         return Collections.emptyList();
     }
 
+    public static List<Integer> getPressedModifiers() {
+        return getPressedKeys().stream().filter(ALL_MODIFIERS::contains).collect(Collectors.toList());
+    }
+
     /**
      * Returns all currently pressed keys except for the ones excluded in the parameter.
      *
