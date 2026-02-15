@@ -1,5 +1,3 @@
--- TODO: replace ENTER_WORLD and stuff
-
 function run_clear_worlds()
     if not jingle.isInstanceActive() then
         return
@@ -7,10 +5,49 @@ function run_clear_worlds()
     jingle.clearWorlds(false)
 end
 
-last_enter_world = 0
+local last_enter_world = 0
+local world = nil
+local world_loaded = false
+local opened_to_lan = false
+local screen_open = false
+local screen_is_pause = false
 
-function save_enter_world_time()
-    last_enter_world = jingle.getCurrentTime()
+function on_main_instance_changed()
+    last_enter_world = 0
+    world = nil
+    world_loaded = false
+    opened_to_lan = false
+    screen_open = false
+    screen_is_pause = false
+end
+
+function on_hermes_state_change()
+    local hermes_state = hermes.getState()
+    local previous_world = world
+    local new_world = hermes_state["world"]
+    if new_world ~= nil then
+        new_world = new_world["path"]
+    end
+    if previous_world ~= new_world then
+        world_loaded = false
+        world = new_world
+    end
+    if world ~= nil and world_loaded == false then
+        if hermes_state["screen"]["class"] == nil then
+            world_loaded = true
+            last_enter_world = jingle.getCurrentTime()
+        elseif basics.stringEndsWith(hermes_state["screen"]["class"], ".class_433") then -- fabric intermediary
+            world_loaded = true
+            last_enter_world = jingle.getCurrentTime()
+        elseif basics.stringEndsWith(hermes_state["screen"]["class"], ".PauseScreen") then -- unobfuscated 1.21.11+
+            world_loaded = true
+            last_enter_world = jingle.getCurrentTime()
+        end
+    end
+
+    screen_open = hermes_state["screen"]["class"] ~= nil
+    screen_is_pause = hermes_state["screen"]["is_pause"]
+    opened_to_lan = hermes_state["opened_to_lan"] == true
 end
 
 function get_reset_key()
@@ -23,26 +60,23 @@ function can_run_reset()
         return false
     end
 
-    state = jingle.getInstanceState()
-
-    if state == 'INWORLD' then
-        state = jingle.getInstanceInWorldState()
-        if state == 'UNPAUSED' then
+    if world ~= nil and world_loaded then
+        if not screen_open then
             return jingle.getCustomizable('iwu', 'true') == 'true'
         end
-        if state == 'PAUSED' then
+        if screen_is_pause then
             return jingle.getCustomizable('iwp', 'true') == 'true'
         end
-        if state == 'GAMESCREENOPEN' then
+        if not screen_is_pause then
             return jingle.getCustomizable('iwgso', 'false') == 'true'
         end
     end
 
-    if state == 'TITLE' then
+    if world == nil then
         return jingle.getCustomizable('t', 'false') == 'true'
     end
 
-    if state == 'PREVIEWING' then
+    if world ~= nil and not world_loaded then
         return jingle.getCustomizable('p', 'false') == 'true'
     end
 
@@ -76,11 +110,21 @@ function run_reset_before_20s()
 end
 
 function run_start_coping()
-    if (not jingle.isInstanceActive()) or (jingle.getInstanceState() ~= "INWORLD") or (jingle.getInstanceInWorldState() ~= "UNPAUSED") then
+    if not jingle.isInstanceActive() then
+        return
+    end
+    if opened_to_lan then
+        return
+    end
+    if not world_loaded then
+        return
+    end
+    if screen_open then
         return
     end
     jingle.openToLan(false, true)
     jingle.sendChatMessage("/gamemode spectator")
+    opened_to_lan = true
 end
 
 function run_minimize()
@@ -100,7 +144,8 @@ function customize()
 end
 
 jingle.addHotkey("Clear Worlds", run_clear_worlds)
-jingle.listen("ENTER_WORLD", save_enter_world_time)
+jingle.listen("HERMES_STATE_CHANGE", on_hermes_state_change)
+jingle.listen("MAIN_INSTANCE_CHANGED", on_main_instance_changed)
 jingle.addHotkey("Safe Reset", run_safe_reset)
 jingle.addHotkey("Reset Before 20s", run_reset_before_20s)
 jingle.addHotkey("Start Coping", run_start_coping)

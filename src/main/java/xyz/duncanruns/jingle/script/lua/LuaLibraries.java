@@ -19,6 +19,8 @@ public final class LuaLibraries {
     static {
         LIBRARY_PROVIDERS = new ArrayList<>();
         LIBRARY_PROVIDERS.add(JingleLuaLibrary::new);
+        LIBRARY_PROVIDERS.add(HermesLuaLibrary::new);
+        LIBRARY_PROVIDERS.add(BasicsLuaLibrary::new);
     }
 
     private LuaLibraries() {

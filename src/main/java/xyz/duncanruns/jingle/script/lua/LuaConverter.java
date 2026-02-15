@@ -1,6 +1,8 @@
 package xyz.duncanruns.jingle.script.lua;
 
 import com.google.common.primitives.Primitives;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.luaj.vm2.*;
 
 import java.util.HashMap;
@@ -82,6 +84,9 @@ public final class LuaConverter {
     }
 
     public static Varargs convertToLua(Object value) {
+        if (value instanceof JsonElement) {
+            return fromJson((JsonElement) value);
+        }
         if (value == null) {
             return LuaValue.NIL;
         }
@@ -111,5 +116,31 @@ public final class LuaConverter {
 
     public static String classToLuaName(Class<?> clazz) {
         return luaTypeMap.get(clazz);
+    }
+
+    public static LuaValue fromJson(JsonElement jsonElement) {
+        if (jsonElement.isJsonObject()) {
+            LuaTable table = LuaValue.tableOf();
+            jsonElement.getAsJsonObject().entrySet().forEach(entry -> table.set(entry.getKey(), fromJson(entry.getValue())));
+            return table;
+        } else if (jsonElement.isJsonArray()) {
+            LuaTable table = LuaValue.tableOf();
+            int i = 0;
+            for (JsonElement element : jsonElement.getAsJsonArray()) {
+                table.set(LuaValue.valueOf(++i), fromJson(element));
+            }
+            return table;
+        } else if (jsonElement.isJsonPrimitive()) {
+            JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+            if (primitive.isBoolean()) {
+                return LuaValue.valueOf(primitive.getAsBoolean());
+            } else if (primitive.isNumber()) {
+                return LuaValue.valueOf(primitive.getAsDouble());
+            } else {
+                return LuaValue.valueOf(primitive.getAsString());
+            }
+        } else {
+            return LuaValue.NIL;
+        }
     }
 }

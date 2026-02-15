@@ -12,6 +12,7 @@ import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.*;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
+import xyz.duncanruns.jingle.script.HermesStateScriptRelay;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.*;
 import xyz.duncanruns.jingle.win32.User32;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -40,6 +42,7 @@ public final class Jingle {
     public static final Logger LOGGER = LogManager.getLogger("Jingle");
 
     private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService LOG_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
     private static boolean started = false;
     private static volatile boolean running = false;
@@ -59,20 +62,21 @@ public final class Jingle {
 
     private static boolean guiWasFocused = false;
 
-    private static boolean openedToLan = false;
-
     private Jingle() {
     }
 
 
     public static void log(Level level, String message) {
-        new Thread(() -> {
-            String messageWithTime = String.format("[%s/%s] %s", new SimpleDateFormat("HH:mm:ss").format(new Date()), level, message);
-            if (!JingleGUI.instanceExists()) return;
-            JingleGUI.get().logDocumentWithDebug.addLineWithRolling(messageWithTime);
-            if (level.equals(Level.DEBUG)) return;
-            JingleGUI.get().logDocument.addLineWithRolling(messageWithTime);
-        }, "log-append").start();
+        try {
+            LOG_EXECUTOR.execute(() -> {
+                String messageWithTime = String.format("[%s/%s] %s", new SimpleDateFormat("HH:mm:ss").format(new Date()), level, message);
+                if (!JingleGUI.instanceExists()) return;
+                JingleGUI.get().logDocumentWithDebug.addLineWithRolling(messageWithTime);
+                if (level.equals(Level.DEBUG)) return;
+                JingleGUI.get().logDocument.addLineWithRolling(messageWithTime);
+            });
+        } catch (RejectedExecutionException ignored) {
+        }
         LOGGER.log(level, message);
     }
 
@@ -116,6 +120,8 @@ public final class Jingle {
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
 
         Kerykeion.addListener(HermesInstanceDepot.get(), 100, EXECUTOR);
+        Kerykeion.addListener(HermesStateScriptRelay.get(), 1, EXECUTOR);
+        Kerykeion.setErrorLogger((s, throwable) -> logError("(Kerykeion) " + s, throwable));
         Kerykeion.start(true);
         EXECUTOR.scheduleWithFixedDelay(Jingle::tryTick, 0, 1, TimeUnit.MILLISECONDS);
     }
@@ -286,7 +292,6 @@ public final class Jingle {
         if (mainInstance == instance) return;
         mainInstance = instance == null ? null : new OpenedInstance(instance);
         legalModCheckNeeded = instance != null;
-        resetStates();
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
         if (instance != null) seeInstancePath(instance.instancePath);
         if (options.autoBorderless && mainInstance != null && User32.INSTANCE.IsWindow(mainInstance.hwnd)) {
@@ -308,10 +313,6 @@ public final class Jingle {
         }
     }
 
-    private static void resetStates() {
-        openedToLan = false;
-    }
-
     private static void seeInstancePath(Path instancePath) {
         options.seenPaths = new HashMap<>(options.seenPaths);
         options.seenPaths.entrySet().removeIf(stringLongEntry -> !Files.isDirectory(Paths.get(stringLongEntry.getKey())));
@@ -323,6 +324,7 @@ public final class Jingle {
         try {
             running = false;
             EXECUTOR.shutdown();
+            LOG_EXECUTOR.shutdown();
             waitForMainLoopStopOrTerminate(5000);
             PluginEvents.STOP.runAll();
             synchronized (Jingle.class) {
@@ -403,10 +405,12 @@ public final class Jingle {
         return String.format("%s - %s", action.substring(0, i), action.substring(i + 1));
     }
 
+    /**
+     * Runs common key presses to open a world to lan. Does not check if the instance is already opened to lan, or if
+     * it is in a world. Scripts/plugins should determine these things before running this.
+     */
     public static void openToLan(boolean alreadyPaused, boolean enableCheats) {
-        if (true) return;
-        // TODO rewrite prevention from multiple open to lan
-
+        if (!getMainInstance().isPresent()) return;
         KeyPresser keyPresser = getMainInstance().get().keyPresser;
         keyPresser.releaseAllModifiers();
         if (!alreadyPaused) {
@@ -424,7 +428,6 @@ public final class Jingle {
         }
         keyPresser.pressTab(MCVersionUtil.isNewerThan(versionString, "1.19.2") ? 2 : 1);
         keyPresser.pressEnter();
-        openedToLan = true;
     }
 
     /**

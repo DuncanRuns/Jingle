@@ -20,6 +20,7 @@ public final class ScriptStuff {
     public static final RunnableEventType START_TICK = new RunnableEventType();
     public static final RunnableEventType END_TICK = new RunnableEventType();
     public static final RunnableEventType MAIN_INSTANCE_CHANGED = new RunnableEventType();
+    public static final RunnableEventType HERMES_STATE_CHANGE = new RunnableEventType();
 
     private static final Map<String, RunnableEventType> SCRIPT_EVENTS = new HashMap<>();
 
@@ -27,6 +28,7 @@ public final class ScriptStuff {
         SCRIPT_EVENTS.put("START_TICK", START_TICK);
         SCRIPT_EVENTS.put("END_TICK", END_TICK);
         SCRIPT_EVENTS.put("MAIN_INSTANCE_CHANGED", MAIN_INSTANCE_CHANGED);
+        SCRIPT_EVENTS.put("HERMES_STATE_CHANGE", HERMES_STATE_CHANGE);
     }
 
     private ScriptStuff() {
@@ -100,6 +102,7 @@ public final class ScriptStuff {
         }
         try {
             for (String s : ResourceUtil.getResourcesFromFolder("defaultscripts")) {
+                if(!s.endsWith(".lua")) continue;
                 try {
                     ScriptFile script = ScriptFile.loadResource("/defaultscripts/" + s);
                     if (!Jingle.options.disabledScripts.contains(script.name)) {
