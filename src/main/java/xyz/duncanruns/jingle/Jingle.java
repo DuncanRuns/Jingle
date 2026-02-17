@@ -12,7 +12,7 @@ import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.*;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
-import xyz.duncanruns.jingle.script.HermesStateScriptRelay;
+import xyz.duncanruns.jingle.script.HermesScriptRelay;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.*;
 import xyz.duncanruns.jingle.win32.User32;
@@ -122,7 +122,7 @@ public final class Jingle {
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
 
         Kerykeion.addListener(HermesInstanceDepot.get(), 100, EXECUTOR);
-        Kerykeion.addListener(HermesStateScriptRelay.get(), 1, EXECUTOR);
+        Kerykeion.addListener(HermesScriptRelay.get(), 1, EXECUTOR);
         Kerykeion.setErrorLogger((s, throwable) -> logError("(Kerykeion) " + s, throwable));
         Kerykeion.start(true);
         EXECUTOR.scheduleWithFixedDelay(Jingle::tryTick, 0, 1, TimeUnit.MILLISECONDS);

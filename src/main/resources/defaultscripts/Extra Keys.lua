@@ -5,6 +5,8 @@ local function run_clear_worlds()
     jingle.clearWorlds(false)
 end
 
+local initialized = false
+
 local last_enter_world = 0
 local world = nil
 local world_loaded = false
@@ -13,6 +15,7 @@ local screen_open = false
 local screen_is_pause = false
 
 local function on_main_instance_changed()
+    initialized = false
     last_enter_world = 0
     world = nil
     world_loaded = false
@@ -21,7 +24,9 @@ local function on_main_instance_changed()
     screen_is_pause = false
 end
 
+-- We could use HERMES_WORLD_LOG as well, but that might happen out of ideal order, and dealing with that could end up making this more complicated, and doesn't provide better functionality.
 local function on_hermes_state_change()
+    initialized = true
     local hermes_state = hermes.getState()
     local previous_world = world
     local new_world = hermes_state["world"]
@@ -32,22 +37,21 @@ local function on_hermes_state_change()
         world_loaded = false
         world = new_world
     end
-    if world ~= nil and world_loaded == false then
-        if hermes_state["screen"]["class"] == nil then
-            world_loaded = true
-            last_enter_world = jingle.getCurrentTime()
-        elseif basics.stringEndsWith(hermes_state["screen"]["class"], ".class_433") then -- fabric intermediary
-            world_loaded = true
-            last_enter_world = jingle.getCurrentTime()
-        elseif basics.stringEndsWith(hermes_state["screen"]["class"], ".PauseScreen") then -- unobfuscated 1.21.11+
-            world_loaded = true
-            last_enter_world = jingle.getCurrentTime()
-        end
-    end
-
-    screen_open = hermes_state["screen"]["class"] ~= nil
+    local screen_class = hermes_state["screen"]["class"]
+    screen_open = screen_class ~= nil
     screen_is_pause = hermes_state["screen"]["is_pause"]
     opened_to_lan = hermes_state["open_to_lan"] == true
+
+    jingle.log("Screen class: " .. (screen_class or "nil"))
+    if world == nil or world_loaded then
+        return
+    end
+    if (screen_class == nil) or
+        (basics.stringEndsWith(screen_class, ".class_433")) or
+        (basics.stringEndsWith(screen_class, ".PauseScreen")) then
+        world_loaded = true
+        last_enter_world = jingle.getCurrentTime()
+    end
 end
 
 local function get_reset_key()
@@ -57,6 +61,9 @@ end
 
 local function can_run_reset()
     if not jingle.isInstanceActive() then
+        return false
+    end
+    if not initialized then
         return false
     end
 

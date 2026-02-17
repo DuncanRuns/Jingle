@@ -21,6 +21,7 @@ public final class ScriptStuff {
     public static final RunnableEventType END_TICK = new RunnableEventType();
     public static final RunnableEventType MAIN_INSTANCE_CHANGED = new RunnableEventType();
     public static final RunnableEventType HERMES_STATE_CHANGE = new RunnableEventType();
+    public static final RunnableEventType HERMES_WORLD_LOG = new RunnableEventType();
 
     private static final Map<String, RunnableEventType> SCRIPT_EVENTS = new HashMap<>();
 
@@ -29,6 +30,7 @@ public final class ScriptStuff {
         SCRIPT_EVENTS.put("END_TICK", END_TICK);
         SCRIPT_EVENTS.put("MAIN_INSTANCE_CHANGED", MAIN_INSTANCE_CHANGED);
         SCRIPT_EVENTS.put("HERMES_STATE_CHANGE", HERMES_STATE_CHANGE);
+        SCRIPT_EVENTS.put("HERMES_WORLD_LOG", HERMES_WORLD_LOG);
     }
 
     private ScriptStuff() {

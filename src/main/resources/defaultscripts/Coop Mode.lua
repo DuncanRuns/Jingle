@@ -1,13 +1,13 @@
-local initialized = false
-local world_loaded = nil
+local ready = false
+local screen_nil = false
 
 local function is_number(value)
     return tonumber(value) ~= nil
 end
 
 local function on_main_instance_changed()
-    initialized = false
-    world_loaded = nil
+    ready = false
+    screen_nil = false
 end
 
 local function customize()
@@ -18,30 +18,38 @@ local function customize()
     jingle.showCustomizationMenu()
 end
 
-local function on_hermes_state_change()
-    local hermes_state = hermes.getState()
 
-    local new_world = hermes_state["world"]
-    if new_world ~= nil then
-        new_world = new_world["path"]
-    end
-    if not initialized or new_world == world_loaded then
-        world_loaded = new_world
-        initialized = true
-        return
-    end
-
-    if (hermes_state["world"] == nil) or
-        (hermes_state["screen"]["class"] ~= nil) or
-        (hermes_state["open_to_lan"] == true) then
-        return
-    end
-    world_loaded = new_world
+local function run()
     local delay = jingle.getCustomizable("delay", "50")
     jingle.sleep(tonumber(delay) or 50) -- ms
     jingle.openToLan(false, jingle.getCustomizable("cheats_enabled", "true") == "true")
+    ready = false
+end
+
+-- Unlike in the Extra Keys script, we use both HERMES_STATE_CHANGE and HERMES_WORLD_LOG because handling out of order events is not that complicated here, and ends up being simpler.
+
+local function on_hermes_state_change()
+    screen_nil = hermes.getState()["screen"]["class"] == nil
+    if not (ready and screen_nil) then
+        return
+    end
+    run()
+end
+
+
+local function on_hermes_world_log()
+    local entry = hermes.getWorldLogEntry()
+    if entry["type"] == "entering" then
+        ready = true
+        if screen_nil then
+            run()
+        end
+    elseif entry["type"] == "leave" then
+        ready = false
+    end
 end
 
 jingle.listen("HERMES_STATE_CHANGE", on_hermes_state_change)
+jingle.listen("HERMES_WORLD_LOG", on_hermes_world_log)
 jingle.listen("MAIN_INSTANCE_CHANGED", on_main_instance_changed)
 jingle.setCustomization(customize)
