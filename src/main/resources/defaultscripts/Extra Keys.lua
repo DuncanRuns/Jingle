@@ -24,6 +24,23 @@ local function on_main_instance_changed()
     screen_is_pause = false
 end
 
+local ends_with = basics.stringEndsWith
+
+local function is_loading_screen(screen_class)
+    if screen_class == nil then
+        return false
+    end
+    -- Classes may need updating based on mc version
+    return -- Fabric intermediary classes
+        ends_with(screen_class, ".class_435") or
+        ends_with(screen_class, ".class_3928") or
+        ends_with(screen_class, ".class_434") or
+        -- Official unobfuscated classes
+        ends_with(screen_class, ".ProgressScreen") or
+        ends_with(screen_class, ".LevelLoadingScreen") or
+        ends_with(screen_class, ".ReceivingLevelScreen")
+end
+
 -- We could use HERMES_WORLD_LOG as well, but that might happen out of ideal order, and dealing with that could end up making this more complicated, and doesn't provide better functionality.
 local function on_hermes_state_change()
     initialized = true
@@ -42,13 +59,11 @@ local function on_hermes_state_change()
     screen_is_pause = hermes_state["screen"]["is_pause"]
     opened_to_lan = hermes_state["open_to_lan"] == true
 
-    jingle.log("Screen class: " .. (screen_class or "nil"))
     if world == nil or world_loaded then
         return
     end
-    if (screen_class == nil) or
-        (basics.stringEndsWith(screen_class, ".class_433")) or
-        (basics.stringEndsWith(screen_class, ".PauseScreen")) then
+    if not is_loading_screen(screen_class) then
+        jingle.log("World Loaded")
         world_loaded = true
         last_enter_world = jingle.getCurrentTime()
     end
