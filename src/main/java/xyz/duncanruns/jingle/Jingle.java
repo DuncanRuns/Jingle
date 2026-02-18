@@ -41,8 +41,8 @@ public final class Jingle {
     public static final String VERSION = Optional.ofNullable(Jingle.class.getPackage().getImplementationVersion()).orElse("DEV");
     public static final Logger LOGGER = LogManager.getLogger("Jingle");
 
-    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
-    private static final ScheduledExecutorService LOG_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "Jingle"));
+    private static final ScheduledExecutorService LOG_EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "Jingle-Log"));
 
     private static boolean started = false;
     private static volatile boolean running = false;
@@ -70,7 +70,8 @@ public final class Jingle {
 
     public static void log(Level level, String message) {
         try {
-            LOG_EXECUTOR.execute(() -> {
+
+            SwingUtilities.invokeLater(() -> {
                 String messageWithTime = String.format("[%s/%s] %s", new SimpleDateFormat("HH:mm:ss").format(new Date()), level, message);
                 if (!JingleGUI.instanceExists()) return;
                 JingleGUI.get().logDocumentWithDebug.addLineWithRolling(messageWithTime);
@@ -121,7 +122,7 @@ public final class Jingle {
 
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
 
-        Kerykeion.addListener(HermesInstanceDepot.get(), 100, EXECUTOR);
+        Kerykeion.addListener(InstanceChecker.HermesChecker.get(), 100, EXECUTOR);
         Kerykeion.addListener(HermesScriptRelay.get(), 1, EXECUTOR);
         Kerykeion.setErrorLogger((s, throwable) -> logError("(Kerykeion) " + s, throwable));
         Kerykeion.start(true);
@@ -283,13 +284,13 @@ public final class Jingle {
         if (mainInstancePreviouslyExists && (getMainInstance().get().pid == activePid || getMainInstance().get().checkWindow(activeHwnd)))
             return;
 
-        Set<OpenedInstanceInfo> allOpenedInstances = InstanceChecker.getAllOpenedInstances();
+        Set<OpenedInstance> allOpenedInstances = InstanceChecker.getAllOpenedInstances();
         if (allOpenedInstances.isEmpty()) {
             setMainInstance(null, null);
             return;
         }
 
-        Optional<OpenedInstanceInfo> newActiveInstance = allOpenedInstances.stream().filter(openedInstanceInfo -> Objects.equals(activePid, openedInstanceInfo.pid)).findAny();
+        Optional<OpenedInstance> newActiveInstance = allOpenedInstances.stream().filter(openedInstanceInfo -> Objects.equals(activePid, openedInstanceInfo.pid)).findAny();
         if (newActiveInstance.isPresent()) {
             setMainInstance(newActiveInstance.get(), activeHwnd);
             return;
@@ -311,10 +312,10 @@ public final class Jingle {
         return getMainInstance().flatMap(OpenedInstance::getKeyPresser);
     }
 
-    public static void setMainInstance(@Nullable OpenedInstanceInfo instance, WinDef.HWND hwnd) {
-        undoWindowTitle(mainInstance);
+    public static void setMainInstance(@Nullable OpenedInstance instance, WinDef.HWND hwnd) {
         if (mainInstance == instance) return;
-        mainInstance = instance == null ? null : new OpenedInstance(instance);
+        undoWindowTitle(mainInstance);
+        mainInstance = instance;
         legalModCheckNeeded = instance != null;
         JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
         borderlessScheduledTime = -1;

@@ -10,7 +10,7 @@ import xyz.duncanruns.jingle.JingleUpdater;
 import xyz.duncanruns.jingle.bopping.Bopping;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
-import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
+import xyz.duncanruns.jingle.instance.OpenedInstance;
 import xyz.duncanruns.jingle.packaging.Packaging;
 import xyz.duncanruns.jingle.script.ScriptStuff;
 import xyz.duncanruns.jingle.util.*;
@@ -213,7 +213,7 @@ public class JingleGUI extends JFrame {
         this.quickActionButtonSuppliers.add(Pair.of(-priority, buttonSupplier));
     }
 
-    public void setInstance(OpenedInstanceInfo instance) {
+    public void setInstance(OpenedInstance instance) {
         this.setInstance(instance == null ? null : instance.instancePath, instance != null);
     }
 

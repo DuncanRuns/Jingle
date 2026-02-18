@@ -18,8 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class InstanceInfo {
-    public final String versionString;
-    public final Path instancePath;
+    public String versionString;
+    public Path instancePath;
 
     InstanceInfo(String versionString, Path instancePath) {
         this.versionString = versionString;
@@ -29,7 +29,7 @@ public class InstanceInfo {
     /**
      * Uses powershell to get the command line of a Minecraft instance and retrieve relevant information about it
      *
-     * @param hwnd the window pointer object of the Minecraft instance
+     * @param pid the pid of the Minecraft instance
      * @return the extracted instance info of the Minecraft instance
      */
     public static InstanceInfo getInstanceInfoFromHwnd(int pid) {
