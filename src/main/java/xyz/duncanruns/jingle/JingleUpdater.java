@@ -66,7 +66,7 @@ public final class JingleUpdater {
 
         if (meta == null) {
             try {
-                meta = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Jingle/main/meta_v2.json");
+                meta = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Jingle/meta/meta_v2.json");
             } catch (Exception e) {
                 Jingle.logError("Failed to grab Jingle update meta:", e);
                 return;
