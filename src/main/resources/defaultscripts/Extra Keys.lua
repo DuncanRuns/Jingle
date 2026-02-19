@@ -63,7 +63,6 @@ local function on_hermes_state_change()
         return
     end
     if not is_loading_screen(screen_class) then
-        jingle.log("World Loaded")
         world_loaded = true
         last_enter_world = jingle.getCurrentTime()
     end
