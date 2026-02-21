@@ -160,7 +160,7 @@ public final class Jingle {
     private static void loadSupporters() {
         new Thread(() -> {
             try {
-                JingleGUI.get().showSupporters(GrabUtil.grab("https://raw.githubusercontent.com/DuncanRuns/Jingle/main/supporters.txt").split(", "));
+                JingleGUI.get().showSupporters(GrabUtil.grab("https://raw.githubusercontent.com/DuncanRuns/Jingle/meta/supporters.txt").split(", "));
             } catch (Exception e) {
                 logError("Failed to obtain list of supporters!", e);
             }
@@ -170,7 +170,7 @@ public final class Jingle {
     private static void loadCommunity() {
         new Thread(() -> {
             try {
-                JsonObject json = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Jingle/main/community.json");
+                JsonObject json = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Jingle/meta/community.json");
                 List<Pair<String, String>> buttons = json.getAsJsonArray("buttons").asList().stream()
                         .map(JsonElement::getAsJsonObject)
                         .map(j -> Pair.of(j.get("display").getAsString(), j.get("link").getAsString()))
