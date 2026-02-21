@@ -237,17 +237,18 @@ public final class Jingle {
             borderlessScheduledTime = -1;
         }
         if (JingleGUI.instanceExists()) {
-            tickSaveCheck();
+            tickFocusCheck();
         }
         PluginEvents.END_TICK.runAll();
         ScriptStuff.END_TICK.runAll();
     }
 
-    private static void tickSaveCheck() {
+    private static void tickFocusCheck() {
         boolean focused = JingleGUI.get().isFocused();
         if (focused == guiWasFocused) return;
         guiWasFocused = focused;
         if (!focused) {
+            PluginEvents.GUI_LOST_FOCUS.runAll();
             log(Level.DEBUG, "Unfocused, saving options...");
             options.save();
         }

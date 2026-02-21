@@ -11,6 +11,8 @@ public final class PluginEvents {
     public static RunnableEventType STOP = new RunnableEventType();
     // Runs when the instance changes, can be null
     public static RunnableEventType MAIN_INSTANCE_CHANGED = new RunnableEventType();
+    // Runs when the GUI loses focus, right before saving options
+    public static RunnableEventType GUI_LOST_FOCUS = new RunnableEventType();
 
     private PluginEvents() {
     }
