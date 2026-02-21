@@ -75,9 +75,10 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 - `Open Scripts Folder` will open the folder where .lua files will be placed. The folder also contains a `libs` folder
   containing all the functions a script can use.
 - `Reload Scripts` will reload all scripts and load new ones added to the scripts folder.
-- As of v1.3.0, there are 3 default scripts packaged with Jingle.
+- As of v2.0, there are 3 default scripts packaged with Jingle.
     - **Coop Mode**: This script will automatically open to lan when joining a world. It will always do this if the
-      script is enabled. Press `Customize` to decide if you want cheats enabled (for /difficulty and /time set 0).
+      script is enabled. Press `Customize` to decide if you want cheats enabled (for /difficulty and /time set 0), and
+      change the delay before opening to lan.
     - **Extra Keys**: This script adds 4 hotkeys actions, and some customization for 2 of them.
         - The customization for this script tweaks when the reset keys for this script are allowed to activate.
         - `Safe Reset` is a hotkey action that will reset the world for you, but only if you are in a location selected
@@ -90,30 +91,14 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
         - `Start Coping` will open to lan with cheats enabled and send "/gamemode spectator" to the in game chat. **This
           will only work if you have an "Open Chat" key set in game.**
         - `Minimize Instance` will minimize the Minecraft window to the task bar. Works with borderless windows.
-    - **Resizing**: This script adds 3 hotkey actions and customization for each.
-        - `Eye Measuring` makes your Minecraft window really tall (and skinny to save on lag), this makes it so each
-          pixel represents a tiny angle on screen, useful for eye measuring. This hotkey will also show and uncover the
-          Eye Measuring Projector, see the OBS tab to get the Eye Measuring Projector.
-        - `Planar Abuse` makes your Minecraft window really wide and short so that you can abuse planar fog to see
-          further in the nether.
-        - `Thin BT` makes your Minecraft window really skinny to provide a smaller scanning area for mapless, making it
-          easier to distinguish where the buried treasure subchunk could be.
-        - Customization:
-            - Each of the window sizes for the hotkeys can be individually customized here.
-            - `Undo Resizing after Reset` will enable automatic undoing of size changes after leaving the world. (You
-              probably want to keep this on)
-            - `Change Cursor Speed to 1 when Measuring` will set your windows cursor speed setting to 1 when activating
-              the `Eye Measuring` hotkey action. This is only effective when used with raw input (in game setting)
-              disabled.
-                - If enabled, another question will be asked, press `Yes` to the question if the windows mouse speed it
-                  asks about will always be your preferred windows mouse speed. If your preferred windows mouse speed
-                  ever changes, you can go through this customization again to save a new preferred speed.
 
 ### Plugins
 
 - The only thing this tab does is provide a space for plugins to add their own tabs for customization or buttons (or
   anything else that can be added to a GUI).
-- There are 4 default plugins as of Jingle v1.1.1:
+- There are 4 default plugins as of Jingle v2.0:
+    - [`OBS Link`](https://github.com/DuncanRuns/Jingle-OBS-Link/) allows Jingle to detect whether you are on the wall
+      or are in a game, and switch between "Playing" and "Walling" scenes.
     - [`PaceMan Tracker`](https://github.com/PaceMan-MCSR/PaceMan-Tracker/) tracks RSG Any% speedruns
       for [PaceMan.gg](https://paceman.gg/). Setup and further information can be found through the website.
     - [`Standard Switcher`](https://github.com/DuncanRuns/Jingle-Standard-Switcher) allows changing out the standard
@@ -127,38 +112,16 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
           It will then set the instance to use this file.
         - `Switch to Another File` will allow switching the instance's current standard settings to any created file in
           the Standard Switcher folder.
-    - [`EyeSee`](https://github.com/DuncanRuns/Jingle-EyeSee-Plugin) provides an eye measuring projector without needing
-      to set up OBS. It features similar settings to the OBS eye measuring projector as well as an FPS Limit setting to
-      prevent unnecessary lag.
     - [`Program Launching`](https://github.com/joe-ldp/Jingle-Launch-Programs) allows adding a list of programs/files
       that are opened when pressing the launch button on the plugin tab or when using the quick action on the main
       Jingle tab. It also allows launching a Minecraft instance with Prism Launcher or MultiMC and automatically
       launching when Jingle launches.
 
-### OBS
-
-- This tab contains instructions on how to link OBS to Jingle. Follow the instructions in the tab to do so.
-- `Copy Script Path` will copy the full file path to the OBS script generated in the Jingle folder. This file will be
-  updated by Jingle whenever Jingle updates and opens, so you should use this file path so that it can stay updated, and
-  not a different copy of the script.
-- The following options will only work after following the instructions and linking Jingle to OBS.
-    - `Enable OBS Eye Meauring Projector` will automatically open an OBS projector for eye measuring, by default it
-      should appear black until using a hotkey action that activates it. See the information in the scripts section
-      about the eye measuring hotkey action.
-    - `Automatically Position OBS Eye Measuring Projector` will set a good widely used position for the projector,
-      disabling this allows a specific custom position to be set.
-    - `OBS Projector Name Pattern` allows changing the window title searched for by Jingle for the Eye Measuring
-      Projector. It is recommended to keep this on the default value `*Jingle Mag`.
-    - `Hide Projector When Inactive` will move the projector off-screen when it is not needed. If you experience issues
-      with Minecraft minimizing/unfocusing when using the eye measuring projector, you can try disabling this option.
-- **The Eye Measuring Projector will not work if OBS is run in administrator mode while Jingle is not in administrator
-  mode!**
-
 ### Community
 
 - This tab contains a list of buttons that link to various community resources that have some relation to Jingle.
     - Retrieves buttons and links from
-      [community.json](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/main/community.json).
+      [community.json](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/meta/community.json).
 - Includes a support section, with a button that links to [my ko-fi](https://ko-fi.com/DuncanRuns), and shows 3 random
   supporters from [supporters.txt](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/main/supporters.txt)
   every 5 seconds.
