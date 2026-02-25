@@ -79,7 +79,12 @@ public class JingleOptions {
         if (Files.exists(path)) {
             try {
                 JingleOptions options = FileUtil.readJson(path, JingleOptions.class, LOAD_GSON);
-                options.fix();
+                if (options.optionsVersion > CURRENT_OPTIONS_VERSION) {
+                    Jingle.log(Level.WARN, "Options file is from a newer version of Jingle, some settings may not be loaded correctly. A copy of the options file for the newer version of Jingle has been saved to options." + options.optionsVersion + ".json");
+                    Files.copy(path, OPTIONS_PATH.resolveSibling("options." + options.optionsVersion + ".json"));
+                } else {
+                    options.fix();
+                }
                 return Optional.of(options);
             } catch (Exception e) {
                 Jingle.logError("Failed to load " + path.getFileName().toString(), e);
