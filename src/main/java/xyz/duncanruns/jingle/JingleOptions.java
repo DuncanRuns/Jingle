@@ -1,6 +1,7 @@
 package xyz.duncanruns.jingle;
 
 import com.google.gson.*;
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 import xyz.duncanruns.jingle.util.FileUtil;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
-    private static final int CURRENT_OPTIONS_VERSION = 6;
+    private static final int CURRENT_OPTIONS_VERSION = 7;
     public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
     public static final Path OPTIONS_BACKUP_PATH = Jingle.FOLDER.resolve("options.json.backup").toAbsolutePath();
     public static final JingleOptions DEFAULTS = createNew();
@@ -108,6 +109,11 @@ public class JingleOptions {
         }
         if (this.disabledDefaultScripts != null) {
             this.disabledScripts.addAll(this.disabledDefaultScripts);
+        }
+
+        // Change Extra Keys Reset Before 20s to Quick Reset
+        if (this.optionsVersion < 7) {
+            this.setSavedHotkeys(this.copySavedHotkeys().stream().map(sh -> sh.action.equals("Extra Keys:Reset Before 20s") ? new SavedHotkey(sh.type, "Extra Keys:Quick Reset", sh.keys, sh.ignoreModifiers) : sh).collect(Collectors.toList()));
         }
 
         this.optionsVersion = DEFAULTS.optionsVersion;

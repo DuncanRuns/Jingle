@@ -13,6 +13,7 @@ local world_loaded = false
 local opened_to_lan = false
 local screen_open = false
 local screen_is_pause = false
+local quick_reset_allowed = false
 
 local function on_main_instance_changed()
     initialized = false
@@ -22,6 +23,7 @@ local function on_main_instance_changed()
     opened_to_lan = false
     screen_open = false
     screen_is_pause = false
+    quick_reset_allowed = false
 end
 
 local ends_with = basics.stringEndsWith
@@ -64,6 +66,7 @@ local function on_hermes_state_change()
     end
     if not is_loading_screen(screen_class) then
         world_loaded = true
+        quick_reset_allowed = true
         last_enter_world = jingle.getCurrentTime()
     end
 end
@@ -71,6 +74,10 @@ end
 local function get_reset_key()
     return jingle.getInstanceKeyOption("key_Create New World") or
         jingle.getInstanceKeyOption("key_Create New World§r")
+end
+
+local function can_run_preview_reset()
+    return world ~= nil and not world_loaded and jingle.getCustomizable('p', 'false') == 'true'
 end
 
 local function can_run_reset()
@@ -97,37 +104,39 @@ local function can_run_reset()
         return jingle.getCustomizable('t', 'false') == 'true'
     end
 
-    if world ~= nil and not world_loaded then
-        return jingle.getCustomizable('p', 'false') == 'true'
-    end
+    return can_run_preview_reset()
+end
 
-    return false
+local function press_reset()
+    local key = get_reset_key()
+    if key == nil then
+        jingle.log("Can't reset! A create new world key is not set.")
+        return
+    end
+    jingle.sendKeyToInstance(key)
 end
 
 local function run_safe_reset()
     if can_run_reset() then
-        local key = get_reset_key()
-        if key == nil then
-            jingle.log("Can't run Safe Reset! A create new world key is not set.")
-            return
-        end
-        jingle.sendKeyToInstance(key)
+        press_reset()
     end
 end
 
-local function run_reset_before_20s()
+local function run_quick_reset()
     if not can_run_reset() then
         return
     end
-    if math.abs(jingle.getCurrentTime() - last_enter_world) > 20000 then
+    if can_run_preview_reset() then
+        press_reset()
         return
     end
-    local key = get_reset_key()
-    if key == nil then
-        jingle.log("Can't run Reset Before 20s! A create new world key is not set.")
-        return
+    if quick_reset_allowed and math.abs(jingle.getCurrentTime() - last_enter_world) <= 20000 then
+        press_reset()
     end
-    jingle.sendKeyToInstance(key)
+end
+
+local function run_disable_quick_reset()
+    quick_reset_allowed = false
 end
 
 local function run_start_coping()
@@ -153,7 +162,7 @@ local function run_minimize()
 end
 
 local function customize()
-    jingle.addCustomizationMenuText("Allowed states for 'Safe Reset' and 'Reset Before 20s':")
+    jingle.addCustomizationMenuText("Allowed states for 'Safe Reset' and 'Quick Reset':")
     jingle.addCustomizationMenuCheckBox("iwu", true, "In World, Unpaused")
     jingle.addCustomizationMenuCheckBox("iwp", true, "In World, Paused")
     jingle.addCustomizationMenuCheckBox("iwgso", false, "In World, Inventory/Chat Open")
@@ -166,7 +175,8 @@ jingle.addHotkey("Clear Worlds", run_clear_worlds)
 jingle.listen("HERMES_STATE_CHANGE", on_hermes_state_change)
 jingle.listen("MAIN_INSTANCE_CHANGED", on_main_instance_changed)
 jingle.addHotkey("Safe Reset", run_safe_reset)
-jingle.addHotkey("Reset Before 20s", run_reset_before_20s)
+jingle.addHotkey("Quick Reset", run_quick_reset)
+jingle.addHotkey("Disable Quick Reset", run_disable_quick_reset)
 jingle.addHotkey("Start Coping", run_start_coping)
 jingle.addHotkey("Minimize Instance", run_minimize)
 jingle.setCustomization(customize)

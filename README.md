@@ -75,18 +75,21 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 - `Open Scripts Folder` will open the folder where .lua files will be placed. The folder also contains a `libs` folder
   containing all the functions a script can use.
 - `Reload Scripts` will reload all scripts and load new ones added to the scripts folder.
-- As of v2.0, there are 3 default scripts packaged with Jingle.
+- As of v2.0, there are 2 default scripts packaged with Jingle.
     - **Coop Mode**: This script will automatically open to lan when joining a world. It will always do this if the
       script is enabled. Press `Customize` to decide if you want cheats enabled (for /difficulty and /time set 0), and
       change the delay before opening to lan.
-    - **Extra Keys**: This script adds 4 hotkeys actions, and some customization for 2 of them.
+    - **Extra Keys**: This script adds 6 hotkeys actions and some customization.
         - The customization for this script tweaks when the reset keys for this script are allowed to activate.
         - `Safe Reset` is a hotkey action that will reset the world for you, but only if you are in a location selected
           in the customization. **This will only work if you have a "Create New World" hotkey set in game, and it must
           be set to something different from this hotkey.**
-        - `Reset Before 20s` is exactly like `Safe Reset`, except it will only work within the first 20 seconds of
+        - `Quick Reset` is exactly like `Safe Reset`, except it will only work within the first 20 seconds of
           joining a world. This is useful for setting to a mouse button or another easily accessible button to make
           resetting more comfortable, but prevents accidentally pressing reset on a good run.
+        - `Disable Quick Reset` will disable the `Quick Reset` hotkey action until the next world is loaded. For
+          example, setting to left-click means once you start digging for a buried treasure, you can't accidentally
+          reset using `Quick Reset`.
         - `Clear Worlds` is exactly like pressing the button from the `Jingle` tab.
         - `Start Coping` will open to lan with cheats enabled and send "/gamemode spectator" to the in game chat. **This
           will only work if you have an "Open Chat" key set in game.**
