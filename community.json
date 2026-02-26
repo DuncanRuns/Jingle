@@ -17,6 +17,10 @@
       "link": "https://discord.com/invite/jmdFn3C"
     },
     {
+      "display": "Toolscreen",
+      "link": "https://github.com/jojoe77777/Toolscreen/releases"
+    },
+    {
       "display": "PaceMan.gg",
       "link": "https://paceman.gg/"
     },
@@ -29,4 +33,5 @@
       "link": "https://github.com/MCSRLauncher/Launcher"
     }
   ]
+
 }
