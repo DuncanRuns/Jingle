@@ -158,9 +158,9 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 
 - This tab contains a list of buttons that link to various community resources that have some relation to Jingle.
     - Retrieves buttons and links from
-      [community.json](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/main/community.json).
+      [community.json](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/meta/community.json).
 - Includes a support section, with a button that links to [my ko-fi](https://ko-fi.com/DuncanRuns), and shows 3 random
-  supporters from [supporters.txt](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/main/supporters.txt)
+  supporters from [supporters.txt](https://raw.githubusercontent.com/DuncanRuns/Jingle/refs/heads/meta/supporters.txt)
   every 5 seconds.
 
 ## Jingle Launcher
@@ -168,7 +168,7 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 A small executable program that will run any Jingle jar it finds in the same folder. This allows running as admin and
 pinning to the start menu.
 
-[Download](https://github.com/DuncanRuns/Jingle/raw/refs/heads/main/Launcher/zig-out/bin/Jingle%20Launcher.exe) | [Source Code](https://github.com/DuncanRuns/Jingle/tree/main/Launcher)
+[Download](https://github.com/DuncanRuns/Jingle/raw/refs/heads/v1/Launcher/zig-out/bin/Jingle%20Launcher.exe) | [Source Code](https://github.com/DuncanRuns/Jingle/tree/v1/Launcher)
 
 ## Developing
 
