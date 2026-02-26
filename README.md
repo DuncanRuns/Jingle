@@ -134,7 +134,7 @@ Here's an overview of everything in Jingle sorted by the GUI tabs they can be fo
 A small executable program that will run any Jingle jar it finds in the same folder. This allows running as admin and
 pinning to the start menu.
 
-[Download](https://github.com/DuncanRuns/Jingle/raw/refs/heads/main/Launcher/zig-out/bin/Jingle%20Launcher.exe) | [Source Code](https://github.com/DuncanRuns/Jingle/tree/main/Launcher)
+[Download](https://github.com/DuncanRuns/Jingle/raw/refs/heads/v2/Launcher/zig-out/bin/Jingle%20Launcher.exe) | [Source Code](https://github.com/DuncanRuns/Jingle/tree/v2/Launcher)
 
 ## Developing
 
