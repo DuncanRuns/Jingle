@@ -233,7 +233,7 @@ public final class KeyboardUtil {
     }
 
     public static void sendKeyDownToHwnd(HWND hwnd, int virtualKey) {
-        User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(256), new WinDef.WPARAM(virtualKey), createLParamKeyDown(virtualKey));
+        User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(WinUser.WM_KEYDOWN), new WinDef.WPARAM(virtualKey), createLParamKeyDown(virtualKey));
     }
 
     public static void sendKeyDownToHwnd(HWND hwnd, Win32VK virtualKey) {
@@ -241,7 +241,7 @@ public final class KeyboardUtil {
     }
 
     public static void sendKeyUpToHwnd(HWND hwnd, int virtualKey) {
-        User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(257), new WinDef.WPARAM(virtualKey), createLParamKeyUp(virtualKey));
+        User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(WinUser.WM_KEYUP), new WinDef.WPARAM(virtualKey), createLParamKeyUp(virtualKey));
     }
 
     public static void sendKeyUpToHwnd(HWND hwnd, Win32VK virtualKey) {
