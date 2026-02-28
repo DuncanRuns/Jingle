@@ -53,7 +53,12 @@ public class InstanceInfo {
         String commandLine;
         try {
             commandLine = CommandLineUtil.getCommandLineStringFromPid(pid);
-            Jingle.log(Level.DEBUG, "InstanceInfo: Found command line (" + commandLine.length() + " chars).");
+            if (commandLine.trim().isEmpty()) {
+                commandLine = null;
+            } else {
+                commandLine = commandLine.trim();
+                Jingle.log(Level.DEBUG, "InstanceInfo: Found command line (" + commandLine.length() + " chars).");
+            }
         } catch (Exception e) {
             Jingle.log(Level.ERROR, "Failed to get command line: " + ExceptionUtil.toDetailedString(e));
             commandLine = null;
@@ -61,8 +66,11 @@ public class InstanceInfo {
         if (commandLine == null) {
             try {
                 commandLine = getCommandLinePS(pid);
-                if (commandLine != null)
+                if (commandLine != null && !commandLine.trim().isEmpty()) {
                     Jingle.log(Level.DEBUG, "InstanceInfo: Found command line (" + commandLine.length() + " chars).");
+                } else {
+                    commandLine = null;
+                }
             } catch (Exception e) {
                 Jingle.log(Level.ERROR, "Failed to get command line via powershell: " + ExceptionUtil.toDetailedString(e));
             }
@@ -70,7 +78,13 @@ public class InstanceInfo {
         if (commandLine == null && environmentVariables.isEmpty()) {
             return null;
         }
-        CommandLineArgs commandLineArgs = CommandLineUtil.getCommandLineArgs(commandLine);
+        CommandLineArgs commandLineArgs;
+        try {
+            commandLineArgs = CommandLineUtil.getCommandLineArgs(commandLine);
+        } catch (Exception e) {
+            Jingle.log(Level.ERROR, "Failed to parse command line: " + ExceptionUtil.toDetailedString(e));
+            return null;
+        }
 
         Path instancePath = Optional.ofNullable(environmentVariables.getOrDefault("INST_MC_DIR", null)).map(Paths::get).orElse(null);
         if (instancePath != null) {
