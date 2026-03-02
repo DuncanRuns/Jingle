@@ -42,7 +42,7 @@ class JingleLuaLibrary extends LuaLibrary {
         };
     }
 
-    @LuaDocumentation(description = "Registers a hotkey action. If a user sets up a hotkey with the given hotkey action name and then presses their set hotkey, the given function will be ran.")
+    @LuaDocumentation(description = "Registers a hotkey action for this script. If a user sets up a hotkey with the given hotkey action name and then presses their set hotkey, the given function will be ran.")
     public void addHotkey(String hotkeyName, LuaFunction hotkeyFunction) {
         assert this.script != null;
         assert this.globals != null;
@@ -50,6 +50,18 @@ class JingleLuaLibrary extends LuaLibrary {
             Jingle.log(Level.ERROR, "Can't add hotkey script: script name \"" + hotkeyName + "\" contains a colon!");
         }
         ScriptStuff.addHotkeyAction(this.script, hotkeyName, wrapFunction(hotkeyFunction));
+    }
+
+    @LuaDocumentation(description = "Removes a hotkey action for this script.")
+    public void removeHotkey(String hotkeyName) {
+        assert this.script != null;
+        ScriptStuff.removeHotkeyAction(this.script, hotkeyName);
+    }
+
+    @LuaDocumentation(description = "Removes all hotkey actions for this script.")
+    public void clearHotkeys() {
+        assert this.script != null;
+        ScriptStuff.clearHotkeyActions(this.script);
     }
 
     @LuaDocumentation(description = "Registers the customization function for this script. If a user presses the \"Customize\" button for this script, the given function will be ran.")

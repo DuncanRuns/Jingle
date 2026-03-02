@@ -68,6 +68,14 @@ public final class ScriptStuff {
         HOTKEYS_ACTIONS.put(script.getName() + ":" + hotkeyName, hotkeyFunction);
     }
 
+    public static void removeHotkeyAction(ScriptFile script, String hotkeyName) {
+        HOTKEYS_ACTIONS.remove(script.getName() + ":" + hotkeyName);
+    }
+
+    public static void clearHotkeyActions(ScriptFile script) {
+        HOTKEYS_ACTIONS.keySet().removeIf(key -> key.startsWith(script.getName() + ":"));
+    }
+
     public static void setCustomization(ScriptFile scriptFile, Runnable customizationFunction) {
         CUSTOMIZATION_FUNCTIONS.put(scriptFile.getName(), customizationFunction);
     }
