@@ -109,8 +109,6 @@ public final class Jingle {
         loadLegalMods();
         new Thread(JingleUpdater::checkForUpdates, "update-checker").start();
 
-        generateResources();
-
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Jingle v" + VERSION + " with java: " + usedJava);
 
@@ -181,17 +179,6 @@ public final class Jingle {
                 JingleGUI.get().showCommunityButtons(null);
             }
         }, "community-loader").start();
-    }
-
-    private static void generateResources() {
-        Path overlayPngPath = FOLDER.resolve("measuring_overlay.png");
-        if (Files.exists(overlayPngPath)) return;
-        try {
-            ResourceUtil.copyResourceToFile("/measuring_overlay.png", overlayPngPath);
-            Jingle.log(Level.INFO, "Created measuring_overlay.png");
-        } catch (IOException e) {
-            Jingle.logError("Failed to measuring_overlay.png!", e);
-        }
     }
 
     private static void tryTick() {
