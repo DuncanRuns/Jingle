@@ -130,7 +130,11 @@ local function run_quick_reset()
         press_reset()
         return
     end
-    if quick_reset_allowed and math.abs(jingle.getCurrentTime() - last_enter_world) <= 20000 then
+    local time_limit = tonumber(jingle.getCustomizable('qr_time_limit', '20')) or 20
+    if time_limit > 0 and math.abs(jingle.getCurrentTime() - last_enter_world) > (time_limit * 1000) then
+        return
+    end
+    if quick_reset_allowed then
         press_reset()
     end
 end
@@ -161,7 +165,14 @@ local function run_minimize()
     end
 end
 
+local function is_number(value)
+    return tonumber(value) ~= nil
+end
+
 local function customize()
+    jingle.addCustomizationMenuText("Quick Reset Time Limit (set to 0 to disable time limit):")
+    jingle.addCustomizationMenuTextField("qr_time_limit", "20", is_number)
+    jingle.addCustomizationMenuText(" ")
     jingle.addCustomizationMenuText("Allowed states for 'Safe Reset' and 'Quick Reset':")
     jingle.addCustomizationMenuCheckBox("iwu", true, "In World, Unpaused")
     jingle.addCustomizationMenuCheckBox("iwp", true, "In World, Paused")
