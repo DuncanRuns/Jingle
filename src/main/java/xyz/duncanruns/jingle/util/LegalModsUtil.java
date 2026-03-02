@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public final class LegalModsUtil {
     private static Set<String> legalMods = Arrays.stream(
             // Start with default legal mods in case updating fails
-            "planifolia, phosphor, antiresourcereload, forceport, chunkumulator, fabricproxylite, lithium, voyager, dynamicmenufps, nopaus, sleepbackground, setspawnmod, sodiummac, fastreset, legacycrashfix, statsperworld, chunkcacher, speedrunigt, atum, speedrunapi, retino, standardsettings, antigone, lazydfu, lazystronghold, optifabric, starlight, extraoptions, zbufferfog, sodium, stateoutput, tabfocus, krypton, worldpreview, anchiale, biomethreadlocalfix, seedqueue, costar"
+            "anchiale, antigone, antiresourcereload, atum, biomethreadlocalfix, boundlesswindow, chunkcacher, chunkumulator, costar, dynamicmenufps, extraoptions, fabricproxylite, fastreset, forceport, hermes, hermescore, krypton, lazydfu, lazystronghold, legacycrashfix, legacyplanifolia, lithium, mcsrfairplay, nopaus, optifabric, optifabricorigins, optifine, optifinelight, phosphor, planifolia, retino, seedqueue, setspawnmod, sleepbackground, sodium, sodiummac, speedrunapi, speedrunigt, standardsettings, starlight, stateoutput, statsperworld, tabfocus, voyager, worldpreview, zbufferfog"
                     .split(", ")
     ).collect(Collectors.toSet());
     private static boolean updated = false;
@@ -32,9 +32,14 @@ public final class LegalModsUtil {
     }
 
     private static Set<String> obtainLegalMods() throws IOException {
-        return GrabUtil.grabJson("https://raw.githubusercontent.com/tildejustin/mcsr-meta/schema-6/mods.json")
+        return GrabUtil.grabJson("https://raw.githubusercontent.com/tildejustin/mcsr-meta/schema-7/mods.json")
                 .getAsJsonArray("mods").asList().stream()
                 .map(JsonElement::getAsJsonObject)
                 .map(j -> j.get("modid").getAsString().replaceAll("[-_]", "")).collect(Collectors.toSet());
+    }
+
+    // Generates the defaults
+    public static void main(String[] args) throws IOException {
+        System.out.println(obtainLegalMods().stream().sorted().collect(Collectors.joining(", ")));
     }
 }
