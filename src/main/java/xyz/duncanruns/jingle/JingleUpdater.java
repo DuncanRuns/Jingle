@@ -99,7 +99,6 @@ public final class JingleUpdater {
         if (!shouldUpdate(currentVersion, foundLatestVersion, lastCheckedVersion)) return;
 
         synchronized (Jingle.class) {
-            Jingle.options = JingleOptions.load();
             Jingle.options.lastCheckedVersion = foundLatestVersion;
         }
 
