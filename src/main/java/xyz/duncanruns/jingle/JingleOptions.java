@@ -1,7 +1,6 @@
 package xyz.duncanruns.jingle;
 
 import com.google.gson.*;
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.jingle.hotkey.SavedHotkey;
 import xyz.duncanruns.jingle.util.FileUtil;
 
@@ -18,8 +17,6 @@ import java.util.stream.Collectors;
 public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
     private static final int CURRENT_OPTIONS_VERSION = 7;
-    public static final Path OPTIONS_PATH = Jingle.FOLDER.resolve("options.json").toAbsolutePath();
-    public static final Path OPTIONS_BACKUP_PATH = Jingle.FOLDER.resolve("options.json.backup").toAbsolutePath();
     public static final JingleOptions DEFAULTS = createNew();
 
     private static final Gson LOAD_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
@@ -73,19 +70,33 @@ public class JingleOptions {
     }
 
     public static JingleOptions load() {
-        return loadFrom(OPTIONS_PATH).orElseGet(() -> loadFrom(OPTIONS_BACKUP_PATH).orElseGet(JingleOptions::createNew));
+        List<Path> optionsPaths = new ArrayList<>();
+        for (int i = CURRENT_OPTIONS_VERSION; i > 5; i--) {
+            optionsPaths.add(getOptionsPathForVersion(i, false));
+            optionsPaths.add(getOptionsPathForVersion(i, true));
+        }
+        optionsPaths = optionsPaths.stream().filter(Files::exists).collect(Collectors.toList());
+        for (Path optionsPath : optionsPaths) {
+            Optional<JingleOptions> o = loadFrom(optionsPath);
+            if (o.isPresent()) {
+                return o.get();
+            }
+        }
+        return createNew();
+    }
+
+    private static Path getOptionsPathForVersion(int optionsVersion, boolean backup) {
+        if (optionsVersion < 7) {
+            return Jingle.FOLDER.resolve("options.json" + (backup ? ".backup" : ""));
+        }
+        return Jingle.FOLDER.resolve("options." + optionsVersion + ".json" + (backup ? ".backup" : ""));
     }
 
     private static Optional<JingleOptions> loadFrom(Path path) {
         if (Files.exists(path)) {
             try {
                 JingleOptions options = FileUtil.readJson(path, JingleOptions.class, LOAD_GSON);
-                if (options.optionsVersion > CURRENT_OPTIONS_VERSION) {
-                    Jingle.log(Level.WARN, "Options file is from a newer version of Jingle, some settings may not be loaded correctly. A copy of the options file for the newer version of Jingle has been saved to options." + options.optionsVersion + ".json");
-                    Files.copy(path, OPTIONS_PATH.resolveSibling("options." + options.optionsVersion + ".json"));
-                } else {
-                    options.fix();
-                }
+                options.fix();
                 return Optional.of(options);
             } catch (Exception e) {
                 Jingle.logError("Failed to load " + path.getFileName().toString(), e);
@@ -121,8 +132,8 @@ public class JingleOptions {
 
     public void save() {
         try {
-            FileUtil.writeString(OPTIONS_PATH, SAVE_GSON.toJson(this));
-            FileUtil.writeString(OPTIONS_BACKUP_PATH, SAVE_GSON.toJson(this));
+            FileUtil.writeString(getOptionsPathForVersion(CURRENT_OPTIONS_VERSION, false), SAVE_GSON.toJson(this));
+            FileUtil.writeString(getOptionsPathForVersion(CURRENT_OPTIONS_VERSION, true), SAVE_GSON.toJson(this));
         } catch (Exception e) {
             Jingle.logError("Failed to save options.json:", e);
         }
