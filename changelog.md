@@ -1,3 +1,28 @@
+Changes in v2.0.0:
+
+- When Jingle opens the game to lan, it will now re-press any modifiers that were pressed before opening to lan
+    - This means doing mapless with the coop mode script should be much easier, as it won't release shift every time it
+      opens to lan
+- Changed `Reset < 20s` to `Quick Reset` in the Extra Keys script
+    - The time limit is now customizable
+    - A new hotkey action `Disable Quick Reset` has been added to disable quick reset until the next world is loaded
+        - For example, setting to left-click to prevent the key from working after you start mining for a buried
+          treasure
+- Many features removed in favor of Toolscreen:
+    - The resizing script, and resizing related lua functions
+    - The EyeSee plugin
+    - The OBS measuring projector
+- Jingle now uses Hermes instead of state output for instance state
+    - State output support is entirely removed, including any related script functions, breaking most scripts
+    - Default scripts have been updated to use Hermes
+- When options are broken by updates, it will now save into a new location, so that downgrading is still possible
+    - Example: In Jingle v2.0.0, the options version is `7`, so the options file will be saved as `options.7.json`, this
+      prevents overwriting the old `options.json`, allowing downgrading to v1.3.0 with no problems
+- Many improvements to the shutdown process, including proper cleanup of the tray icon and many executors and plugins
+    - Jingle used to exit with `System.exit(0)`, which forcefully shut down the program, which could cause issues if
+      plugins are trying to save data or do some other tasks
+    - If Jingle fails to shut down after 5 seconds, Jingle will still forcefully exit
+
 Changes in v1.3.0:
 
 - `Minimize Projector When Inactive` OBS option renamed to `Hide Projector When Inactive` and now defaults to true
