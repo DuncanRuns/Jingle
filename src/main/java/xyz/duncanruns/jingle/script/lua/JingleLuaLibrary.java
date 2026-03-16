@@ -168,9 +168,7 @@ class JingleLuaLibrary extends LuaLibrary {
         if (!chatKey.isPresent()) return false;
         keyPresser.pressKey(chatKey.get());
         SleepUtil.sleep(100);
-        for (char c : message.toCharArray()) {
-            instance.getHwnd().ifPresent(hwnd -> KeyboardUtil.sendCharToHwnd(hwnd, c));
-        }
+        keyPresser.type(message);
         keyPresser.pressEnter();
         return true;
     }
@@ -268,22 +266,22 @@ class JingleLuaLibrary extends LuaLibrary {
 
     @LuaDocumentation(description = "Sends a key down and up message to the instance with no delay between.")
     public void sendKeyToInstance(int key) {
-        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyToHwnd(hwnd, key));
+        Jingle.getMainInstanceKeyPresser().ifPresent(kp -> kp.pressKey(key));
     }
 
     @LuaDocumentation(description = "Sends a key down message to the instance.")
     public void sendKeyDownToInstance(int key) {
-        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyDownToHwnd(hwnd, key));
+        Jingle.getMainInstanceKeyPresser().ifPresent(kp -> kp.pressKeyDown(key));
     }
 
     @LuaDocumentation(description = "Sends a key up message to the instance.")
     public void sendKeyUpToInstance(int key) {
-        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyUpToHwnd(hwnd, key));
+        Jingle.getMainInstanceKeyPresser().ifPresent(kp -> kp.pressKeyUp(key));
     }
 
     @LuaDocumentation(description = "Sends a key down and up message to the instance with a specified delay between.")
     public void sendKeyHoldToInstance(int key, long millis) {
-        Jingle.getMainInstanceHwnd().ifPresent(hwnd -> KeyboardUtil.sendKeyToHwnd(hwnd, key, millis));
+        Jingle.getMainInstanceKeyPresser().ifPresent(kp -> kp.holdKey(key, millis));
     }
 
     @LuaDocumentation(description = "Logs a message to the Jingle log.")

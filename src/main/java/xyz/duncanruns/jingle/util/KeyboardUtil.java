@@ -219,16 +219,16 @@ public final class KeyboardUtil {
         return new ImmutablePair<>(scanCode, isExtended);
     }
 
-    private static WinDef.LPARAM createLParam(int virtualKey, int repeatCount, boolean transitionState, boolean previousKeyState, boolean contextCode) {
+    public static WinDef.LPARAM createLParam(int virtualKey, int repeatCount, boolean transitionState, boolean previousKeyState, boolean contextCode) {
         Pair<Integer, Boolean> scanCode = virtualKeyToScanCode(virtualKey);
         return new WinDef.LPARAM(((transitionState ? 1 : 0) << 31) | ((previousKeyState ? 1 : 0) << 30) | ((contextCode ? 1 : 0) << 29) | ((scanCode.getRight() ? 1 : 0) << 24) | (scanCode.getLeft() << 16) | (repeatCount));
     }
 
-    private static WinDef.LPARAM createLParamKeyDown(int virtualKey) {
+    public static WinDef.LPARAM createLParamKeyDown(int virtualKey) {
         return createLParam(virtualKey, 1, false, false, false);
     }
 
-    private static WinDef.LPARAM createLParamKeyUp(int virtualKey) {
+    public static WinDef.LPARAM createLParamKeyUp(int virtualKey) {
         return createLParam(virtualKey, 1, true, true, false);
     }
 
