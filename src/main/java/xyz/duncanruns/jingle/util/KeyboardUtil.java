@@ -180,6 +180,10 @@ public final class KeyboardUtil {
         return getPressedKeys().stream().filter(ALL_MODIFIERS::contains).collect(Collectors.toList());
     }
 
+    public static List<Integer> getPressedShiftKeys(){
+        return getPressedKeys().stream().filter(vk -> vk == User32.VK_SHIFT || vk == User32.VK_LSHIFT || vk == User32.VK_RSHIFT).collect(Collectors.toList());
+    }
+
     /**
      * Returns all currently pressed keys except for the ones excluded in the parameter.
      *

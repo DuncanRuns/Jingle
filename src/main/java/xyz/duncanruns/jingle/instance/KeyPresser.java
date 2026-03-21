@@ -2,6 +2,8 @@ package xyz.duncanruns.jingle.instance;
 
 import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef.HWND;
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.util.ToolscreenUtil;
 
 @SuppressWarnings("unused")
@@ -14,6 +16,9 @@ public class KeyPresser {
         if (toolscreenInstalled || System.currentTimeMillis() - lastToolscreenCheck < 5000) return;
         lastToolscreenCheck = System.currentTimeMillis();
         toolscreenInstalled = ToolscreenUtil.hasToolscreen(this.hwnd);
+        if (toolscreenInstalled) {
+            Jingle.log(Level.INFO, "Found toolscreen version " + ToolscreenUtil.getToolscreenVersion(this.hwnd));
+        }
     }
 
     public KeyPresser(HWND hwnd) {

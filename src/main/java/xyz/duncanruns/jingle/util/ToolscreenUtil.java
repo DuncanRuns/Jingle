@@ -20,12 +20,12 @@ public class ToolscreenUtil {
         return lresult.intValue() != 0;
     }
 
-    public static VersionUtil.Version getToolscreenVersion(WinDef.HWND hwnd) {
+    public static String getToolscreenVersion(WinDef.HWND hwnd) {
         int i = User32.INSTANCE.SendMessageA(hwnd, TOOL_SCREEN_GET_VERSION, new WinDef.WPARAM(0), new WinDef.LPARAM(0)).intValue();
         int major = (i >> 16) & 0xFF;
         int minor = (i >> 8) & 0xFF;
         int patch = i & 0xFF;
-        return VersionUtil.Version.of(major + "." + minor + "." + patch);
+        return major + "." + minor + "." + patch;
     }
 
     public static void sendKeyDownNoRebind(WinDef.HWND hwnd, int virtualKey, boolean toolscreenInstalled) {

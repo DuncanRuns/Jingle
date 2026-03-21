@@ -448,7 +448,7 @@ public final class Jingle {
         keyPresser.pressTab(MCVersionUtil.isNewerThan(versionString, "1.19.2") ? 2 : 1);
         keyPresser.pressEnter();
 
-        if (isInstanceActive()) for (Integer pressedModifier : KeyboardUtil.getPressedModifiers()) {
+        if (isInstanceActive()) for (Integer pressedModifier : KeyboardUtil.getPressedShiftKeys()) {
             keyPresser.pressKeyDown(pressedModifier);
         }
     }
