@@ -8,6 +8,8 @@ Changes in v2.0.0:
     - A new hotkey action `Disable Quick Reset` has been added to disable quick reset until the next world is loaded
         - For example, setting to left-click to prevent the key from working after you start mining for a buried
           treasure
+- Direct compatibility with Toolscreen
+    - Communicates with Toolscreen to send keys without rebinding
 - Many features removed in favor of Toolscreen:
     - The resizing script, and resizing related lua functions
     - The EyeSee plugin
