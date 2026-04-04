@@ -55,6 +55,8 @@ public class JingleOptions {
     public int[] lastPosition = new int[]{50, 50};
     public int[] lastSize = new int[]{600, 400};
 
+    public boolean seenGuttingWarning = false;
+
     @Deprecated
     @LoadOnly
     @Nullable

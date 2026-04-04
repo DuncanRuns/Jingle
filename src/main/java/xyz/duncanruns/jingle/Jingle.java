@@ -9,8 +9,12 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.jingle.gui.JingleGUI;
+import xyz.duncanruns.jingle.gui.GuttingWarning;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
-import xyz.duncanruns.jingle.instance.*;
+import xyz.duncanruns.jingle.instance.InstanceChecker;
+import xyz.duncanruns.jingle.instance.InstanceMods;
+import xyz.duncanruns.jingle.instance.KeyPresser;
+import xyz.duncanruns.jingle.instance.OpenedInstance;
 import xyz.duncanruns.jingle.plugin.PluginEvents;
 import xyz.duncanruns.jingle.script.HermesScriptRelay;
 import xyz.duncanruns.jingle.script.ScriptStuff;
@@ -117,6 +121,8 @@ public final class Jingle {
         MonitorUtil.retrieveMinY();
 
         checkJavaVersion();
+
+        GuttingWarning.check();
 
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
 
