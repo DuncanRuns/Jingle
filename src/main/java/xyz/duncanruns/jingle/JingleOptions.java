@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
-    private static final int CURRENT_OPTIONS_VERSION = 7;
+    private static final int CURRENT_OPTIONS_VERSION = 8;
     public static final JingleOptions DEFAULTS = createNew();
 
     private static final Gson LOAD_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
