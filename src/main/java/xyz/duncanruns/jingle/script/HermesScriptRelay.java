@@ -21,21 +21,18 @@ public class HermesScriptRelay implements HermesStateListener, HermesWorldLogLis
 
     @Override
     public void onInstanceStateChange(JsonObject instanceInfo, JsonObject stateJson) {
-        Integer current = Jingle.getMainInstance().map(i -> i.pid).orElse(null);
-        if (current == null) return;
-        if (instanceInfo.get("pid").getAsInt() != current) return;
-        latestState = LuaConverter.fromJson(stateJson);
-        ScriptStuff.HERMES_STATE_CHANGE.runAll();
+        if (Jingle.isCurrentInstance(instanceInfo)) {
+            latestState = LuaConverter.fromJson(stateJson);
+            ScriptStuff.HERMES_STATE_CHANGE.runAll();
+        }
     }
 
     @Override
     public void onWorldLogEntry(JsonObject instanceInfo, JsonObject logJson, boolean isNew) {
-        Integer current = Jingle.getMainInstance().map(i -> i.pid).orElse(null);
-        if (current == null) return;
-        if (!isNew) return;
-        if (instanceInfo.get("pid").getAsInt() != current) return;
-        latestWorldLogEntry = LuaConverter.fromJson(logJson);
-        ScriptStuff.HERMES_WORLD_LOG.runAll();
+        if (isNew && Jingle.isCurrentInstance(instanceInfo)) {
+            latestWorldLogEntry = LuaConverter.fromJson(logJson);
+            ScriptStuff.HERMES_WORLD_LOG.runAll();
+        }
     }
 
     public static LuaValue getLatestState() {

@@ -8,8 +8,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.gui.GuttingWarning;
+import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
 import xyz.duncanruns.jingle.instance.InstanceChecker;
 import xyz.duncanruns.jingle.instance.InstanceMods;
@@ -479,5 +479,22 @@ public final class Jingle {
                         .map(Map.Entry::getKey).map(Paths::get)
                         .orElse(null)
         ));
+    }
+
+    public static boolean isCurrentInstance(JsonElement hermesInstanceObject) {
+        if (hermesInstanceObject == null) return false;
+        if (hermesInstanceObject.isJsonNull()) return false;
+        if (!hermesInstanceObject.isJsonObject()) return false;
+
+        JsonObject o = hermesInstanceObject.getAsJsonObject();
+
+        Optional<Integer> activePid = getMainInstance().map(openedInstance -> openedInstance.pid).map(i -> i < 0 ? null : i);
+        if (!activePid.isPresent()) return false;
+
+        try {
+            return activePid.get() == o.get("pid").getAsInt();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
