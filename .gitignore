@@ -123,3 +123,4 @@ src/test/
 update-meta.py
 Launcher/.zig*
 /src/main/resources/defaultscripts/libs
+/.zig-cache
