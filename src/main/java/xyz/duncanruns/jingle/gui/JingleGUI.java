@@ -97,6 +97,7 @@ public class JingleGUI extends JFrame {
     private JPanel quickActionsPanel;
     private JPanel communityButtonsPanel;
     private JLabel communityButtonsLabel;
+    private JTextArea hermesWarningTextArea;
 
     private JingleGUI() {
         this.$$$setupUI$$$();
@@ -214,10 +215,10 @@ public class JingleGUI extends JFrame {
     }
 
     public void setInstance(OpenedInstance instance) {
-        this.setInstance(instance == null ? null : instance.instancePath, instance != null);
+        this.setInstance(instance == null ? null : instance.instancePath, instance != null, instance != null && !instance.hasHermesCore());
     }
 
-    public void setInstance(Path instancePath, boolean open) {
+    public void setInstance(Path instancePath, boolean open, boolean showHermesWarning) {
         boolean exists = instancePath != null;
         this.clearWorldsButton.setEnabled(exists);
         this.goBorderlessButton.setEnabled(open);
@@ -232,6 +233,7 @@ public class JingleGUI extends JFrame {
         } else {
             this.instanceLabel.setText("No instances ever opened!");
         }
+        this.hermesWarningTextArea.setVisible(showHermesWarning);
     }
 
     private void noInstanceYet() {
@@ -240,6 +242,7 @@ public class JingleGUI extends JFrame {
         this.openMinecraftFolderButton.setEnabled(false);
         this.packageSubmissionFilesButton.setEnabled(false);
         this.instanceLabel.setText("Loading...");
+        this.hermesWarningTextArea.setVisible(false);
     }
 
     private void addPluginTabInternal(String name, JPanel panel, Runnable onSwitchTo) {
@@ -387,6 +390,15 @@ public class JingleGUI extends JFrame {
             Jingle.options.autoBorderless = b;
             if (b) Jingle.goBorderless();
         });
+
+        hermesWarningTextArea.setLineWrap(true);
+        hermesWarningTextArea.setWrapStyleWord(true);
+        hermesWarningTextArea.setEditable(false);
+        hermesWarningTextArea.setOpaque(false);
+        hermesWarningTextArea.setFocusable(false);
+        hermesWarningTextArea.setBorder(null);
+        hermesWarningTextArea.setForeground(Color.ORANGE);
+        hermesWarningTextArea.setVisible(false);
     }
 
     private void packageSubmissionFiles() {
@@ -469,7 +481,7 @@ public class JingleGUI extends JFrame {
         panel1.putClientProperty("html.disable", Boolean.FALSE);
         mainTabbedPane.addTab("Jingle", panel1);
         instancePanel = new JPanel();
-        instancePanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
+        instancePanel.setLayout(new GridLayoutManager(4, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(instancePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         instanceLabel = new JLabel();
         instanceLabel.setText("Instance: No instances opened!");
@@ -486,6 +498,9 @@ public class JingleGUI extends JFrame {
         openMinecraftFolderButton = new JButton();
         openMinecraftFolderButton.setText("Open Minecraft Folder");
         instancePanel.add(openMinecraftFolderButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        hermesWarningTextArea = new JTextArea();
+        hermesWarningTextArea.setText("Warning: Instance does not have Hermes/Hermes Core installed, things may not work as intended!");
+        instancePanel.add(hermesWarningTextArea, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         extraButtonsPanel = new JPanel();
         extraButtonsPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(extraButtonsPanel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

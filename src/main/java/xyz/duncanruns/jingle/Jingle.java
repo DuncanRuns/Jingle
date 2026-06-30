@@ -100,7 +100,7 @@ public final class Jingle {
 
         ScriptStuff.reloadScripts();
         SwingUtilities.invokeLater(() -> {
-            JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), false);
+            JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), false, false);
             JingleGUI.get().scriptListPanel.reload();
             JingleGUI.get().refreshQuickActions();
             JingleGUI.get().refreshHack();
@@ -311,7 +311,7 @@ public final class Jingle {
         undoWindowTitle(mainInstance);
         mainInstance = instance;
         legalModCheckNeeded = instance != null;
-        JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null);
+        JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null, instance != null && !instance.hasHermesCore());
         borderlessScheduledTime = -1;
         shouldScheduleBorderless = false;
         if (instance != null) {

@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="37" y="32" width="731" height="459"/>
+      <xy x="37" y="32" width="775" height="459"/>
     </constraints>
     <properties>
       <enabled value="true"/>
@@ -34,7 +34,7 @@
             </clientProperties>
             <border type="none"/>
             <children>
-              <grid id="beecc" binding="instancePanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="beecc" binding="instancePanel" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
@@ -82,6 +82,16 @@
                     </constraints>
                     <properties>
                       <text value="Open Minecraft Folder"/>
+                    </properties>
+                  </component>
+                  <component id="8adb6" class="javax.swing.JTextArea" binding="hermesWarningTextArea">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="150" height="50"/>
+                      </grid>
+                    </constraints>
+                    <properties>
+                      <text value="Warning: Instance does not have Hermes/Hermes Core installed, things may not work as intended!"/>
                     </properties>
                   </component>
                 </children>
