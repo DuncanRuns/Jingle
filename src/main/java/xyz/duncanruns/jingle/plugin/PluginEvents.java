@@ -14,6 +14,13 @@ public final class PluginEvents {
     // Runs when the GUI loses focus, right before saving options
     public static RunnableEventType GUI_LOST_FOCUS = new RunnableEventType();
 
+    // Runs when a world is exited
+    @Deprecated
+    public static RunnableEventType EXIT_WORLD = new RunnableEventType();
+    // Runs when a world is entered
+    @Deprecated
+    public static RunnableEventType ENTER_WORLD = new RunnableEventType();
+
     private PluginEvents() {
     }
 }

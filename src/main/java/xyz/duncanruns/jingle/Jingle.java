@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import xyz.duncanruns.jingle.backcompat.BackCompat;
 import xyz.duncanruns.jingle.gui.GuttingWarning;
 import xyz.duncanruns.jingle.gui.JingleGUI;
 import xyz.duncanruns.jingle.hotkey.HotkeyManager;
@@ -45,7 +46,7 @@ public final class Jingle {
     public static final String VERSION = Optional.ofNullable(Jingle.class.getPackage().getImplementationVersion()).orElse("DEV");
     public static final Logger LOGGER = LogManager.getLogger("Jingle");
 
-    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "Jingle"));
+    public static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "Jingle"));
     private static final ScheduledExecutorService LOG_EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "Jingle-Log"));
 
     private static boolean started = false;
@@ -125,6 +126,8 @@ public final class Jingle {
         GuttingWarning.check();
 
         log(Level.INFO, "Jingle process ID: " + PidUtil.getPidForSelf());
+
+        BackCompat.init();
 
         Kerykeion.addListener(InstanceChecker.HermesChecker.get(), 100, EXECUTOR);
         Kerykeion.addListener(HermesScriptRelay.get(), 1, EXECUTOR);
