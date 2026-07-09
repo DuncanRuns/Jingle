@@ -24,6 +24,9 @@ Changes in v2.0.0:
     - Jingle used to exit with `System.exit(0)`, which forcefully shut down the program, which could cause issues if
       plugins are trying to save data or do some other tasks
     - If Jingle fails to shut down after 5 seconds, Jingle will still forcefully exit
+- Jingle now shows a warning when an instance does not have Hermes or Hermes Core installed
+- Added backwards compatibility for plugins using old events, such as pace status
+- Added the Easy Co-op plugin as a default plugin
 
 Changes in v1.3.0:
 
