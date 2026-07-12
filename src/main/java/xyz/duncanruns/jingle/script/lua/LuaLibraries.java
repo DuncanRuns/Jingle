@@ -16,6 +16,7 @@ import java.util.function.BiFunction;
 
 public final class LuaLibraries {
     private static final List<BiFunction<ScriptFile, Globals, LuaLibrary>> LIBRARY_PROVIDERS;
+
     static {
         LIBRARY_PROVIDERS = new ArrayList<>();
         LIBRARY_PROVIDERS.add(JingleLuaLibrary::new);

@@ -112,7 +112,7 @@ public final class ScriptStuff {
         }
         try {
             for (String s : ResourceUtil.getResourcesFromFolder("defaultscripts")) {
-                if(!s.endsWith(".lua")) continue;
+                if (!s.endsWith(".lua")) continue;
                 try {
                     ScriptFile script = ScriptFile.loadResource("/defaultscripts/" + s);
                     if (!Jingle.options.disabledScripts.contains(script.name)) {

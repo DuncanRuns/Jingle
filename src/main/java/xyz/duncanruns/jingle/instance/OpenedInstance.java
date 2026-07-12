@@ -90,7 +90,7 @@ public class OpenedInstance extends InstanceInfo {
         return Optional.ofNullable(hermesInfo);
     }
 
-    public void updateWithHermes(JsonObject hermesInfo){
+    public void updateWithHermes(JsonObject hermesInfo) {
         this.hermesCore = true;
         this.hermesInfo = hermesInfo;
         this.mods = new InstanceMods(this.instancePath.resolve("mods"), hermesInfo);

@@ -180,7 +180,7 @@ public final class KeyboardUtil {
         return getPressedKeys().stream().filter(ALL_MODIFIERS::contains).collect(Collectors.toList());
     }
 
-    public static List<Integer> getPressedShiftKeys(){
+    public static List<Integer> getPressedShiftKeys() {
         return getPressedKeys().stream().filter(vk -> vk == User32.VK_SHIFT || vk == User32.VK_LSHIFT || vk == User32.VK_RSHIFT).collect(Collectors.toList());
     }
 
@@ -225,7 +225,7 @@ public final class KeyboardUtil {
 
     public static WinDef.LPARAM createLParam(int virtualKey, int repeatCount, boolean transitionState, boolean previousKeyState, boolean contextCode) {
         Pair<Integer, Boolean> scanCode = virtualKeyToScanCode(virtualKey);
-        return new WinDef.LPARAM(((transitionState ? 1 : 0) << 31) | ((previousKeyState ? 1 : 0) << 30) | ((contextCode ? 1 : 0) << 29) | ((scanCode.getRight() ? 1 : 0) << 24) | (scanCode.getLeft() << 16) | (repeatCount));
+        return new WinDef.LPARAM(((transitionState ? 1 : 0) << 31) | ((previousKeyState ? 1 : 0) << 30) | ((contextCode ? 1 : 0) << 29) | ((scanCode.getRight() ? 1 : 0) << 24) | ((long) scanCode.getLeft() << 16) | (repeatCount));
     }
 
     public static WinDef.LPARAM createLParamKeyDown(int virtualKey) {
