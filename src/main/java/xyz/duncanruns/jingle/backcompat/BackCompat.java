@@ -8,6 +8,6 @@ public final class BackCompat {
     }
 
     public static void init() {
-        Kerykeion.addListener(new WorldEventsListener(),5, Jingle.EXECUTOR);
+        Kerykeion.addListener(new WorldEventsListener(), 5, Jingle.EXECUTOR);
     }
 }
