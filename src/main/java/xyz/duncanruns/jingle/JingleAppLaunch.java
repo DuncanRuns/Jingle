@@ -66,7 +66,8 @@ public final class JingleAppLaunch {
 
     private static void doLockStuff() {
         if (LockUtil.isLocked(LOCK_FILE)) {
-            showMultiJingleWarning();
+            checkNoReopen();
+            promptAlreadyOpen();
             LockUtil.keepTryingLock(LOCK_FILE, ls -> {
                 lockStuff = ls;
                 Jingle.log(Level.DEBUG, "Obtained Lock");
@@ -82,9 +83,20 @@ public final class JingleAppLaunch {
         LockUtil.releaseLock(lockStuff);
     }
 
-
-    private static void showMultiJingleWarning() {
+    private static void promptAlreadyOpen() {
         if (0 != JOptionPane.showConfirmDialog(null, "Jingle is already running! Are you sure you want to open Jingle again?", "Jingle: Already Opened", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
+            Jingle.log(Level.DEBUG, "Obtained Lock");
+            System.exit(0);
+        }
+    }
+
+    /**
+     * Checks for a `noreopen` arg, and exits the application if it is present.
+     * Only used if Jingle is already open.
+     */
+    private static void checkNoReopen() {
+        if (Arrays.stream(args).map(s -> s.replace("-", "")).anyMatch("noreopen"::equalsIgnoreCase)) {
+            Jingle.log(Level.DEBUG, "No reopen arg is present while tracker is already open, exiting...");
             System.exit(0);
         }
     }
