@@ -67,6 +67,8 @@ public final class Jingle {
     public static WinDef.HWND activeHwnd = null;
     public static int activePid = -1;
 
+    private static boolean hadHermesCore;
+
     private static boolean guiWasFocused = false;
 
     private Jingle() {
@@ -220,6 +222,10 @@ public final class Jingle {
                 if (legalModCheckNeeded && LegalModsUtil.hasUpdated()) {
                     checkLegalMods();
                 }
+                if (hadHermesCore != i.hasHermesCore()) {
+                    setGuiInstance(i);
+                    hadHermesCore = i.hasHermesCore();
+                }
             });
         }
         // Try assign hwnd to main instance
@@ -314,7 +320,7 @@ public final class Jingle {
         undoWindowTitle(mainInstance);
         mainInstance = instance;
         legalModCheckNeeded = instance != null;
-        JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null, instance != null && !instance.hasHermesCore());
+        setGuiInstance(instance);
         borderlessScheduledTime = -1;
         shouldScheduleBorderless = false;
         if (instance != null) {
@@ -325,6 +331,10 @@ public final class Jingle {
         log(Level.INFO, instance == null ? "No instances are open." : ("Instance Found! " + instance.instancePath + ", " + instance.versionString));
         PluginEvents.MAIN_INSTANCE_CHANGED.runAll();
         ScriptStuff.MAIN_INSTANCE_CHANGED.runAll();
+    }
+
+    private static void setGuiInstance(@Nullable OpenedInstance instance) {
+        JingleGUI.get().setInstance(getLatestInstancePath().orElse(null), instance != null, instance != null && !instance.hasHermesCore());
     }
 
     private static void undoWindowTitle(OpenedInstance instance) {
