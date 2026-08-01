@@ -120,24 +120,29 @@ public final class InstanceChecker {
                 if (jsonObject.get("is_server").getAsBoolean()) return;
                 int pid = jsonObject.get("pid").getAsInt();
 
-                Optional<OpenedInstance> existingInstance = INSTANCES.stream().filter(i -> i.pid == pid).findAny();
-                if (existingInstance.isPresent()) {
-                    // Update instance
-                    OpenedInstance instanceToReplace = existingInstance.get();
-                    Jingle.log(Level.DEBUG, "Updating instance with Hermes info.");
-                    instanceToReplace.updateWithHermes(jsonObject);
-                    return;
-                }
-                Jingle.log(Level.DEBUG, "Creating new instance from Hermes.");
-                OpenedInstance newInstance = OpenedInstance.getInstanceFromHermes(jsonObject, pid);
-                INSTANCES.add(newInstance);
+                if (onHermesInstance(jsonObject, pid)) return;
             } catch (Exception e) {
-                Jingle.log(Level.ERROR, "Failed to get pid from Hermes instance: " + ExceptionUtil.toDetailedString(e));
+                Jingle.log(Level.ERROR, "Failed to get data from Hermes instance: " + ExceptionUtil.toDetailedString(e));
             }
         }
 
         @Override
         public void onInstanceClosed(JsonObject jsonObject) {
         }
+    }
+
+    private synchronized static boolean onHermesInstance(JsonObject jsonObject, int pid) {
+        Optional<OpenedInstance> existingInstance = INSTANCES.stream().filter(i -> i.pid == pid).findAny();
+        if (existingInstance.isPresent()) {
+            // Update instance
+            OpenedInstance instanceToReplace = existingInstance.get();
+            Jingle.log(Level.DEBUG, "Updating instance with Hermes info.");
+            instanceToReplace.updateWithHermes(jsonObject);
+            return true;
+        }
+        Jingle.log(Level.DEBUG, "Creating new instance from Hermes.");
+        OpenedInstance newInstance = OpenedInstance.getInstanceFromHermes(jsonObject, pid);
+        INSTANCES.add(newInstance);
+        return false;
     }
 }
