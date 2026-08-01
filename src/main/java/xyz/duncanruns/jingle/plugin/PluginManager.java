@@ -174,7 +174,7 @@ public final class PluginManager {
             Jingle.log(Level.ERROR, "Failed to load default plugins: " + ExceptionUtil.toDetailedString(e));
         }
 
-        // Mod ID -> path and data
+        // Plugin ID -> path and data
         Map<String, Pair<Path, JinglePluginData>> bestPluginVersions = new HashMap<>();
 
         Stream.concat(folderPlugins.stream(), defaultPlugins.stream()).forEach(pair -> {
