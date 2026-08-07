@@ -1,12 +1,14 @@
 Changes in v2.0.0:
 
+- Intentionally broke a few plugins and most scripts due to rewrites and removals.
 - When Jingle opens the game to lan, it will now re-press any modifiers that were pressed before opening to lan
     - This means doing mapless with the coop mode script should be much easier, as it won't release shift every time it
       opens to lan
 - Changed `Reset < 20s` to `Quick Reset` in the Extra Keys script
     - The time limit is now customizable
-    - A new hotkey action `Disable Quick Reset` has been added to disable quick reset until the next world is loaded
-        - For example, setting to left-click to prevent the key from working after you start mining for a buried
+    - A new hotkey action `Disable Quick Reset` has been added to disable the `Quick Reset` action until the next world
+      is loaded
+        - For example, setting to left-click prevents quick resetting from working after you start mining for a buried
           treasure
 - Direct compatibility with Toolscreen
     - Communicates with Toolscreen to send keys without rebinding
@@ -19,14 +21,20 @@ Changes in v2.0.0:
     - Default scripts have been updated to use Hermes
 - When options are broken by updates, it will now save into a new location, so that downgrading is still possible
     - Example: In Jingle v2.0.0, the options version is `7`, so the options file will be saved as `options.7.json`, this
-      prevents overwriting the old `options.json`, allowing downgrading to v1.3.0 with no problems
+      prevents overwriting the old `options.json`, allowing easier downgrading to v1.3.0
 - Many improvements to the shutdown process, including proper cleanup of the tray icon and many executors and plugins
     - Jingle used to exit with `System.exit(0)`, which forcefully shut down the program, which could cause issues if
       plugins are trying to save data or do some other tasks
     - If Jingle fails to shut down after 5 seconds, Jingle will still forcefully exit
 - Jingle now shows a warning when an instance does not have Hermes or Hermes Core installed
 - Added backwards compatibility for plugins using old events, such as pace status
+- The OBS tab and the OBS Link script have been moved into a simpler plugin which switches between Playing/Walling
+  scenes.
 - Added the Easy Co-op plugin as a default plugin
+- Added @marin774's World Bopper plugin as a default plugin
+- Added @cylorun's Pace Status plugin as a default plugin
+- Added a `noreopen` launch argument which will automatically say no to the "Are you sure you want to open Jingle
+  again?" prompt, allowing for Jingle to be added as a pre-launch command for instances in various launchers
 
 Changes in v1.3.0:
 
