@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class JingleOptions {
     private static final int DEFAULT_LOADED_OPTIONS_VERSION = 1;
-    private static final int CURRENT_OPTIONS_VERSION = 8;
+    private static final int CURRENT_OPTIONS_VERSION = 9;
     public static final JingleOptions DEFAULTS = createNew();
 
     private static final Gson LOAD_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
@@ -127,6 +127,10 @@ public class JingleOptions {
         // Change Extra Keys Reset Before 20s to Quick Reset
         if (this.optionsVersion < 7) {
             this.setSavedHotkeys(this.copySavedHotkeys().stream().map(sh -> sh.action.equals("Extra Keys:Reset Before 20s") ? new SavedHotkey(sh.type, "Extra Keys:Quick Reset", sh.keys, sh.ignoreModifiers) : sh).collect(Collectors.toList()));
+        }
+
+        if(this.optionsVersion < 9){
+            this.disabledScripts.add("Clipboard Reset");
         }
 
         this.optionsVersion = DEFAULTS.optionsVersion;

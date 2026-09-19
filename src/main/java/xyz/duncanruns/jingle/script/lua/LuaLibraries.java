@@ -22,6 +22,7 @@ public final class LuaLibraries {
         LIBRARY_PROVIDERS.add(JingleLuaLibrary::new);
         LIBRARY_PROVIDERS.add(HermesLuaLibrary::new);
         LIBRARY_PROVIDERS.add(BasicsLuaLibrary::new);
+        LIBRARY_PROVIDERS.add(ClipboardLuaLibrary::new);
     }
 
     private LuaLibraries() {
