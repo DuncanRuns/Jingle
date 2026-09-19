@@ -20,7 +20,7 @@ Changes in v2.0.0:
     - State output support is entirely removed, including any related script functions, breaking most scripts
     - Default scripts have been updated to use Hermes
 - When options are broken by updates, it will now save into a new location, so that downgrading is still possible
-    - Example: In Jingle v2.0.0, the options version is `7`, so the options file will be saved as `options.7.json`, this
+    - Example: In Jingle v2.0.0, the options version is `9`, so the options file will be saved as `options.9.json`, this
       prevents overwriting the old `options.json`, allowing easier downgrading to v1.3.0
 - Many improvements to the shutdown process, including proper cleanup of the tray icon and many executors and plugins
     - Jingle used to exit with `System.exit(0)`, which forcefully shut down the program, which could cause issues if
@@ -35,6 +35,8 @@ Changes in v2.0.0:
 - Added @cylorun's Pace Status plugin as a default plugin
 - Added a `noreopen` launch argument which will automatically say no to the "Are you sure you want to open Jingle
   again?" prompt, allowing for Jingle to be added as a pre-launch command for instances in various launchers
+- Added `Clipboard Reset` as a default script, which copies a customizable text to clipboard when entering a new world
+    - Uses the new `clipboard` lua library, which includes functions `set(string)` and `get()`
 
 Changes in v1.3.0:
 
@@ -64,8 +66,8 @@ Changes in v1.2.3:
 
 - Changed logic of "minimize projector when inactive" (@draconix)
     - Instead of actually minimizing, it is now moved to (0,-1) with a size of 1x1, so a single pixel off-screen
-- Changed instance detection logic to no longer require powershell, now using OS level calls to try gather information (
-  command line and environment variables)
+- Changed instance detection logic to no longer require powershell, now using OS level calls to try gather information
+  (command line and environment variables)
     - In case the new method fails for getting the command line of the process, it will still try to use powershell
     - Other tweaks are in place to improve version detection and game directory detection, and as a result, more
       launchers such as the new MCSRLauncher are also supported with this change
@@ -99,8 +101,8 @@ Changes in v1.1.4:
 
 Changes in v1.1.3:
 
-- Allow many more key combinations (multiple main keys, or only modifier
-  keys) ([#7](https://github.com/DuncanRuns/Jingle/issues/7), [#8](https://github.com/DuncanRuns/Jingle/issues/8))
+- Allow many more key combinations (multiple main keys, or only modifier keys)
+  ([#7](https://github.com/DuncanRuns/Jingle/issues/7), [#8](https://github.com/DuncanRuns/Jingle/issues/8))
 - Allow plugins to specify a minimum Java version
 
 Changes in v1.1.2:
@@ -179,7 +181,7 @@ Changes in v0.2.0:
 - New script functionality for creating better customization menus
 - Improved Resizing script customization with the new customization menus
 - Move "Revert Window after Reset" option to the resizing script customization
-- Close measuring projector(s) upon closing Jingle
+- Close measuring projector (s) upon closing Jingle
 
 Changes in v0.1.x:
 
